@@ -88,6 +88,61 @@ const PROGRESSIONS = {
         { degree: 7, type: 'maj', numeral: 'V' },
       ],
     },
+    {
+      id: 'I-iii-IV-V',
+      label: 'I – iii – IV – V',
+      description: 'Classic rock build (Brown Eyed Girl, La Bamba)',
+      chords: [
+        { degree: 0, type: 'maj', numeral: 'I' },
+        { degree: 4, type: 'min', numeral: 'iii' },
+        { degree: 5, type: 'maj', numeral: 'IV' },
+        { degree: 7, type: 'maj', numeral: 'V' },
+      ],
+    },
+    {
+      id: 'I-IV-vi-V',
+      label: 'I – IV – vi – V',
+      description: 'Upbeat pop (Walking on Sunshine feel)',
+      chords: [
+        { degree: 0, type: 'maj', numeral: 'I' },
+        { degree: 5, type: 'maj', numeral: 'IV' },
+        { degree: 9, type: 'min', numeral: 'vi' },
+        { degree: 7, type: 'maj', numeral: 'V' },
+      ],
+    },
+    {
+      id: 'I-V-IV-V',
+      label: 'I – V – IV – V',
+      description: 'Rock shuffle (La Grange, Sweet Home Chicago)',
+      chords: [
+        { degree: 0, type: 'maj', numeral: 'I' },
+        { degree: 7, type: 'maj', numeral: 'V' },
+        { degree: 5, type: 'maj', numeral: 'IV' },
+        { degree: 7, type: 'maj', numeral: 'V' },
+      ],
+    },
+    {
+      id: 'Imaj7-IVmaj7-ii7-V7',
+      label: 'Imaj7 – IVmaj7 – ii⁷ – V⁷',
+      description: 'Neo-soul / smooth jazz groove (Isn\'t She Lovely feel)',
+      chords: [
+        { degree: 0, type: 'maj7', numeral: 'Imaj7' },
+        { degree: 5, type: 'maj7', numeral: 'IVmaj7' },
+        { degree: 2, type: 'min7', numeral: 'ii⁷' },
+        { degree: 7, type: 'dom7', numeral: 'V⁷' },
+      ],
+    },
+    {
+      id: 'I-bVII-IV-I',
+      label: 'I – ♭VII – IV – I',
+      description: 'Mixolydian rock (Sweet Home Alabama, Hey Jude)',
+      chords: [
+        { degree: 0,  type: 'maj', numeral: 'I' },
+        { degree: 10, type: 'maj', numeral: '♭VII' },
+        { degree: 5,  type: 'maj', numeral: 'IV' },
+        { degree: 0,  type: 'maj', numeral: 'I' },
+      ],
+    },
   ],
   minor: [
     {
@@ -151,6 +206,61 @@ const PROGRESSIONS = {
         { degree: 2, type: 'dim',  numeral: 'ii°' },
         { degree: 7, type: 'dom7', numeral: 'V⁷' },
         { degree: 0, type: 'min',  numeral: 'i' },
+      ],
+    },
+    {
+      id: 'i-III-VII-VI',
+      label: 'i – III – VII – VI',
+      description: 'Epic cinematic / game soundtrack (Game of Thrones feel)',
+      chords: [
+        { degree: 0,  type: 'min', numeral: 'i' },
+        { degree: 3,  type: 'maj', numeral: 'III' },
+        { degree: 10, type: 'maj', numeral: 'VII' },
+        { degree: 8,  type: 'maj', numeral: 'VI' },
+      ],
+    },
+    {
+      id: 'i-v-VI-III',
+      label: 'i – v – VI – III',
+      description: 'Dorian minor groove (Oye Como Va, Evil Ways)',
+      chords: [
+        { degree: 0, type: 'min', numeral: 'i' },
+        { degree: 7, type: 'min', numeral: 'v' },
+        { degree: 8, type: 'maj', numeral: 'VI' },
+        { degree: 3, type: 'maj', numeral: 'III' },
+      ],
+    },
+    {
+      id: 'i-VII-VI-VII-i',
+      label: 'i – VII – VI – VII',
+      description: 'Metal / hard rock power loop (Metallica, Sabbath feel)',
+      chords: [
+        { degree: 0,  type: 'min', numeral: 'i' },
+        { degree: 10, type: 'maj', numeral: 'VII' },
+        { degree: 8,  type: 'maj', numeral: 'VI' },
+        { degree: 10, type: 'maj', numeral: 'VII' },
+      ],
+    },
+    {
+      id: 'i-iv-VII-III',
+      label: 'i – iv – VII – III',
+      description: 'Cinematic descending minor (Requiem for a Dream feel)',
+      chords: [
+        { degree: 0,  type: 'min', numeral: 'i' },
+        { degree: 5,  type: 'min', numeral: 'iv' },
+        { degree: 10, type: 'maj', numeral: 'VII' },
+        { degree: 3,  type: 'maj', numeral: 'III' },
+      ],
+    },
+    {
+      id: 'i-VI-III-VII-repeat',
+      label: 'i – VI – iv – V',
+      description: 'Dramatic minor ballad (Nothing Else Matters feel)',
+      chords: [
+        { degree: 0, type: 'min', numeral: 'i' },
+        { degree: 8, type: 'maj', numeral: 'VI' },
+        { degree: 5, type: 'min', numeral: 'iv' },
+        { degree: 7, type: 'maj', numeral: 'V' },
       ],
     },
   ],
