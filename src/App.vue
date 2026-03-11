@@ -3,15 +3,15 @@ import { ref } from 'vue'
 import ClavesMode from './components/ClavesMode.vue'
 import ScaleVisualizer from './components/ScaleVisualizer.vue'
 import ChordProgressions from './components/ChordProgressions.vue'
-import PitchDetector from './components/PitchDetector.vue'
 import ChordDetector from './components/ChordDetector.vue'
+import ProgressionBuilder from './components/ProgressionBuilder.vue'
 
 const tabs = [
   { id: 'claves',         label: 'Claves Mode',        component: ClavesMode },
   { id: 'scales',         label: 'Scale Visualizer',   component: ScaleVisualizer },
   { id: 'chords',         label: 'Chord Progressions', component: ChordProgressions },
   { id: 'chord-detector', label: 'Chord Detector',     component: ChordDetector },
-  { id: 'pitch',          label: 'Pitch Detector',     component: PitchDetector },
+  { id: 'prog-builder',   label: 'Progression Builder', component: ProgressionBuilder },
 ]
 
 const activeTab = ref('claves')
