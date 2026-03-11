@@ -22,7 +22,6 @@ const tabs = computed(() =>
   allTabs.filter(t => !t.ep1320Only || displayMode.value === 'ep1320')
 )
 
-const activeLabel = computed(() => allTabs.find(t => t.id === activeTab.value)?.label ?? '')
 
 watch(displayMode, (mode) => {
   if (mode !== 'ep1320' && activeTab.value === 'claves') {
@@ -43,8 +42,7 @@ function selectTab(id) {
     <header>
       <div class="header-row">
         <div class="title-block">
-          <h1>Tonarium <span class="dim">chromatic</span></h1>
-          <p class="tagline">tools & reference</p>
+          <h1>Tonarium</h1>
         </div>
         <div class="header-controls">
           <div class="display-mode-control">
@@ -61,7 +59,6 @@ function selectTab(id) {
           </button>
         </div>
       </div>
-      <div class="active-tab-label">{{ activeLabel }}</div>
     </header>
 
     <div class="menu-overlay" :class="{ open: menuOpen }" @click="menuOpen = false"></div>
@@ -91,7 +88,7 @@ header {
 
 .header-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
@@ -104,19 +101,6 @@ h1 {
   text-transform: uppercase;
 }
 
-h1 .dim {
-  color: #6a5f50;
-  font-weight: 400;
-}
-
-.tagline {
-  font-size: 0.8rem;
-  color: #5a5040;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-top: 0.2rem;
-}
-
 .title-block {
   min-width: 0;
 }
@@ -126,7 +110,6 @@ h1 .dim {
   align-items: center;
   gap: 0.75rem;
   flex-shrink: 0;
-  margin-top: 0.3rem;
 }
 
 .display-mode-control {
@@ -183,16 +166,6 @@ h1 .dim {
 
 .burger-btn:hover {
   border-color: #c8a96e;
-}
-
-/* Active tab label under header */
-.active-tab-label {
-  font-size: 0.78rem;
-  color: #7a6f60;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-top: 0.5rem;
-  font-weight: 600;
 }
 
 /* Overlay */
