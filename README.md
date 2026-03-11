@@ -4,6 +4,7 @@ Tonarium is a web tool to help people with bad musical education. Primarily buil
 ## Features
 - supported instruments
   - guitar
+  - piano
   - ep-1320 synthesizer
   - generic display mode for notes
 - map notes to pads (ep1320 only)

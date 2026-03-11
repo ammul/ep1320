@@ -6,7 +6,6 @@ import { buildRows } from '../musicUtils.js'
 import ChordCardBody from './ChordCardBody.vue'
 
 const input = ref('D f#m E D')
-const activeChordIndex = ref(0)
 
 function parseToken(token) {
   const s = token[0].toUpperCase() + token.slice(1)
@@ -64,29 +63,13 @@ const chordCards = computed(() =>
     })
 )
 
-watch(chordCards, () => {
-  if (activeChordIndex.value >= chordCards.value.length) {
-    activeChordIndex.value = Math.max(0, chordCards.value.length - 1)
-  }
-})
-
-function handleKey(e) {
-  if (!chordCards.value.length) return
-  if (e.key === 'ArrowRight') {
-    activeChordIndex.value = (activeChordIndex.value + 1) % chordCards.value.length
-    e.preventDefault()
-  } else if (e.key === 'ArrowLeft') {
-    activeChordIndex.value = (activeChordIndex.value - 1 + chordCards.value.length) % chordCards.value.length
-    e.preventDefault()
-  }
-}
 </script>
 
 <template>
-  <div class="prog-builder" tabindex="0" @keydown="handleKey">
+  <div class="prog-builder">
     <div class="prog-builder-header">
       <h2>Progression Builder</h2>
-      <p class="subtitle">type chords separated by spaces · click or ← → to step through</p>
+      <p class="subtitle">type chords separated by spaces</p>
     </div>
 
     <div class="input-row">
@@ -114,8 +97,7 @@ function handleKey(e) {
           v-for="card in chordCards"
           :key="card.idx"
           class="chord-card"
-          :class="{ active: card.idx === activeChordIndex, 'piano-mode': displayMode === 'piano' }"
-          @click="activeChordIndex = card.idx"
+          :class="{ 'piano-mode': displayMode === 'piano' }"
         >
           <div class="chord-info">
             <div class="chord-name">{{ card.name }}</div>
@@ -132,15 +114,6 @@ function handleKey(e) {
         </div>
       </div>
 
-      <div class="step-dots">
-        <span
-          v-for="(card, i) in chordCards"
-          :key="i"
-          class="dot"
-          :class="{ active: i === activeChordIndex }"
-          @click="activeChordIndex = i"
-        />
-      </div>
     </template>
 
     <p v-else-if="input.trim()" class="empty-hint">No valid chords recognised yet.</p>
@@ -153,7 +126,6 @@ function handleKey(e) {
   border: 1px solid #3a3228;
   border-radius: 12px;
   padding: 2rem;
-  outline: none;
 }
 
 .prog-builder-header h2 {
@@ -275,14 +247,6 @@ function handleKey(e) {
 }
 
 .chord-name { font-size: 1.1rem; font-weight: 700; color: #c8a96e; line-height: 1; }
-.chord-card.active .chord-name { color: #f0c87a; }
-
-/* Step dots */
-.step-dots { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.25rem; }
-
-.dot { width: 8px; height: 8px; border-radius: 50%; background: #3a3228; cursor: pointer; transition: background 0.15s; }
-.dot:hover  { background: #6a5a30; }
-.dot.active { background: #c8a96e; }
 
 @media (max-width: 600px) {
   .prog-builder { padding: 1.25rem 1rem; }

@@ -250,10 +250,9 @@ const PROGRESSIONS = {
   ],
 }
 
-const selectedRoot     = ref('A')
-const mode             = ref('major')
-const progressionId    = ref('I-V-vi-IV')
-const activeChordIndex = ref(0)
+const selectedRoot  = ref('A')
+const mode          = ref('major')
+const progressionId = ref('I-V-vi-IV')
 
 const progressions = computed(() => PROGRESSIONS[mode.value])
 
@@ -263,10 +262,7 @@ const selectedProgression = computed(
 
 watch(mode, () => {
   progressionId.value = progressions.value[0].id
-  activeChordIndex.value = 0
 })
-
-watch(progressionId, () => { activeChordIndex.value = 0 })
 
 const rootIndex = computed(() => NOTES.indexOf(selectedRoot.value))
 
@@ -287,24 +283,13 @@ const chordCards = computed(() =>
     }
   })
 )
-
-function handleKey(e) {
-  if (e.key === 'ArrowRight') {
-    activeChordIndex.value = (activeChordIndex.value + 1) % chordCards.value.length
-    e.preventDefault()
-  } else if (e.key === 'ArrowLeft') {
-    activeChordIndex.value =
-      (activeChordIndex.value - 1 + chordCards.value.length) % chordCards.value.length
-    e.preventDefault()
-  }
-}
 </script>
 
 <template>
-  <div class="chord-prog" tabindex="0" @keydown="handleKey">
+  <div class="chord-prog">
     <div class="chord-prog-header">
       <h2>Chord Progressions</h2>
-      <p class="subtitle">multi-pad chords for claves mode · click or ← → to step through</p>
+      <p class="subtitle">multi-pad chords for claves mode</p>
     </div>
 
     <div class="controls">
@@ -343,8 +328,7 @@ function handleKey(e) {
         v-for="card in chordCards"
         :key="card.idx"
         class="chord-card"
-        :class="{ active: card.idx === activeChordIndex, 'piano-mode': displayMode === 'piano' }"
-        @click="activeChordIndex = card.idx"
+        :class="{ 'piano-mode': displayMode === 'piano' }"
       >
         <div class="chord-info">
           <div class="chord-numeral">{{ card.numeral }}</div>
@@ -361,16 +345,6 @@ function handleKey(e) {
         </div>
       </div>
     </div>
-
-    <div class="step-dots">
-      <span
-        v-for="(card, i) in chordCards"
-        :key="i"
-        class="dot"
-        :class="{ active: i === activeChordIndex }"
-        @click="activeChordIndex = i"
-      />
-    </div>
   </div>
 </template>
 
@@ -380,7 +354,6 @@ function handleKey(e) {
   border: 1px solid #3a3228;
   border-radius: 12px;
   padding: 2rem;
-  outline: none;
 }
 
 .chord-prog-header h2 {
@@ -518,12 +491,6 @@ select:focus { border-color: #c8a96e; }
 
 .chord-card:hover { background: #252219; border-color: #6a5a30; }
 
-.chord-card.active {
-  border-color: #c8a96e;
-  background: #2a2318;
-  box-shadow: 0 0 0 1px #c8a96e44;
-}
-
 .chord-info {
   display: flex;
   flex-direction: column;
@@ -554,28 +521,6 @@ select:focus { border-color: #c8a96e; }
   color: #c8a96e;
   line-height: 1;
 }
-
-.chord-card.active .chord-name { color: #f0c87a; }
-
-/* Step dots */
-.step-dots {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1.25rem;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #3a3228;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.dot:hover  { background: #6a5a30; }
-.dot.active { background: #c8a96e; }
 
 @media (max-width: 600px) {
   .chord-prog { padding: 1.25rem 1rem; }

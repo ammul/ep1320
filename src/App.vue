@@ -16,10 +16,13 @@ const allTabs = [
 ]
 
 const activeTab = ref('claves')
+const menuOpen  = ref(false)
 
 const tabs = computed(() =>
   allTabs.filter(t => !t.ep1320Only || displayMode.value === 'ep1320')
 )
+
+const activeLabel = computed(() => allTabs.find(t => t.id === activeTab.value)?.label ?? '')
 
 watch(displayMode, (mode) => {
   if (mode !== 'ep1320' && activeTab.value === 'claves') {
@@ -28,35 +31,51 @@ watch(displayMode, (mode) => {
 })
 
 const activeComponent = computed(() => allTabs.find(t => t.id === activeTab.value)?.component)
+
+function selectTab(id) {
+  activeTab.value = id
+  menuOpen.value = false
+}
 </script>
 
 <template>
   <div id="app">
     <header>
       <div class="header-row">
-        <div>
+        <div class="title-block">
           <h1>Tonarium <span class="dim">chromatic</span></h1>
           <p class="tagline">tools & reference</p>
         </div>
-        <div class="display-mode-control">
-          <label class="mode-label">Display</label>
-          <select v-model="displayMode">
-            <option value="ep1320">EP-1320</option>
-            <option value="notes">Notes</option>
-            <option value="guitar">Guitar</option>
-          <option value="piano">Piano</option>
-          </select>
+        <div class="header-controls">
+          <div class="display-mode-control">
+            <label class="mode-label">Display</label>
+            <select v-model="displayMode">
+              <option value="ep1320">EP-1320</option>
+              <option value="notes">Notes</option>
+              <option value="guitar">Guitar</option>
+              <option value="piano">Piano</option>
+            </select>
+          </div>
+          <button class="burger-btn" @click="menuOpen = true" aria-label="Open menu">
+            <span></span><span></span><span></span>
+          </button>
         </div>
       </div>
+      <div class="active-tab-label">{{ activeLabel }}</div>
     </header>
 
-    <nav>
-      <button
-        v-for="tab in tabs"
-        :key="tab.id"
-        :class="{ active: activeTab === tab.id }"
-        @click="activeTab = tab.id"
-      >{{ tab.label }}</button>
+    <div class="menu-overlay" :class="{ open: menuOpen }" @click="menuOpen = false"></div>
+
+    <nav class="side-menu" :class="{ open: menuOpen }">
+      <button class="close-btn" @click="menuOpen = false" aria-label="Close menu">&#x2715;</button>
+      <ul>
+        <li v-for="tab in tabs" :key="tab.id">
+          <button
+            :class="{ active: activeTab === tab.id }"
+            @click="selectTab(tab.id)"
+          >{{ tab.label }}</button>
+        </li>
+      </ul>
     </nav>
 
     <main>
@@ -75,7 +94,6 @@ header {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  flex-wrap: wrap;
 }
 
 h1 {
@@ -99,12 +117,18 @@ h1 .dim {
   margin-top: 0.2rem;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  margin-top: 0.3rem;
+}
+
 .display-mode-control {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  flex-shrink: 0;
-  margin-top: 0.3rem;
 }
 
 .mode-label {
@@ -130,41 +154,122 @@ h1 .dim {
   border-color: #c8a96e;
 }
 
-nav {
+/* Burger button */
+.burger-btn {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #3a3228;
-  padding-bottom: 0.75rem;
-}
-
-nav button {
-  padding: 0.4rem 1rem;
-  border-radius: 6px;
-  border: 1px solid transparent;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
   background: transparent;
-  color: #7a6f60;
-  font-size: 0.85rem;
-  font-weight: 600;
+  border: 1px solid #4a4030;
+  border-radius: 6px;
   cursor: pointer;
-  letter-spacing: 0.04em;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  padding: 8px 7px;
+  flex-shrink: 0;
 }
 
-@media (max-width: 600px) {
-  nav button {
-    flex: 1;
-    text-align: center;
-    padding: 0.5rem 0.5rem;
-  }
+.burger-btn span {
+  display: block;
+  height: 2px;
+  background: #c8a96e;
+  border-radius: 1px;
 }
 
-nav button:hover {
+.burger-btn:hover {
+  border-color: #c8a96e;
+}
+
+/* Active tab label under header */
+.active-tab-label {
+  font-size: 0.78rem;
+  color: #7a6f60;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+/* Overlay */
+.menu-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+}
+
+.menu-overlay.open {
+  display: block;
+}
+
+/* Side menu */
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 260px;
+  background: #1a1814;
+  border-left: 1px solid #3a3228;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1rem;
+  transform: translateX(100%);
+  transition: transform 0.22s ease;
+}
+
+.side-menu.open {
+  transform: translateX(0);
+}
+
+.close-btn {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  color: #7a6f60;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.close-btn:hover {
   color: #e8dcc8;
 }
 
-nav button.active {
+.side-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.side-menu ul li button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #7a6f60;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.65rem 0.9rem;
+  letter-spacing: 0.03em;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.side-menu ul li button:hover {
+  color: #e8dcc8;
+  background: #252219;
+}
+
+.side-menu ul li button.active {
   background: #2e2820;
   border-color: #4a4030;
   color: #c8a96e;
