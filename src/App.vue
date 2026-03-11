@@ -86,6 +86,15 @@ header {
   margin-bottom: 1.5rem;
 }
 
+@media (orientation: landscape) and (max-height: 500px) {
+  header {
+    margin-bottom: 0.5rem;
+  }
+  h1 {
+    font-size: 1.1rem;
+  }
+}
+
 .header-row {
   display: flex;
   align-items: center;

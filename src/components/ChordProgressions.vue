@@ -538,4 +538,25 @@ select:focus { border-color: #c8a96e; }
     max-width: calc(50% - 0.375rem);
   }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .chord-prog { padding: 0.75rem 1rem; }
+
+  .subtitle { display: none; }
+
+  .controls { margin: 0.5rem 0; gap: 0.5rem; }
+
+  .control-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+  }
+
+  .control-group label { min-width: unset; white-space: nowrap; }
+
+  .note-picker button { padding: 0.2rem 0.4rem; font-size: 0.75rem; min-width: 2rem; }
+
+  .chord-row { margin-top: 0.5rem; }
+}
 </style>

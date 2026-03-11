@@ -8,6 +8,7 @@ const props = defineProps({
   octave:             { type: Number,  default: 4 },
   showOctaveSelector: { type: Boolean, default: true },
   clickable:          { type: Boolean, default: false },
+  dimInactive:        { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['toggle', 'update:octave'])
@@ -47,7 +48,7 @@ function onToggle(noteIdx) {
       <button @click="emit('update:octave', Math.min(9, octave + 1))">+</button>
     </div>
 
-    <div class="piano" :class="{ clickable }">
+    <div class="piano" :class="{ clickable, 'dim-inactive': dimInactive }">
       <button
         v-for="key in whiteKeys"
         :key="key.noteIdx"
@@ -167,6 +168,9 @@ function onToggle(noteIdx) {
 .white-key.active { background: #c89420; }
 .white-key.root   { background: #f0c020; }
 
+.dim-inactive .white-key:not(.active):not(.root) { background: #7a7268; }
+.dim-inactive .white-key:not(.active):not(.root) .key-label { color: #4a4438; }
+
 /* Black keys */
 .black-key {
   position: absolute;
@@ -203,6 +207,9 @@ function onToggle(noteIdx) {
 
 .black-key.active { background: #b07a10; }
 .black-key.root   { background: #d49800; }
+
+.dim-inactive .black-key:not(.active):not(.root) { background: #302c28; }
+.dim-inactive .black-key:not(.active):not(.root) .key-label { color: #3a3430; }
 
 /* Key labels */
 .key-label {

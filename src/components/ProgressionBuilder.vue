@@ -252,4 +252,10 @@ const chordCards = computed(() =>
   .prog-builder { padding: 1.25rem 1rem; }
   .chord-card { flex: 1 1 calc(50% - 0.375rem); max-width: calc(50% - 0.375rem); }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .prog-builder { padding: 0.75rem 1rem; }
+  .subtitle { display: none; }
+  .chord-row { margin-top: 0.5rem; }
+}
 </style>

@@ -37,3 +37,9 @@ body {
     padding: 1rem;
   }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  #app {
+    padding: 0.6rem 1.25rem;
+  }
+}

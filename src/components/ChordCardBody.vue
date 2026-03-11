@@ -68,6 +68,7 @@ const pianoActiveIndices = computed(() =>
       :activeIndices="pianoActiveIndices"
       :rootIndex="chordRootIdx"
       :showOctaveSelector="false"
+      :dimInactive="true"
     />
   </template>
 </template>

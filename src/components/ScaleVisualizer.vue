@@ -167,6 +167,7 @@ const guitarNeck = computed(() =>
         :activeIndices="activeIndices"
         :rootIndex="rootIndex"
         v-model:octave="pianoOctave"
+        :dimInactive="true"
       />
     </template>
 
@@ -531,6 +532,47 @@ select:focus { border-color: #c8a96e; }
 
   .pad-note {
     font-size: 1.2rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .scale-viz {
+    padding: 0.75rem 1rem;
+  }
+
+  .scale-viz-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .controls {
+    margin: 0.5rem 0;
+    gap: 0.5rem;
+  }
+
+  .control-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+  }
+
+  .control-group label {
+    min-width: unset;
+    white-space: nowrap;
+  }
+
+  .note-picker button {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+    min-width: 2rem;
+  }
+
+  .scale-notes {
+    margin-top: 0.5rem;
   }
 }
 </style>

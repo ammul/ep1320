@@ -233,4 +233,26 @@ const rows = computed(() => [
     font-size: 0.62rem;
   }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .claves {
+    padding: 0.75rem 1rem;
+  }
+
+  .claves-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .octave-control {
+    margin: 0.5rem 0;
+  }
+
+  .legend {
+    display: none;
+  }
+}
 </style>

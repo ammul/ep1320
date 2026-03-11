@@ -410,4 +410,28 @@ const chord = computed(() => detectChord([...selected.value]))
   .chord-detector { padding: 1.25rem 1rem; }
   .pad-note { font-size: 1.2rem; }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .chord-detector {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .header h2 {
+    font-size: 1.1rem;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .result {
+    padding-top: 0.75rem;
+    min-height: 60px;
+  }
+
+  .chord-name {
+    font-size: clamp(1.8rem, 8vw, 2.5rem);
+  }
+}
 </style>
