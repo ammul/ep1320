@@ -1,9 +1,15 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { displayMode } from '../displayMode.js'
 
 const NOTES  = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 const LABELS = ['.',  '0',  'i', '1', '2',  '3', '4',  '5', '6', '7',  '8', '9']
 const SHARPS = new Set(['A#', 'C#', 'D#', 'F#', 'G#'])
+
+// Guitar neck: open string note indices (E2, A2, D3, G3, B3, E4)
+const OPEN_STRINGS = [7, 0, 5, 10, 2, 7]
+const STRING_NAMES = ['E', 'A', 'D', 'G', 'B', 'e']
+const FRET_COUNT = 12
 
 const SCALES = [
   { id: '12t',  label: '12T — Chromatic',         intervals: [0,1,2,3,4,5,6,7,8,9,10,11], description: 'All 12 semitones. No inherent tonality — every key plays, nothing is highlighted. Useful for atonal passages or when you want full chromatic access.' },
@@ -23,16 +29,13 @@ const selectedScaleId = ref('maj')
 const showInfo = ref(false)
 
 const selectedScale = computed(() => SCALES.find(s => s.id === selectedScaleId.value))
-
 const rootIndex = computed(() => NOTES.indexOf(selectedRoot.value))
 
-// Set of pad indices (0–11) that are active in the current scale
 const activeIndices = computed(() => {
   const root = rootIndex.value
   return new Set(selectedScale.value.intervals.map(i => (root + i) % 12))
 })
 
-// Which interval degree (1-based) is each active pad?
 const degreeMap = computed(() => {
   const root = rootIndex.value
   const map = {}
@@ -54,8 +57,6 @@ const pads = computed(() =>
   }))
 )
 
-// Numpad layout (top→bottom): 7 8 9 / 4 5 6 / 1 2 3 / . 0 i
-// Notes ascend bottom→top: A on ., G# on 9
 const rows = computed(() => [
   pads.value.slice(9, 12),
   pads.value.slice(6, 9),
@@ -66,13 +67,47 @@ const rows = computed(() => [
 const scaleNotes = computed(() =>
   selectedScale.value.intervals.map(i => NOTES[(rootIndex.value + i) % 12])
 )
+
+// Notes mode: all 12 chromatic notes as tiles
+const chromaTiles = computed(() =>
+  NOTES.map((note, i) => ({
+    note,
+    isSharp: SHARPS.has(note),
+    isActive: activeIndices.value.has(i),
+    isRoot: i === rootIndex.value,
+    degree: degreeMap.value[i] ?? null,
+  }))
+)
+
+// Guitar neck: 6 strings displayed high→low (e, B, G, D, A, E)
+const guitarNeck = computed(() => {
+  const neck = []
+  for (let s = 5; s >= 0; s--) {
+    const cells = []
+    for (let f = 0; f <= FRET_COUNT; f++) {
+      const noteIdx = (OPEN_STRINGS[s] + f) % 12
+      cells.push({
+        noteIdx,
+        note: NOTES[noteIdx],
+        isActive: activeIndices.value.has(noteIdx),
+        isRoot: noteIdx === rootIndex.value,
+        fret: f,
+        isOpen: f === 0,
+      })
+    }
+    neck.push({ stringIdx: s, name: STRING_NAMES[s], cells })
+  }
+  return neck
+})
 </script>
 
 <template>
   <div class="scale-viz">
     <div class="scale-viz-header">
       <h2>Scale Visualizer</h2>
-      <p class="subtitle">see which pads are active for any scale · matches EP‑1320 scale names</p>
+      <p class="subtitle" v-if="displayMode === 'ep1320'">see which pads are active for any scale · matches EP‑1320 scale names</p>
+      <p class="subtitle" v-else-if="displayMode === 'notes'">chromatic note strip — scale notes highlighted</p>
+      <p class="subtitle" v-else>guitar neck (standard tuning) — scale positions highlighted</p>
     </div>
 
     <div class="controls">
@@ -100,25 +135,78 @@ const scaleNotes = computed(() =>
       </div>
     </div>
 
-    <div class="grid">
-      <div class="row" v-for="(row, ri) in rows" :key="ri">
-        <div
-          v-for="pad in row"
-          :key="pad.number"
-          class="pad"
-          :class="{
-            active: pad.isActive,
-            root: pad.isRoot,
-            sharp: pad.isSharp,
-            inactive: !pad.isActive,
-          }"
-        >
-          <span class="pad-label">{{ pad.label }}</span>
-          <span class="pad-note">{{ pad.note }}</span>
-          <span class="pad-degree" v-if="pad.isActive">{{ pad.isRoot ? '①' : pad.degree }}</span>
+    <!-- EP-1320 mode: pad grid -->
+    <template v-if="displayMode === 'ep1320'">
+      <div class="grid">
+        <div class="row" v-for="(row, ri) in rows" :key="ri">
+          <div
+            v-for="pad in row"
+            :key="pad.number"
+            class="pad"
+            :class="{
+              active: pad.isActive,
+              root: pad.isRoot,
+              sharp: pad.isSharp,
+              inactive: !pad.isActive,
+            }"
+          >
+            <span class="pad-label">{{ pad.label }}</span>
+            <span class="pad-note">{{ pad.note }}</span>
+            <span class="pad-degree" v-if="pad.isActive">{{ pad.isRoot ? '①' : pad.degree }}</span>
+          </div>
         </div>
       </div>
-    </div>
+    </template>
+
+    <!-- Notes mode: chromatic strip -->
+    <template v-else-if="displayMode === 'notes'">
+      <div class="chroma-strip">
+        <div
+          v-for="tile in chromaTiles"
+          :key="tile.note"
+          class="chroma-tile"
+          :class="{
+            active: tile.isActive,
+            root: tile.isRoot,
+            sharp: tile.isSharp,
+            inactive: !tile.isActive,
+          }"
+        >
+          <span class="tile-note">{{ tile.note }}</span>
+          <span class="tile-degree" v-if="tile.isActive">{{ tile.isRoot ? '①' : tile.degree }}</span>
+        </div>
+      </div>
+    </template>
+
+    <!-- Guitar mode: neck -->
+    <template v-else>
+      <div class="guitar-neck-wrap">
+        <div class="guitar-neck">
+          <div v-for="(string, si) in guitarNeck" :key="si" class="neck-row">
+            <div class="string-name">{{ string.name }}</div>
+            <div
+              v-for="cell in string.cells"
+              :key="cell.fret"
+              class="neck-cell"
+              :class="{
+                active: cell.isActive,
+                root: cell.isRoot,
+                open: cell.isOpen,
+              }"
+            >
+              <span v-if="cell.isActive" class="neck-dot" :class="{ root: cell.isRoot }"></span>
+            </div>
+          </div>
+          <!-- fret numbers -->
+          <div class="fret-numbers">
+            <div class="string-name-spacer"></div>
+            <div v-for="f in FRET_COUNT + 1" :key="f" class="fret-num">
+              {{ f - 1 === 0 ? '' : f - 1 }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
 
     <div class="scale-notes">
       <span class="scale-label">Notes in scale</span>
@@ -196,21 +284,9 @@ const scaleNotes = computed(() =>
   text-align: center;
 }
 
-.note-picker button.sharp {
-  background: #161412;
-  color: #7a6f60;
-}
-
-.note-picker button:hover {
-  border-color: #c8a96e;
-  color: #e8dcc8;
-}
-
-.note-picker button.active {
-  background: #c8a96e;
-  border-color: #c8a96e;
-  color: #1a1714;
-}
+.note-picker button.sharp { background: #161412; color: #7a6f60; }
+.note-picker button:hover  { border-color: #c8a96e; color: #e8dcc8; }
+.note-picker button.active { background: #c8a96e; border-color: #c8a96e; color: #1a1714; }
 
 .scale-select-row {
   display: flex;
@@ -235,16 +311,8 @@ const scaleNotes = computed(() =>
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 
-.info-btn:hover {
-  border-color: #c8a96e;
-  color: #e8dcc8;
-}
-
-.info-btn.active {
-  background: #3a2e10;
-  border-color: #c8a96e;
-  color: #c8a96e;
-}
+.info-btn:hover  { border-color: #c8a96e; color: #e8dcc8; }
+.info-btn.active { background: #3a2e10; border-color: #c8a96e; color: #c8a96e; }
 
 .scale-info {
   margin-top: 0.6rem;
@@ -271,11 +339,9 @@ select {
   max-width: 100%;
 }
 
-select:focus {
-  border-color: #c8a96e;
-}
+select:focus { border-color: #c8a96e; }
 
-/* Grid */
+/* EP-1320 grid */
 .grid {
   display: flex;
   flex-direction: column;
@@ -302,45 +368,125 @@ select:focus {
   transition: background 0.15s, border-color 0.15s;
 }
 
-.pad.inactive {
-  background: #1a1714;
-  opacity: 0.35;
+.pad.inactive { background: #1a1714; opacity: 0.35; }
+.pad.active   { background: #2e2820; border-color: #6a5a30; }
+.pad.root     { background: #3a2e10; border-color: #c8a96e; }
+
+.pad-label  { font-size: 0.7rem; color: #5a5040; font-weight: 600; letter-spacing: 0.1em; }
+.pad-note   { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+
+.pad.inactive .pad-note { color: #4a4030; }
+.pad.active .pad-note   { color: #c8a96e; }
+.pad.root .pad-note     { color: #f0c87a; }
+
+.pad-degree           { font-size: 0.72rem; color: #8a7850; }
+.pad.root .pad-degree { color: #c8a96e; }
+
+/* Notes mode chromatic strip */
+.chroma-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.pad.active {
-  background: #2e2820;
-  border-color: #6a5a30;
+.chroma-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 8px;
+  border: 1px solid #3a3228;
+  transition: background 0.15s, border-color 0.15s;
 }
 
-.pad.root {
-  background: #3a2e10;
-  border-color: #c8a96e;
+.chroma-tile.inactive { background: #1a1714; opacity: 0.35; }
+.chroma-tile.active   { background: #2e2820; border-color: #6a5a30; }
+.chroma-tile.root     { background: #3a2e10; border-color: #c8a96e; }
+
+.tile-note { font-size: 1.1rem; font-weight: 700; line-height: 1; }
+.chroma-tile.inactive .tile-note { color: #4a4030; }
+.chroma-tile.active .tile-note   { color: #c8a96e; }
+.chroma-tile.root .tile-note     { color: #f0c87a; }
+
+.tile-degree           { font-size: 0.65rem; color: #8a7850; }
+.chroma-tile.root .tile-degree { color: #c8a96e; }
+
+/* Guitar neck */
+.guitar-neck-wrap {
+  overflow-x: auto;
+  margin-bottom: 0.5rem;
 }
 
-.pad-label {
+.guitar-neck {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 600px;
+}
+
+.neck-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #2a2420;
+}
+
+.string-name {
+  width: 1.8rem;
   font-size: 0.7rem;
   color: #5a5040;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  text-align: right;
+  padding-right: 0.5rem;
+  flex-shrink: 0;
 }
 
-.pad-note {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
+.neck-cell {
+  flex: 1;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #2a2420;
+  position: relative;
 }
 
-.pad.inactive .pad-note  { color: #4a4030; }
-.pad.active .pad-note    { color: #c8a96e; }
-.pad.root .pad-note      { color: #f0c87a; }
-
-.pad-degree {
-  font-size: 0.72rem;
-  color: #8a7850;
+.neck-cell.open {
+  border-right: 3px solid #4a4030;
 }
 
-.pad.root .pad-degree {
-  color: #c8a96e;
+.neck-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #6a5a30;
+  display: block;
+}
+
+.neck-dot.root {
+  background: #c8a96e;
+  box-shadow: 0 0 4px rgba(200,169,110,0.5);
+}
+
+.fret-numbers {
+  display: flex;
+  align-items: center;
+  margin-top: 0.3rem;
+}
+
+.string-name-spacer {
+  width: 1.8rem;
+  flex-shrink: 0;
+}
+
+.fret-num {
+  flex: 1;
+  font-size: 0.6rem;
+  color: #4a4030;
+  text-align: center;
 }
 
 /* Scale notes strip */

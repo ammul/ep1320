@@ -1,28 +1,52 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { displayMode } from './displayMode.js'
 import ClavesMode from './components/ClavesMode.vue'
 import ScaleVisualizer from './components/ScaleVisualizer.vue'
 import ChordProgressions from './components/ChordProgressions.vue'
 import ChordDetector from './components/ChordDetector.vue'
 import ProgressionBuilder from './components/ProgressionBuilder.vue'
 
-const tabs = [
-  { id: 'claves',         label: 'Claves Mode',        component: ClavesMode },
-  { id: 'scales',         label: 'Scale Visualizer',   component: ScaleVisualizer },
-  { id: 'chords',         label: 'Chord Progressions', component: ChordProgressions },
-  { id: 'chord-detector', label: 'Chord Detector',     component: ChordDetector },
+const allTabs = [
+  { id: 'claves',         label: 'Claves Mode',         component: ClavesMode,        ep1320Only: true },
+  { id: 'scales',         label: 'Scale Visualizer',    component: ScaleVisualizer },
+  { id: 'chords',         label: 'Chord Progressions',  component: ChordProgressions },
+  { id: 'chord-detector', label: 'Chord Detector',      component: ChordDetector },
   { id: 'prog-builder',   label: 'Progression Builder', component: ProgressionBuilder },
 ]
 
 const activeTab = ref('claves')
-const activeComponent = () => tabs.find(t => t.id === activeTab.value)?.component
+
+const tabs = computed(() =>
+  allTabs.filter(t => !t.ep1320Only || displayMode.value === 'ep1320')
+)
+
+watch(displayMode, (mode) => {
+  if (mode !== 'ep1320' && activeTab.value === 'claves') {
+    activeTab.value = 'scales'
+  }
+})
+
+const activeComponent = () => allTabs.find(t => t.id === activeTab.value)?.component
 </script>
 
 <template>
   <div id="app">
     <header>
-      <h1>EP–1320 <span class="dim">medieval</span></h1>
-      <p class="tagline">tools & reference</p>
+      <div class="header-row">
+        <div>
+          <h1>Tonarium <span class="dim">chromatic</span></h1>
+          <p class="tagline">tools & reference</p>
+        </div>
+        <div class="display-mode-control">
+          <label class="mode-label">Display</label>
+          <select v-model="displayMode">
+            <option value="ep1320">EP-1320</option>
+            <option value="notes">Notes</option>
+            <option value="guitar">Guitar</option>
+          </select>
+        </div>
+      </div>
     </header>
 
     <nav>
@@ -45,6 +69,14 @@ header {
   margin-bottom: 1.5rem;
 }
 
+.header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 h1 {
   font-size: 1.8rem;
   font-weight: 700;
@@ -64,6 +96,37 @@ h1 .dim {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   margin-top: 0.2rem;
+}
+
+.display-mode-control {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+  margin-top: 0.3rem;
+}
+
+.mode-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #7a6f60;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.display-mode-control select {
+  background: #1e1c18;
+  border: 1px solid #4a4030;
+  border-radius: 6px;
+  color: #e8dcc8;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.display-mode-control select:focus {
+  border-color: #c8a96e;
 }
 
 nav {

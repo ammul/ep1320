@@ -1,16 +1,19 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { displayMode } from '../displayMode.js'
 
 const NOTES  = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 const LABELS = ['.',  '0',  'i', '1', '2',  '3', '4',  '5', '6', '7',  '8', '9']
 const SHARPS = new Set(['A#', 'C#', 'D#', 'F#', 'G#'])
 
-// Semitone value from C for each note index (A=0 in app, C=0 in music theory)
-// A→9, A#→10, B→11, C→0, C#→1, D→2, D#→3, E→4, F→5, F#→6, G→7, G#→8
+// Guitar neck open string note indices: E2, A2, D3, G3, B3, E4
+const OPEN_STRINGS = [7, 0, 5, 10, 2, 7]
+const STRING_NAMES = ['E', 'A', 'D', 'G', 'B', 'e']
+const FRET_COUNT = 12
+
 const NOTE_TO_SEMI = [9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8]
 const SEMI_TO_NAME = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
-// interval sets → chord quality suffix
 const CHORD_TYPES = [
   { intervals: [0, 7],           suffix: '5',      name: 'Power chord' },
   { intervals: [0, 4, 7],        suffix: '',        name: 'Major' },
@@ -33,24 +36,16 @@ const CHORD_TYPES = [
 
 function detectChord(noteIndices) {
   if (noteIndices.length < 2) return null
-
-  // Convert app indices to semitone values, deduplicate pitch classes
   const semis = [...new Set(noteIndices.map(i => NOTE_TO_SEMI[i]))].sort((a, b) => a - b)
-
-  // Try each note as root, look for a matching chord type
   const results = []
-
   for (const rootSemi of semis) {
-    // Compute intervals from this root, mod 12, sort
     const intervals = semis.map(s => (s - rootSemi + 12) % 12).sort((a, b) => a - b)
-
     for (const type of CHORD_TYPES) {
       if (
         type.intervals.length === intervals.length &&
         type.intervals.every((v, i) => v === intervals[i])
       ) {
         const rootName = SEMI_TO_NAME[rootSemi]
-        // Determine if it's an inversion (lowest note ≠ root)
         const lowestSemi = semis[0]
         const isInversion = lowestSemi !== rootSemi
         const bassName = SEMI_TO_NAME[lowestSemi]
@@ -64,20 +59,16 @@ function detectChord(noteIndices) {
       }
     }
   }
-
   if (results.length === 0) return null
-
-  // Prefer root-position chords, then return first match
   const rootPos = results.find(r => !r.inversion)
   return rootPos ?? results[0]
 }
 
-// ── Pad state ──────────────────────────────────────────────
 const selected = ref(new Set())
 
-function togglePad(index) {
+function toggleNote(noteIndex) {
   const next = new Set(selected.value)
-  next.has(index) ? next.delete(index) : next.add(index)
+  next.has(noteIndex) ? next.delete(noteIndex) : next.add(noteIndex)
   selected.value = next
 }
 
@@ -85,6 +76,7 @@ function clearAll() {
   selected.value = new Set()
 }
 
+// EP-1320 pad grid
 const pads = computed(() =>
   NOTES.map((note, i) => ({
     index: i,
@@ -102,6 +94,37 @@ const rows = computed(() => [
   pads.value.slice(0, 3),
 ])
 
+// Notes mode: 12 chromatic note buttons
+const noteButtons = computed(() =>
+  NOTES.map((note, i) => ({
+    index: i,
+    note,
+    isSharp: SHARPS.has(note),
+    isSelected: selected.value.has(i),
+  }))
+)
+
+// Guitar mode: fretboard (high e at top)
+const guitarNeck = computed(() => {
+  const neck = []
+  for (let s = 5; s >= 0; s--) {
+    const cells = []
+    for (let f = 0; f <= FRET_COUNT; f++) {
+      const noteIdx = (OPEN_STRINGS[s] + f) % 12
+      cells.push({
+        noteIdx,
+        note: NOTES[noteIdx],
+        isSharp: SHARPS.has(NOTES[noteIdx]),
+        isSelected: selected.value.has(noteIdx),
+        fret: f,
+        isOpen: f === 0,
+      })
+    }
+    neck.push({ stringIdx: s, name: STRING_NAMES[s], cells })
+  }
+  return neck
+})
+
 const selectedNames = computed(() =>
   [...selected.value].sort((a, b) => a - b).map(i => NOTES[i])
 )
@@ -114,17 +137,20 @@ const chord = computed(() => detectChord([...selected.value]))
 
     <div class="header">
       <h2>Chord Detector</h2>
-      <p class="subtitle">Tap the notes you're playing — the chord is identified instantly</p>
+      <p class="subtitle" v-if="displayMode === 'ep1320'">Tap the notes you're playing — the chord is identified instantly</p>
+      <p class="subtitle" v-else-if="displayMode === 'notes'">Click note names to select — chord identified instantly</p>
+      <p class="subtitle" v-else>Click frets on the neck — chord identified instantly</p>
     </div>
 
-    <div class="grid">
+    <!-- EP-1320 mode: pad grid -->
+    <div v-if="displayMode === 'ep1320'" class="grid">
       <div class="row" v-for="(row, ri) in rows" :key="ri">
         <button
           v-for="pad in row"
           :key="pad.index"
           class="pad"
           :class="{ sharp: pad.isSharp, selected: pad.isSelected }"
-          @click="togglePad(pad.index)"
+          @click="toggleNote(pad.index)"
         >
           <span class="pad-label">{{ pad.label }}</span>
           <span class="pad-note">{{ pad.note }}</span>
@@ -132,11 +158,52 @@ const chord = computed(() => detectChord([...selected.value]))
       </div>
     </div>
 
+    <!-- Notes mode: chromatic note buttons -->
+    <div v-else-if="displayMode === 'notes'" class="note-strip">
+      <button
+        v-for="btn in noteButtons"
+        :key="btn.index"
+        class="note-btn"
+        :class="{ sharp: btn.isSharp, selected: btn.isSelected }"
+        @click="toggleNote(btn.index)"
+      >
+        {{ btn.note }}
+      </button>
+    </div>
+
+    <!-- Guitar mode: fretboard -->
+    <div v-else class="guitar-neck-wrap">
+      <div class="guitar-neck">
+        <div v-for="(string, si) in guitarNeck" :key="si" class="neck-row">
+          <div class="string-name">{{ string.name }}</div>
+          <button
+            v-for="cell in string.cells"
+            :key="cell.fret"
+            class="neck-cell"
+            :class="{
+              selected: cell.isSelected,
+              sharp: cell.isSharp,
+              open: cell.isOpen,
+            }"
+            @click="toggleNote(cell.noteIdx)"
+          >
+            <span v-if="cell.isSelected" class="neck-dot"></span>
+            <span v-else class="neck-note">{{ cell.note }}</span>
+          </button>
+        </div>
+        <div class="fret-numbers">
+          <div class="string-name-spacer"></div>
+          <div v-for="f in FRET_COUNT + 1" :key="f" class="fret-num">
+            {{ f - 1 === 0 ? '' : f - 1 }}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <button class="clear-btn" @click="clearAll" :disabled="selected.size === 0">
       Clear
     </button>
 
-    <!-- Result panel -->
     <div class="result" :class="{ empty: selected.size === 0 }">
       <template v-if="selected.size === 0">
         <p class="hint">Select two or more notes</p>
@@ -173,25 +240,11 @@ const chord = computed(() => detectChord([...selected.value]))
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
-.subtitle {
-  margin-top: 0.3rem;
-  font-size: 0.85rem;
-  color: #7a6f60;
-}
+.subtitle { margin-top: 0.3rem; font-size: 0.85rem; color: #7a6f60; }
 
-/* ── Grid ── */
-.grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  max-width: 360px;
-}
-
-.row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.6rem;
-}
+/* EP-1320 pad grid */
+.grid { display: flex; flex-direction: column; gap: 0.6rem; max-width: 360px; }
+.row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
 
 .pad {
   display: flex;
@@ -209,56 +262,137 @@ const chord = computed(() => detectChord([...selected.value]))
   -webkit-tap-highlight-color: transparent;
 }
 
-.pad:hover {
-  background: #3a3228;
+.pad:hover { background: #3a3228; }
+.pad:active { transform: scale(0.95); }
+.pad.sharp { background: #1e1c18; border-color: #3a3228; }
+.pad.sharp:hover { background: #2a2820; }
+.pad.selected { background: #3d3010; border-color: #c8a96e; box-shadow: 0 0 8px rgba(200,169,110,0.25); }
+.pad.selected.sharp { background: #302808; }
+
+.pad-label { font-size: 0.65rem; color: #5a5040; font-weight: 600; letter-spacing: 0.1em; }
+.pad.selected .pad-label { color: #a08848; }
+.pad-note { font-size: 1.4rem; font-weight: 700; color: #c8a96e; line-height: 1; }
+.pad.sharp .pad-note { color: #a08858; }
+.pad.selected .pad-note { color: #e8c87e; }
+
+/* Notes mode strip */
+.note-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.pad:active {
-  transform: scale(0.95);
+.note-btn {
+  padding: 0.55rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #4a4030;
+  background: #2e2820;
+  color: #c8a96e;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  min-width: 3rem;
+  text-align: center;
+  transition: background 0.1s, border-color 0.1s, transform 0.08s;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.pad.sharp {
-  background: #1e1c18;
-  border-color: #3a3228;
-}
-.pad.sharp:hover {
-  background: #2a2820;
+.note-btn:hover { background: #3a3228; }
+.note-btn:active { transform: scale(0.95); }
+.note-btn.sharp { background: #1e1c18; border-color: #3a3228; color: #a08858; font-size: 0.9rem; }
+.note-btn.sharp:hover { background: #2a2820; }
+.note-btn.selected { background: #3d3010; border-color: #c8a96e; color: #e8c87e; box-shadow: 0 0 6px rgba(200,169,110,0.25); }
+.note-btn.selected.sharp { background: #302808; }
+
+/* Guitar neck */
+.guitar-neck-wrap {
+  overflow-x: auto;
 }
 
-.pad.selected {
-  background: #3d3010;
-  border-color: #c8a96e;
-  box-shadow: 0 0 8px rgba(200, 169, 110, 0.25);
-}
-.pad.selected.sharp {
-  background: #302808;
+.guitar-neck {
+  display: flex;
+  flex-direction: column;
+  min-width: 600px;
 }
 
-.pad-label {
-  font-size: 0.65rem;
+.neck-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid #2a2420;
+}
+
+.string-name {
+  width: 1.8rem;
+  font-size: 0.7rem;
   color: #5a5040;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  text-align: right;
+  padding-right: 0.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
-.pad.selected .pad-label {
-  color: #a08848;
+.neck-cell {
+  flex: 1;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #2a2420;
+  border: none;
+  background: #1e1c18;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.1s;
+  border-right: 1px solid #2a2420;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.pad-note {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #c8a96e;
-  line-height: 1;
-}
-.pad.sharp .pad-note {
-  color: #a08858;
-}
-.pad.selected .pad-note {
-  color: #e8c87e;
+.neck-cell:hover { background: #2a2420; }
+.neck-cell.sharp { background: #181614; }
+.neck-cell.sharp:hover { background: #221e1a; }
+.neck-cell.open { border-right: 3px solid #4a4030; background: #242019; }
+.neck-cell.open:hover { background: #2e2820; }
+.neck-cell.selected { background: #3d3010; }
+.neck-cell.selected.sharp { background: #302808; }
+
+.neck-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #c8a96e;
+  display: block;
+  box-shadow: 0 0 4px rgba(200,169,110,0.4);
 }
 
-/* ── Clear button ── */
+.neck-note {
+  font-size: 0.6rem;
+  color: #3a3228;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.neck-cell.open .neck-note { color: #4a4030; }
+
+.fret-numbers {
+  display: flex;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.string-name-spacer { width: 1.8rem; flex-shrink: 0; }
+
+.fret-num {
+  flex: 1;
+  font-size: 0.6rem;
+  color: #4a4030;
+  text-align: center;
+}
+
+/* Clear button */
 .clear-btn {
   align-self: flex-start;
   padding: 0.35rem 1rem;
@@ -272,16 +406,11 @@ const chord = computed(() => detectChord([...selected.value]))
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
 }
-.clear-btn:hover:not(:disabled) {
-  color: #e8dcc8;
-  border-color: #6a6050;
-}
-.clear-btn:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
 
-/* ── Result ── */
+.clear-btn:hover:not(:disabled) { color: #e8dcc8; border-color: #6a6050; }
+.clear-btn:disabled { opacity: 0.3; cursor: default; }
+
+/* Result */
 .result {
   border-top: 1px solid #3a3228;
   padding-top: 1.5rem;
@@ -292,15 +421,8 @@ const chord = computed(() => detectChord([...selected.value]))
   min-height: 100px;
 }
 
-.result.empty {
-  opacity: 0.4;
-}
-
-.hint {
-  font-size: 0.9rem;
-  color: #5a5040;
-  margin-top: 0.5rem;
-}
+.result.empty { opacity: 0.4; }
+.hint { font-size: 0.9rem; color: #5a5040; margin-top: 0.5rem; }
 
 .chord-name {
   font-size: clamp(2.5rem, 12vw, 4rem);
@@ -309,34 +431,14 @@ const chord = computed(() => detectChord([...selected.value]))
   line-height: 1;
   letter-spacing: 0.03em;
 }
-.chord-name.unknown {
-  color: #5a5040;
-}
 
-.chord-quality {
-  font-size: 0.95rem;
-  color: #a09070;
-  letter-spacing: 0.04em;
-}
-
-.inversion-label {
-  color: #6a6050;
-  font-size: 0.85rem;
-}
-
-.chord-notes {
-  font-size: 0.8rem;
-  color: #5a5040;
-  letter-spacing: 0.08em;
-  margin-top: 0.2rem;
-}
+.chord-name.unknown { color: #5a5040; }
+.chord-quality { font-size: 0.95rem; color: #a09070; letter-spacing: 0.04em; }
+.inversion-label { color: #6a6050; font-size: 0.85rem; }
+.chord-notes { font-size: 0.8rem; color: #5a5040; letter-spacing: 0.08em; margin-top: 0.2rem; }
 
 @media (max-width: 600px) {
-  .chord-detector {
-    padding: 1.25rem 1rem;
-  }
-  .pad-note {
-    font-size: 1.2rem;
-  }
+  .chord-detector { padding: 1.25rem 1rem; }
+  .pad-note { font-size: 1.2rem; }
 }
 </style>

@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { displayMode } from '../displayMode.js'
+import GuitarChordDiagram from './GuitarChordDiagram.vue'
 
 const NOTES  = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 const LABELS = ['.',  '0',  'i', '1', '2',  '3', '4',  '5', '6', '7',  '8', '9']
@@ -314,15 +316,19 @@ function buildRows(activeSet, rootPad) {
 
 const chordCards = computed(() =>
   selectedProgression.value.chords.map((chord, idx) => {
-    const chordRootPad = (rootIndex.value + chord.degree) % 12
+    const chordRootIdx = (rootIndex.value + chord.degree) % 12
     const padIndices   = chordPadIndices(chord.degree, chord.type)
     const pressLabels  = [...padIndices].sort((a, b) => a - b).map(i => LABELS[i])
+    const noteNames    = [...padIndices].sort((a, b) => a - b).map(i => NOTES[i])
     return {
       idx,
-      numeral:     chord.numeral,
-      name:        chordName(chord.degree, chord.type),
-      rows:        buildRows(padIndices, chordRootPad),
+      numeral:      chord.numeral,
+      name:         chordName(chord.degree, chord.type),
+      type:         chord.type,
+      chordRootIdx,
+      rows:         buildRows(padIndices, chordRootIdx),
       pressLabels,
+      noteNames,
     }
   })
 )
@@ -388,29 +394,51 @@ function handleKey(e) {
         <div class="chord-numeral">{{ card.numeral }}</div>
         <div class="chord-name">{{ card.name }}</div>
 
-        <div class="mini-grid">
-          <div class="mini-row" v-for="(row, ri) in card.rows" :key="ri">
-            <div
-              v-for="pad in row"
-              :key="pad.label"
-              class="mini-pad"
-              :class="{
-                active: pad.isActive,
-                root: pad.isRoot,
-                sharp: pad.isSharp,
-                inactive: !pad.isActive,
-              }"
-            >
-              <span class="mini-label">{{ pad.label }}</span>
-              <span class="mini-note" v-if="pad.isActive">{{ pad.note }}</span>
+        <!-- EP-1320 mode: mini pad grid -->
+        <template v-if="displayMode === 'ep1320'">
+          <div class="mini-grid">
+            <div class="mini-row" v-for="(row, ri) in card.rows" :key="ri">
+              <div
+                v-for="pad in row"
+                :key="pad.label"
+                class="mini-pad"
+                :class="{
+                  active: pad.isActive,
+                  root: pad.isRoot,
+                  sharp: pad.isSharp,
+                  inactive: !pad.isActive,
+                }"
+              >
+                <span class="mini-label">{{ pad.label }}</span>
+                <span class="mini-note" v-if="pad.isActive">{{ pad.note }}</span>
+              </div>
             </div>
           </div>
-        </div>
+          <div class="press-labels">
+            <span class="press-hint">press</span>
+            <span v-for="lbl in card.pressLabels" :key="lbl" class="press-badge">{{ lbl }}</span>
+          </div>
+        </template>
 
-        <div class="press-labels">
-          <span class="press-hint">press</span>
-          <span v-for="lbl in card.pressLabels" :key="lbl" class="press-badge">{{ lbl }}</span>
-        </div>
+        <!-- Notes mode: note name badges -->
+        <template v-else-if="displayMode === 'notes'">
+          <div class="note-badges">
+            <span
+              v-for="n in card.noteNames"
+              :key="n"
+              class="note-badge"
+              :class="{ root: n === NOTES[card.chordRootIdx], sharp: SHARPS.has(n) }"
+            >{{ n }}</span>
+          </div>
+        </template>
+
+        <!-- Guitar mode: chord diagram -->
+        <template v-else>
+          <GuitarChordDiagram
+            :rootIndex="card.chordRootIdx"
+            :type="card.type"
+          />
+        </template>
       </div>
     </div>
 
@@ -448,7 +476,6 @@ function handleKey(e) {
   color: #7a6f60;
 }
 
-/* Controls */
 .controls {
   display: flex;
   flex-direction: column;
@@ -496,10 +523,7 @@ function handleKey(e) {
 .note-picker button:hover  { border-color: #c8a96e; color: #e8dcc8; }
 .note-picker button.active { background: #c8a96e; border-color: #c8a96e; color: #1a1714; }
 
-.mode-toggle {
-  display: flex;
-  gap: 0.35rem;
-}
+.mode-toggle { display: flex; gap: 0.35rem; }
 
 .mode-toggle button {
   padding: 0.3rem 0.9rem;
@@ -537,7 +561,6 @@ select:focus { border-color: #c8a96e; }
   font-style: italic;
 }
 
-/* Chord row */
 .chord-row {
   display: flex;
   gap: 0.75rem;
@@ -559,10 +582,7 @@ select:focus { border-color: #c8a96e; }
   gap: 0.4rem;
 }
 
-.chord-card:hover {
-  background: #252219;
-  border-color: #6a5a30;
-}
+.chord-card:hover { background: #252219; border-color: #6a5a30; }
 
 .chord-card.active {
   border-color: #c8a96e;
@@ -586,7 +606,7 @@ select:focus { border-color: #c8a96e; }
 
 .chord-card.active .chord-name { color: #f0c87a; }
 
-/* Mini grid */
+/* Mini grid (EP-1320 mode) */
 .mini-grid {
   display: flex;
   flex-direction: column;
@@ -617,26 +637,13 @@ select:focus { border-color: #c8a96e; }
 .mini-pad.active   { background: #2e2820; border-color: #6a5a30; }
 .mini-pad.root     { background: #3a2e10; border-color: #c8a96e; }
 
-.mini-label {
-  font-size: 0.6rem;
-  font-weight: 700;
-  color: #4a4030;
-  line-height: 1;
-}
-
+.mini-label { font-size: 0.6rem; font-weight: 700; color: #4a4030; line-height: 1; }
 .mini-pad.active .mini-label { color: #8a7850; }
 .mini-pad.root   .mini-label { color: #c8a96e; }
 
-.mini-note {
-  font-size: 0.62rem;
-  font-weight: 700;
-  line-height: 1;
-  color: #c8a96e;
-}
-
+.mini-note { font-size: 0.62rem; font-weight: 700; line-height: 1; color: #c8a96e; }
 .mini-pad.root .mini-note { color: #f0c87a; }
 
-/* Press labels */
 .press-labels {
   display: flex;
   align-items: center;
@@ -645,11 +652,7 @@ select:focus { border-color: #c8a96e; }
   justify-content: center;
 }
 
-.press-hint {
-  font-size: 0.65rem;
-  color: #4a4030;
-  margin-right: 2px;
-}
+.press-hint { font-size: 0.65rem; color: #4a4030; margin-right: 2px; }
 
 .press-badge {
   background: #2e2820;
@@ -659,6 +662,43 @@ select:focus { border-color: #c8a96e; }
   font-size: 0.7rem;
   font-weight: 700;
   color: #c8a96e;
+}
+
+/* Notes mode badges */
+.note-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  margin: 0.25rem 0;
+}
+
+.note-badge {
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  background: #2e2820;
+  border: 1px solid #4a4030;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #c8a96e;
+}
+
+.note-badge.root {
+  background: #3a2e10;
+  border-color: #c8a96e;
+  color: #f0c87a;
+}
+
+.note-badge.sharp {
+  background: #1e1c18;
+  color: #a08858;
+  border-color: #3a3228;
+}
+
+.note-badge.root.sharp {
+  background: #3a2e10;
+  border-color: #c8a96e;
+  color: #f0c87a;
 }
 
 /* Step dots */
@@ -682,9 +722,7 @@ select:focus { border-color: #c8a96e; }
 .dot.active { background: #c8a96e; }
 
 @media (max-width: 600px) {
-  .chord-prog {
-    padding: 1.25rem 1rem;
-  }
+  .chord-prog { padding: 1.25rem 1rem; }
 
   .control-group {
     flex-direction: column;
@@ -692,18 +730,13 @@ select:focus { border-color: #c8a96e; }
     gap: 0.5rem;
   }
 
-  .control-group label {
-    min-width: unset;
-  }
+  .control-group label { min-width: unset; }
 
   .chord-card {
     flex: 1 1 calc(50% - 0.375rem);
     max-width: calc(50% - 0.375rem);
   }
 
-  .mini-pad {
-    width: 30px;
-    height: 30px;
-  }
+  .mini-pad { width: 30px; height: 30px; }
 }
 </style>
