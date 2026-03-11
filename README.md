@@ -1,5 +1,5 @@
 # Tonarium - chromatic music tool
-Tonarium is a web tool to help people with bad musical education. Primarily built to work with the ep-1320 synthesizer. It features some useful tools for mapping of notes to instruments and visualizing of chord progressions.
+Tonarium is a web tool to help people with bad musical education. Primarily built to work with the ep-1320 synthesizer. It features some useful tools for mapping and visualizing of notes and chord progressions.
 
 ## Features
 - supported instruments
@@ -10,7 +10,7 @@ Tonarium is a web tool to help people with bad musical education. Primarily buil
 - visualize/explain different scales
 - visualize some chord progressions to play
 - chord detection: put in some notes and get a chord (if it exists)
-- chord progression building: type in some chords and visualize them
+- chord progression building: type in some chords and visualize the progression to play along
 
 ## Development
 
