@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { displayMode } from './displayMode.js'
 import { colorMode } from './colorMode.js'
+import StartPage from './components/StartPage.vue'
 import ClavesMode from './components/ClavesMode.vue'
 import ScaleVisualizer from './components/ScaleVisualizer.vue'
 import ChordProgressions from './components/ChordProgressions.vue'
@@ -9,6 +10,7 @@ import ChordDetector from './components/ChordDetector.vue'
 import ProgressionBuilder from './components/ProgressionBuilder.vue'
 
 const allTabs = [
+  { id: 'home',           label: 'Home',                component: StartPage },
   { id: 'claves',         label: 'Claves Mode',         component: ClavesMode,        ep1320Only: true },
   { id: 'scales',         label: 'Scale Visualizer',    component: ScaleVisualizer },
   { id: 'chords',         label: 'Chord Progressions',  component: ChordProgressions },
@@ -16,7 +18,7 @@ const allTabs = [
   { id: 'prog-builder',   label: 'Progression Builder', component: ProgressionBuilder },
 ]
 
-const activeTab = ref('claves')
+const activeTab = ref('home')
 const menuOpen  = ref(false)
 
 const tabs = computed(() =>
@@ -26,7 +28,7 @@ const tabs = computed(() =>
 
 watch(displayMode, (mode) => {
   if (mode !== 'ep1320' && activeTab.value === 'claves') {
-    activeTab.value = 'scales'
+    activeTab.value = 'home'
   }
 })
 
@@ -86,7 +88,7 @@ function selectTab(id) {
     </nav>
 
     <main>
-      <component :is="activeComponent" />
+      <component :is="activeComponent" @navigate="selectTab" />
     </main>
   </div>
 </template>

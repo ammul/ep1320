@@ -1,21 +1,29 @@
-# Tonarium - chromatic music tool
-Tonarium is a web tool to help people with bad musical education. Primarily built to work with the ep-1320 synthesizer. It features some useful tools for mapping and visualizing of notes and chord progressions.
+# Tonarium
 
-## Features
-- supported instruments
-  - guitar
-  - piano
-  - ep-1320 synthesizer
-  - generic display mode for notes
-- map notes to pads (ep1320 only)
-- visualize/explain different scales
-- visualize some chord progressions to play
-- chord detection: put in some notes and get a chord (if it exists)
-- chord progression building: type in some chords and visualize the progression to play along
+A web app for people with a bad musical education. Helps you see what's going on harmonically — scales, chords, progressions — laid out visually across the instrument of your choice.
+
+## Tools
+
+- **Chord Progressions** — browse classic progressions (I–V–vi–IV, ii–V–I, Canon in D, …) in any root key
+- **Scale Visualizer** — see any scale across all 12 notes
+- **Chord Detector** — select some notes, find out what chord they make
+- **Progression Builder** — arrange your own chord sequence and see it mapped out
+- **Claves Mode** — note-to-pad mapping for the EP-1320 layout *(EP-1320 display only)*
+
+## Display Modes
+
+All tools adapt to four layouts, selectable via the Display dropdown:
+
+| Mode | Description |
+|------|-------------|
+| EP-1320 | 4×3 chromatic pad grid (Teenage Engineering EP-1320) — default |
+| Guitar | 6-string fretboard in standard tuning |
+| Piano | Keyboard layout |
+| Notes | Plain chromatic note names |
 
 ## Development
 
-Clone the repository, it is a plain vite/vue3 app
+Clone the repository — it's a plain Vite / Vue 3 app.
 
 ```bash
 npm install && npm run dev
@@ -33,4 +41,3 @@ This work is licensed under a
 [cc-by-nc]: https://creativecommons.org/licenses/by-nc/4.0/
 [cc-by-nc-image]: https://licensebuttons.net/l/by-nc/4.0/88x31.png
 [cc-by-nc-shield]: https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg
-
