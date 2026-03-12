@@ -63,15 +63,15 @@ const rows = computed(() => [
 
 <style scoped>
 .claves {
-  background: #242019;
-  border: 1px solid #3a3228;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 2rem;
 }
 
 .claves-header h2 {
   font-size: 1.4rem;
-  color: #c8a96e;
+  color: var(--accent);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -79,7 +79,7 @@ const rows = computed(() => [
 .subtitle {
   margin-top: 0.3rem;
   font-size: 0.85rem;
-  color: #7a6f60;
+  color: var(--text3);
 }
 
 .octave-control {
@@ -88,12 +88,12 @@ const rows = computed(() => [
   gap: 0.75rem;
   margin: 1.5rem 0;
   font-size: 0.9rem;
-  color: #a09080;
+  color: var(--text2);
 }
 
 .octave-control label {
   font-weight: 600;
-  color: #c8a96e;
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.8rem;
@@ -102,10 +102,10 @@ const rows = computed(() => [
 .octave-control button {
   width: 2rem;
   height: 2rem;
-  border: 1px solid #4a4030;
+  border: 1px solid var(--border2);
   border-radius: 6px;
-  background: #1a1714;
-  color: #c8a96e;
+  background: var(--bg);
+  color: var(--accent);
   font-size: 1.1rem;
   cursor: pointer;
   line-height: 1;
@@ -113,8 +113,8 @@ const rows = computed(() => [
 }
 
 .octave-control button:hover {
-  background: #2a2218;
-  border-color: #c8a96e;
+  background: var(--accent-bg);
+  border-color: var(--accent);
 }
 
 .octave-value {
@@ -122,7 +122,7 @@ const rows = computed(() => [
   text-align: center;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #e8dcc8;
+  color: var(--text);
 }
 
 .grid {
@@ -146,29 +146,29 @@ const rows = computed(() => [
   gap: 0.2rem;
   padding: 0.75rem 0.5rem;
   border-radius: 8px;
-  border: 1px solid #4a4030;
-  background: #2e2820;
+  border: 1px solid var(--border2);
+  background: var(--raised);
   cursor: default;
   transition: background 0.15s;
   aspect-ratio: 1;
 }
 
 .pad:hover {
-  background: #3a3228;
+  background: var(--border);
 }
 
 .pad.sharp {
-  background: #1e1c18;
-  border-color: #3a3228;
+  background: var(--input);
+  border-color: var(--border);
 }
 
 .pad.sharp:hover {
-  background: #2a2820;
+  background: var(--border3);
 }
 
 .pad-label {
   font-size: 0.7rem;
-  color: #5a5040;
+  color: var(--text4);
   font-weight: 600;
   letter-spacing: 0.1em;
 }
@@ -176,17 +176,17 @@ const rows = computed(() => [
 .pad-note {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #c8a96e;
+  color: var(--accent);
   line-height: 1;
 }
 
 .pad.sharp .pad-note {
-  color: #a08858;
+  color: var(--accent-lo);
 }
 
 .pad-midi {
   font-size: 0.7rem;
-  color: #6a6050;
+  color: var(--accent-mid);
 }
 
 .legend {
@@ -200,7 +200,7 @@ const rows = computed(() => [
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  color: #7a6f60;
+  color: var(--text3);
 }
 
 .legend-item::before {
@@ -209,15 +209,15 @@ const rows = computed(() => [
   width: 14px;
   height: 14px;
   border-radius: 3px;
-  border: 1px solid #4a4030;
+  border: 1px solid var(--border2);
 }
 
 .legend-item.natural::before {
-  background: #2e2820;
+  background: var(--raised);
 }
 
 .legend-item.sharp::before {
-  background: #1e1c18;
+  background: var(--input);
 }
 
 @media (max-width: 600px) {

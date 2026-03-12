@@ -136,7 +136,7 @@ const voicing = computed(() => {
 
 .base-fret-label {
   font-size: 0.6rem;
-  color: #7a6f60;
+  color: var(--text3);
   margin-top: 1.4rem;
   line-height: 1;
 }
@@ -159,32 +159,32 @@ const voicing = computed(() => {
   align-items: center;
   justify-content: center;
   font-size: 0.55rem;
-  color: #7a6f60;
+  color: var(--text3);
   line-height: 1;
 }
 
-.nut      { height: 2px; background: #4a4030; border-radius: 1px; }
-.nut.open { height: 3px; background: #c8a96e; }
+.nut      { height: 2px; background: var(--border2); border-radius: 1px; }
+.nut.open { height: 3px; background: var(--accent); }
 
 .fret-grid {
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #4a4030;
-  border-right: 1px solid #4a4030;
+  border-left: 1px solid var(--border2);
+  border-right: 1px solid var(--border2);
 }
 
 .fret-row {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   height: 14px;
-  border-bottom: 1px solid #4a4030;
+  border-bottom: 1px solid var(--border2);
 }
 
 .fret-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-right: 1px solid #3a3228;
+  border-right: 1px solid var(--border);
 }
 
 .fret-cell:last-child { border-right: none; }
@@ -193,13 +193,13 @@ const voicing = computed(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #c8a96e;
+  background: var(--accent);
   display: block;
 }
 
 .finger-dot.root {
-  background: #f0c87a;
-  box-shadow: 0 0 3px rgba(240, 200, 122, 0.5);
+  background: var(--accent-hi);
+  box-shadow: 0 0 3px var(--accent-glow);
 }
 
 .voicing-selector {
@@ -210,9 +210,9 @@ const voicing = computed(() => {
 
 .vcng-btn {
   background: transparent;
-  border: 1px solid #3a3228;
+  border: 1px solid var(--border);
   border-radius: 3px;
-  color: #7a6f60;
+  color: var(--text3);
   font-size: 0.75rem;
   width: 1.2rem;
   height: 1.2rem;
@@ -225,11 +225,11 @@ const voicing = computed(() => {
   transition: border-color 0.12s, color 0.12s;
 }
 
-.vcng-btn:hover { border-color: #c8a96e; color: #c8a96e; }
+.vcng-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 .vcng-label {
   font-size: 0.58rem;
-  color: #5a5040;
+  color: var(--text4);
   white-space: nowrap;
 }
 </style>

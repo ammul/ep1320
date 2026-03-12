@@ -82,7 +82,7 @@ const pianoActiveIndices = computed(() =>
   width: 36px;
   height: 36px;
   border-radius: 4px;
-  border: 1px solid #2e2820;
+  border: 1px solid var(--raised);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -91,21 +91,21 @@ const pianoActiveIndices = computed(() =>
   transition: background 0.12s;
 }
 
-.mini-pad.inactive { background: #1a1714; opacity: 0.3; }
-.mini-pad.active   { background: #2e2820; border-color: #6a5a30; }
-.mini-pad.root     { background: #3a2e10; border-color: #c8a96e; }
+.mini-pad.inactive { background: var(--bg); opacity: 0.3; }
+.mini-pad.active   { background: var(--raised); border-color: var(--accent-mid); }
+.mini-pad.root     { background: var(--accent-bg); border-color: var(--accent); }
 
-.mini-label { font-size: 0.6rem; font-weight: 700; color: #4a4030; line-height: 1; }
-.mini-pad.active .mini-label { color: #8a7850; }
-.mini-pad.root   .mini-label { color: #c8a96e; }
+.mini-label { font-size: 0.6rem; font-weight: 700; color: var(--text5); line-height: 1; }
+.mini-pad.active .mini-label { color: var(--accent-dim); }
+.mini-pad.root   .mini-label { color: var(--accent); }
 
-.mini-note { font-size: 0.62rem; font-weight: 700; line-height: 1; color: #c8a96e; }
-.mini-pad.root .mini-note { color: #f0c87a; }
+.mini-note { font-size: 0.62rem; font-weight: 700; line-height: 1; color: var(--accent); }
+.mini-pad.root .mini-note { color: var(--accent-hi); }
 
 /* Press labels */
 .press-labels { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; justify-content: center; }
-.press-hint   { font-size: 0.65rem; color: #4a4030; margin-right: 2px; }
-.press-badge  { background: #2e2820; border: 1px solid #4a4030; border-radius: 3px; padding: 1px 5px; font-size: 0.7rem; font-weight: 700; color: #c8a96e; }
+.press-hint   { font-size: 0.65rem; color: var(--text5); margin-right: 2px; }
+.press-badge  { background: var(--raised); border: 1px solid var(--border2); border-radius: 3px; padding: 1px 5px; font-size: 0.7rem; font-weight: 700; color: var(--accent); }
 
 /* Note badges */
 .note-badges { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin: 0.25rem 0; }
@@ -113,16 +113,16 @@ const pianoActiveIndices = computed(() =>
 .note-badge {
   padding: 0.2rem 0.45rem;
   border-radius: 4px;
-  background: #2e2820;
-  border: 1px solid #4a4030;
+  background: var(--raised);
+  border: 1px solid var(--border2);
   font-size: 0.78rem;
   font-weight: 700;
-  color: #c8a96e;
+  color: var(--accent);
 }
 
-.note-badge.root  { background: #3a2e10; border-color: #c8a96e; color: #f0c87a; }
-.note-badge.sharp { background: #1e1c18; color: #a08858; border-color: #3a3228; }
-.note-badge.root.sharp { background: #3a2e10; border-color: #c8a96e; color: #f0c87a; }
+.note-badge.root  { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-hi); }
+.note-badge.sharp { background: var(--input); color: var(--accent-lo); border-color: var(--border); }
+.note-badge.root.sharp { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-hi); }
 
 @media (max-width: 600px) {
   .mini-pad { width: 30px; height: 30px; }

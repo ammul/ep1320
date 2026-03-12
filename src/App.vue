@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { displayMode } from './displayMode.js'
+import { colorMode } from './colorMode.js'
 import ClavesMode from './components/ClavesMode.vue'
 import ScaleVisualizer from './components/ScaleVisualizer.vue'
 import ChordProgressions from './components/ChordProgressions.vue'
@@ -54,6 +55,15 @@ function selectTab(id) {
               <option value="piano">Piano</option>
             </select>
           </div>
+          <button class="theme-btn" @click="colorMode = colorMode === 'dark' ? 'light' : 'dark'" :aria-label="colorMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+            <svg v-if="colorMode === 'dark'" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="7.5" cy="7.5" r="3" fill="currentColor"/>
+              <path d="M7.5 1V2.5M7.5 12.5V14M1 7.5H2.5M12.5 7.5H14M2.9 2.9L3.96 3.96M11.04 11.04L12.1 12.1M12.1 2.9L11.04 3.96M3.96 11.04L2.9 12.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <svg v-else width="15" height="15" viewBox="0 0 15 15" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12.5 9A6 6 0 1 1 6 2.5a4.5 4.5 0 0 0 6.5 6.5z"/>
+            </svg>
+          </button>
           <button class="burger-btn" @click="menuOpen = true" aria-label="Open menu">
             <span></span><span></span><span></span>
           </button>
@@ -105,7 +115,7 @@ header {
 h1 {
   font-size: clamp(1.2rem, 5vw, 1.8rem);
   font-weight: 700;
-  color: #c8a96e;
+  color: var(--accent);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -130,16 +140,16 @@ h1 {
 .mode-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #7a6f60;
+  color: var(--text3);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .display-mode-control select {
-  background: #1e1c18;
-  border: 1px solid #4a4030;
+  background: var(--input);
+  border: 1px solid var(--border2);
   border-radius: 6px;
-  color: #e8dcc8;
+  color: var(--text);
   padding: 0.35rem 0.7rem;
   font-size: 0.85rem;
   cursor: pointer;
@@ -147,7 +157,29 @@ h1 {
 }
 
 .display-mode-control select:focus {
-  border-color: #c8a96e;
+  border-color: var(--accent);
+}
+
+/* Theme toggle */
+.theme-btn {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.theme-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* Burger button */
@@ -159,7 +191,7 @@ h1 {
   width: 36px;
   height: 36px;
   background: transparent;
-  border: 1px solid #4a4030;
+  border: 1px solid var(--border2);
   border-radius: 6px;
   cursor: pointer;
   padding: 8px 7px;
@@ -169,12 +201,12 @@ h1 {
 .burger-btn span {
   display: block;
   height: 2px;
-  background: #c8a96e;
+  background: var(--accent);
   border-radius: 1px;
 }
 
 .burger-btn:hover {
-  border-color: #c8a96e;
+  border-color: var(--accent);
 }
 
 /* Overlay */
@@ -182,7 +214,7 @@ h1 {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--overlay);
   z-index: 100;
 }
 
@@ -197,8 +229,8 @@ h1 {
   right: 0;
   bottom: 0;
   width: 260px;
-  background: #1a1814;
-  border-left: 1px solid #3a3228;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
   z-index: 101;
   display: flex;
   flex-direction: column;
@@ -215,7 +247,7 @@ h1 {
   align-self: flex-end;
   background: transparent;
   border: none;
-  color: #7a6f60;
+  color: var(--text3);
   font-size: 1.1rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
@@ -223,7 +255,7 @@ h1 {
 }
 
 .close-btn:hover {
-  color: #e8dcc8;
+  color: var(--text);
 }
 
 .side-menu ul {
@@ -241,7 +273,7 @@ h1 {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 8px;
-  color: #7a6f60;
+  color: var(--text3);
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -251,13 +283,13 @@ h1 {
 }
 
 .side-menu ul li button:hover {
-  color: #e8dcc8;
-  background: #252219;
+  color: var(--text);
+  background: var(--hover);
 }
 
 .side-menu ul li button.active {
-  background: #2e2820;
-  border-color: #4a4030;
-  color: #c8a96e;
+  background: var(--raised);
+  border-color: var(--border2);
+  color: var(--accent);
 }
 </style>

@@ -350,15 +350,15 @@ const chordCards = computed(() =>
 
 <style scoped>
 .chord-prog {
-  background: #242019;
-  border: 1px solid #3a3228;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 2rem;
 }
 
 .chord-prog-header h2 {
   font-size: 1.4rem;
-  color: #c8a96e;
+  color: var(--accent);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -366,7 +366,7 @@ const chordCards = computed(() =>
 .subtitle {
   margin-top: 0.3rem;
   font-size: 0.85rem;
-  color: #7a6f60;
+  color: var(--text3);
 }
 
 .controls {
@@ -385,7 +385,7 @@ const chordCards = computed(() =>
 
 .control-group label {
   font-weight: 600;
-  color: #c8a96e;
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.8rem;
@@ -401,9 +401,9 @@ const chordCards = computed(() =>
 .note-picker button {
   padding: 0.3rem 0.6rem;
   border-radius: 5px;
-  border: 1px solid #4a4030;
-  background: #1e1c18;
-  color: #a09080;
+  border: 1px solid var(--border2);
+  background: var(--input);
+  color: var(--text2);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -412,32 +412,32 @@ const chordCards = computed(() =>
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 
-.note-picker button.sharp { background: #161412; color: #7a6f60; }
-.note-picker button:hover  { border-color: #c8a96e; color: #e8dcc8; }
-.note-picker button.active { background: #c8a96e; border-color: #c8a96e; color: #1a1714; }
+.note-picker button.sharp { background: var(--sharp); color: var(--text3); }
+.note-picker button:hover  { border-color: var(--accent); color: var(--text); }
+.note-picker button.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
 .mode-toggle { display: flex; gap: 0.35rem; }
 
 .mode-toggle button {
   padding: 0.3rem 0.9rem;
   border-radius: 5px;
-  border: 1px solid #4a4030;
-  background: #1e1c18;
-  color: #a09080;
+  border: 1px solid var(--border2);
+  background: var(--input);
+  color: var(--text2);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 
-.mode-toggle button:hover  { border-color: #c8a96e; color: #e8dcc8; }
-.mode-toggle button.active { background: #c8a96e; border-color: #c8a96e; color: #1a1714; }
+.mode-toggle button:hover  { border-color: var(--accent); color: var(--text); }
+.mode-toggle button.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
 select {
-  background: #1e1c18;
-  border: 1px solid #4a4030;
+  background: var(--input);
+  border: 1px solid var(--border2);
   border-radius: 6px;
-  color: #e8dcc8;
+  color: var(--text);
   padding: 0.4rem 0.8rem;
   font-size: 0.9rem;
   cursor: pointer;
@@ -445,11 +445,11 @@ select {
   max-width: 100%;
 }
 
-select:focus { border-color: #c8a96e; }
+select:focus { border-color: var(--accent); }
 
 .prog-description {
   font-size: 0.82rem;
-  color: #7a6f60;
+  color: var(--text3);
   margin-bottom: 1.5rem;
   font-style: italic;
 }
@@ -468,8 +468,8 @@ select:focus { border-color: #c8a96e; }
 .chord-card {
   flex: 1 1 120px;
   max-width: 160px;
-  background: #1e1c18;
-  border: 1px solid #3a3228;
+  background: var(--input);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.75rem 0.6rem;
   cursor: pointer;
@@ -489,7 +489,7 @@ select:focus { border-color: #c8a96e; }
   gap: 1rem;
 }
 
-.chord-card:hover { background: #252219; border-color: #6a5a30; }
+.chord-card:hover { background: var(--hover); border-color: var(--accent-mid); }
 
 .chord-info {
   display: flex;
@@ -510,7 +510,7 @@ select:focus { border-color: #c8a96e; }
 
 .chord-numeral {
   font-size: 0.7rem;
-  color: #6a5a40;
+  color: var(--accent-mid);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -518,7 +518,7 @@ select:focus { border-color: #c8a96e; }
 .chord-name {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #c8a96e;
+  color: var(--accent);
   line-height: 1;
 }
 

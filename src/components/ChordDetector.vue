@@ -194,8 +194,8 @@ const chord = computed(() => detectChord([...selected.value]))
 
 <style scoped>
 .chord-detector {
-  background: #242019;
-  border: 1px solid #3a3228;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 2rem;
   display: flex;
@@ -205,11 +205,11 @@ const chord = computed(() => detectChord([...selected.value]))
 
 .header h2 {
   font-size: 1.4rem;
-  color: #c8a96e;
+  color: var(--accent);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
-.subtitle { margin-top: 0.3rem; font-size: 0.85rem; color: #7a6f60; }
+.subtitle { margin-top: 0.3rem; font-size: 0.85rem; color: var(--text3); }
 
 /* EP-1320 pad grid */
 .grid { display: flex; flex-direction: column; gap: 0.6rem; max-width: 360px; }
@@ -223,26 +223,26 @@ const chord = computed(() => detectChord([...selected.value]))
   gap: 0.25rem;
   padding: 0.75rem 0.5rem;
   border-radius: 8px;
-  border: 1px solid #4a4030;
-  background: #2e2820;
+  border: 1px solid var(--border2);
+  background: var(--raised);
   cursor: pointer;
   aspect-ratio: 1;
   transition: background 0.1s, border-color 0.1s, transform 0.08s;
   -webkit-tap-highlight-color: transparent;
 }
 
-.pad:hover { background: #3a3228; }
+.pad:hover { background: var(--border); }
 .pad:active { transform: scale(0.95); }
-.pad.sharp { background: #1e1c18; border-color: #3a3228; }
-.pad.sharp:hover { background: #2a2820; }
-.pad.selected { background: #3d3010; border-color: #c8a96e; box-shadow: 0 0 8px rgba(200,169,110,0.25); }
-.pad.selected.sharp { background: #302808; }
+.pad.sharp { background: var(--input); border-color: var(--border); }
+.pad.sharp:hover { background: var(--border3); }
+.pad.selected { background: var(--selected); border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+.pad.selected.sharp { background: var(--sharp-sel); }
 
-.pad-label { font-size: 0.65rem; color: #5a5040; font-weight: 600; letter-spacing: 0.1em; }
-.pad.selected .pad-label { color: #a08848; }
-.pad-note { font-size: 1.4rem; font-weight: 700; color: #c8a96e; line-height: 1; }
-.pad.sharp .pad-note { color: #a08858; }
-.pad.selected .pad-note { color: #e8c87e; }
+.pad-label { font-size: 0.65rem; color: var(--text4); font-weight: 600; letter-spacing: 0.1em; }
+.pad.selected .pad-label { color: var(--accent-dim); }
+.pad-note { font-size: 1.4rem; font-weight: 700; color: var(--accent); line-height: 1; }
+.pad.sharp .pad-note { color: var(--accent-lo); }
+.pad.selected .pad-note { color: var(--accent-hi); }
 
 /* Notes mode strip */
 .note-strip {
@@ -254,9 +254,9 @@ const chord = computed(() => detectChord([...selected.value]))
 .note-btn {
   padding: 0.55rem 0.8rem;
   border-radius: 6px;
-  border: 1px solid #4a4030;
-  background: #2e2820;
-  color: #c8a96e;
+  border: 1px solid var(--border2);
+  background: var(--raised);
+  color: var(--accent);
   font-size: 1rem;
   font-weight: 700;
   font-family: inherit;
@@ -267,12 +267,12 @@ const chord = computed(() => detectChord([...selected.value]))
   -webkit-tap-highlight-color: transparent;
 }
 
-.note-btn:hover { background: #3a3228; }
+.note-btn:hover { background: var(--border); }
 .note-btn:active { transform: scale(0.95); }
-.note-btn.sharp { background: #1e1c18; border-color: #3a3228; color: #a08858; font-size: 0.9rem; }
-.note-btn.sharp:hover { background: #2a2820; }
-.note-btn.selected { background: #3d3010; border-color: #c8a96e; color: #e8c87e; box-shadow: 0 0 6px rgba(200,169,110,0.25); }
-.note-btn.selected.sharp { background: #302808; }
+.note-btn.sharp { background: var(--input); border-color: var(--border); color: var(--accent-lo); font-size: 0.9rem; }
+.note-btn.sharp:hover { background: var(--border3); }
+.note-btn.selected { background: var(--selected); border-color: var(--accent); color: var(--accent-hi); box-shadow: 0 0 6px var(--accent-glow); }
+.note-btn.selected.sharp { background: var(--sharp-sel); }
 
 /* Guitar neck */
 .guitar-neck-wrap {
@@ -288,13 +288,13 @@ const chord = computed(() => detectChord([...selected.value]))
 .neck-row {
   display: flex;
   align-items: stretch;
-  border-bottom: 1px solid #2a2420;
+  border-bottom: 1px solid var(--border3);
 }
 
 .string-name {
   width: 1.8rem;
   font-size: 0.7rem;
-  color: #5a5040;
+  color: var(--text4);
   font-weight: 600;
   text-align: right;
   padding-right: 0.5rem;
@@ -310,41 +310,41 @@ const chord = computed(() => detectChord([...selected.value]))
   display: flex;
   align-items: center;
   justify-content: center;
-  border-right: 1px solid #2a2420;
+  border-right: 1px solid var(--border3);
   border: none;
-  background: #1e1c18;
+  background: var(--input);
   cursor: pointer;
   position: relative;
   transition: background 0.1s;
-  border-right: 1px solid #2a2420;
+  border-right: 1px solid var(--border3);
   -webkit-tap-highlight-color: transparent;
 }
 
-.neck-cell:hover { background: #2a2420; }
-.neck-cell.sharp { background: #181614; }
-.neck-cell.sharp:hover { background: #221e1a; }
-.neck-cell.open { border-right: 3px solid #4a4030; background: #242019; }
-.neck-cell.open:hover { background: #2e2820; }
-.neck-cell.selected { background: #3d3010; }
-.neck-cell.selected.sharp { background: #302808; }
+.neck-cell:hover { background: var(--border3); }
+.neck-cell.sharp { background: var(--sharp); }
+.neck-cell.sharp:hover { background: var(--border3); }
+.neck-cell.open { border-right: 3px solid var(--border2); background: var(--surface); }
+.neck-cell.open:hover { background: var(--raised); }
+.neck-cell.selected { background: var(--selected); }
+.neck-cell.selected.sharp { background: var(--sharp-sel); }
 
 .neck-dot {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #c8a96e;
+  background: var(--accent);
   display: block;
-  box-shadow: 0 0 4px rgba(200,169,110,0.4);
+  box-shadow: 0 0 4px var(--accent-glow);
 }
 
 .neck-note {
   font-size: 0.6rem;
-  color: #3a3228;
+  color: var(--border);
   font-weight: 600;
   pointer-events: none;
 }
 
-.neck-cell.open .neck-note { color: #4a4030; }
+.neck-cell.open .neck-note { color: var(--text5); }
 
 .fret-numbers {
   display: flex;
@@ -357,7 +357,7 @@ const chord = computed(() => detectChord([...selected.value]))
 .fret-num {
   flex: 1;
   font-size: 0.6rem;
-  color: #4a4030;
+  color: var(--text5);
   text-align: center;
 }
 
@@ -366,9 +366,9 @@ const chord = computed(() => detectChord([...selected.value]))
   align-self: flex-start;
   padding: 0.35rem 1rem;
   border-radius: 6px;
-  border: 1px solid #4a4030;
+  border: 1px solid var(--border2);
   background: transparent;
-  color: #7a6f60;
+  color: var(--text3);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -376,12 +376,12 @@ const chord = computed(() => detectChord([...selected.value]))
   transition: color 0.15s, border-color 0.15s;
 }
 
-.clear-btn:hover:not(:disabled) { color: #e8dcc8; border-color: #6a6050; }
+.clear-btn:hover:not(:disabled) { color: var(--text); border-color: var(--accent-mid); }
 .clear-btn:disabled { opacity: 0.3; cursor: default; }
 
 /* Result */
 .result {
-  border-top: 1px solid #3a3228;
+  border-top: 1px solid var(--border);
   padding-top: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -391,20 +391,20 @@ const chord = computed(() => detectChord([...selected.value]))
 }
 
 .result.empty { opacity: 0.4; }
-.hint { font-size: 0.9rem; color: #5a5040; margin-top: 0.5rem; }
+.hint { font-size: 0.9rem; color: var(--text4); margin-top: 0.5rem; }
 
 .chord-name {
   font-size: clamp(2.5rem, 12vw, 4rem);
   font-weight: 700;
-  color: #c8a96e;
+  color: var(--accent);
   line-height: 1;
   letter-spacing: 0.03em;
 }
 
-.chord-name.unknown { color: #5a5040; }
-.chord-quality { font-size: 0.95rem; color: #a09070; letter-spacing: 0.04em; }
-.inversion-label { color: #6a6050; font-size: 0.85rem; }
-.chord-notes { font-size: 0.8rem; color: #5a5040; letter-spacing: 0.08em; margin-top: 0.2rem; }
+.chord-name.unknown { color: var(--text4); }
+.chord-quality { font-size: 0.95rem; color: var(--accent-lo); letter-spacing: 0.04em; }
+.inversion-label { color: var(--accent-mid); font-size: 0.85rem; }
+.chord-notes { font-size: 0.8rem; color: var(--text4); letter-spacing: 0.08em; margin-top: 0.2rem; }
 
 @media (max-width: 600px) {
   .chord-detector { padding: 1.25rem 1rem; }

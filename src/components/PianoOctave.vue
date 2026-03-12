@@ -86,12 +86,12 @@ function onToggle(noteIdx) {
   align-items: center;
   gap: 0.75rem;
   font-size: 0.9rem;
-  color: #a09080;
+  color: var(--text2);
 }
 
 .octave-ctl label {
   font-weight: 600;
-  color: #c8a96e;
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.8rem;
@@ -100,10 +100,10 @@ function onToggle(noteIdx) {
 .octave-ctl button {
   width: 2rem;
   height: 2rem;
-  border: 1px solid #4a4030;
+  border: 1px solid var(--border2);
   border-radius: 6px;
-  background: #1a1714;
-  color: #c8a96e;
+  background: var(--bg);
+  color: var(--accent);
   font-size: 1.1rem;
   cursor: pointer;
   line-height: 1;
@@ -111,8 +111,8 @@ function onToggle(noteIdx) {
 }
 
 .octave-ctl button:hover {
-  background: #2a2218;
-  border-color: #c8a96e;
+  background: var(--accent-bg);
+  border-color: var(--accent);
 }
 
 .octave-val {
@@ -120,7 +120,7 @@ function onToggle(noteIdx) {
   text-align: center;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #e8dcc8;
+  color: var(--text);
 }
 
 /* Piano keyboard */
@@ -136,8 +136,8 @@ function onToggle(noteIdx) {
 .white-key {
   flex: 1;
   height: 100%;
-  background: #ddd5be;
-  border: 1px solid #8a7850;
+  background: var(--pk-white);
+  border: 1px solid var(--pk-white-bd);
   border-top: none;
   border-radius: 0 0 5px 5px;
   cursor: default;
@@ -157,7 +157,7 @@ function onToggle(noteIdx) {
 }
 
 .piano.clickable .white-key:hover:not(.active):not(.root) {
-  background: #ece4d0;
+  background: var(--pk-white-h);
 }
 
 .piano.clickable .white-key:active {
@@ -165,11 +165,11 @@ function onToggle(noteIdx) {
   transform-origin: top center;
 }
 
-.white-key.active { background: #c89420; }
-.white-key.root   { background: #f0c020; }
+.white-key.active { background: var(--pk-white-active); }
+.white-key.root   { background: var(--pk-white-root); }
 
-.dim-inactive .white-key:not(.active):not(.root) { background: #7a7268; }
-.dim-inactive .white-key:not(.active):not(.root) .key-label { color: #4a4438; }
+.dim-inactive .white-key:not(.active):not(.root) { background: var(--pk-dim-w); }
+.dim-inactive .white-key:not(.active):not(.root) .key-label { color: var(--pk-dim-w-lbl); }
 
 /* Black keys */
 .black-key {
@@ -177,8 +177,8 @@ function onToggle(noteIdx) {
   width: calc(60% / 7);
   height: 65%;
   top: 0;
-  background: #1e1a14;
-  border: 1px solid #0e0c08;
+  background: var(--pk-black);
+  border: 1px solid var(--pk-black-bd);
   border-top: none;
   border-radius: 0 0 4px 4px;
   z-index: 2;
@@ -197,7 +197,7 @@ function onToggle(noteIdx) {
 }
 
 .piano.clickable .black-key:hover:not(.active):not(.root) {
-  background: #2e2820;
+  background: var(--pk-black-h);
 }
 
 .piano.clickable .black-key:active {
@@ -205,11 +205,11 @@ function onToggle(noteIdx) {
   transform-origin: top center;
 }
 
-.black-key.active { background: #b07a10; }
-.black-key.root   { background: #d49800; }
+.black-key.active { background: var(--pk-black-active); }
+.black-key.root   { background: var(--pk-black-root); }
 
-.dim-inactive .black-key:not(.active):not(.root) { background: #302c28; }
-.dim-inactive .black-key:not(.active):not(.root) .key-label { color: #3a3430; }
+.dim-inactive .black-key:not(.active):not(.root) { background: var(--pk-dim-b); }
+.dim-inactive .black-key:not(.active):not(.root) .key-label { color: var(--pk-dim-b-lbl); }
 
 /* Key labels */
 .key-label {
@@ -219,11 +219,11 @@ function onToggle(noteIdx) {
   line-height: 1;
 }
 
-.white-key .key-label         { color: #7a6848; }
-.white-key.active .key-label  { color: #2a1400; }
-.white-key.root .key-label    { color: #1a0a00; }
+.white-key .key-label         { color: var(--pk-white-lbl); }
+.white-key.active .key-label  { color: var(--pk-white-lbl-a); }
+.white-key.root .key-label    { color: var(--pk-white-lbl-r); }
 
-.black-key .key-label         { color: #5a4830; }
-.black-key.active .key-label  { color: #1a0a00; }
-.black-key.root .key-label    { color: #0a0600; }
+.black-key .key-label         { color: var(--pk-black-lbl); }
+.black-key.active .key-label  { color: var(--pk-black-lbl-a); }
+.black-key.root .key-label    { color: var(--pk-black-lbl-r); }
 </style>

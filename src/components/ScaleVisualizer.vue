@@ -215,15 +215,15 @@ const guitarNeck = computed(() =>
 
 <style scoped>
 .scale-viz {
-  background: #242019;
-  border: 1px solid #3a3228;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 2rem;
 }
 
 .scale-viz-header h2 {
   font-size: 1.4rem;
-  color: #c8a96e;
+  color: var(--accent);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -231,7 +231,7 @@ const guitarNeck = computed(() =>
 .subtitle {
   margin-top: 0.3rem;
   font-size: 0.85rem;
-  color: #7a6f60;
+  color: var(--text3);
 }
 
 .controls {
@@ -250,7 +250,7 @@ const guitarNeck = computed(() =>
 
 .control-group label {
   font-weight: 600;
-  color: #c8a96e;
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.8rem;
@@ -266,9 +266,9 @@ const guitarNeck = computed(() =>
 .note-picker button {
   padding: 0.3rem 0.6rem;
   border-radius: 5px;
-  border: 1px solid #4a4030;
-  background: #1e1c18;
-  color: #a09080;
+  border: 1px solid var(--border2);
+  background: var(--input);
+  color: var(--text2);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -277,9 +277,9 @@ const guitarNeck = computed(() =>
   text-align: center;
 }
 
-.note-picker button.sharp { background: #161412; color: #7a6f60; }
-.note-picker button:hover  { border-color: #c8a96e; color: #e8dcc8; }
-.note-picker button.active { background: #c8a96e; border-color: #c8a96e; color: #1a1714; }
+.note-picker button.sharp { background: var(--sharp); color: var(--text3); }
+.note-picker button:hover  { border-color: var(--accent); color: var(--text); }
+.note-picker button.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
 .scale-select-row {
   display: flex;
@@ -292,9 +292,9 @@ const guitarNeck = computed(() =>
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 50%;
-  border: 1px solid #4a4030;
-  background: #1e1c18;
-  color: #7a6f60;
+  border: 1px solid var(--border2);
+  background: var(--input);
+  color: var(--text3);
   font-size: 0.8rem;
   font-style: italic;
   font-weight: 700;
@@ -304,27 +304,27 @@ const guitarNeck = computed(() =>
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 
-.info-btn:hover  { border-color: #c8a96e; color: #e8dcc8; }
-.info-btn.active { background: #3a2e10; border-color: #c8a96e; color: #c8a96e; }
+.info-btn:hover  { border-color: var(--accent); color: var(--text); }
+.info-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
 
 .scale-info {
   margin-top: 0.6rem;
   padding: 0.65rem 0.85rem;
-  background: #1e1c18;
-  border: 1px solid #4a4030;
-  border-left: 3px solid #c8a96e;
+  background: var(--input);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--accent);
   border-radius: 6px;
   font-size: 0.82rem;
-  color: #a09080;
+  color: var(--text2);
   line-height: 1.55;
   width: 100%;
 }
 
 select {
-  background: #1e1c18;
-  border: 1px solid #4a4030;
+  background: var(--input);
+  border: 1px solid var(--border2);
   border-radius: 6px;
-  color: #e8dcc8;
+  color: var(--text);
   padding: 0.4rem 0.8rem;
   font-size: 0.9rem;
   cursor: pointer;
@@ -332,7 +332,7 @@ select {
   max-width: 100%;
 }
 
-select:focus { border-color: #c8a96e; }
+select:focus { border-color: var(--accent); }
 
 /* EP-1320 grid */
 .grid {
@@ -356,24 +356,24 @@ select:focus { border-color: #c8a96e; }
   gap: 0.15rem;
   padding: 0.75rem 0.5rem;
   border-radius: 8px;
-  border: 1px solid #3a3228;
+  border: 1px solid var(--border);
   aspect-ratio: 1;
   transition: background 0.15s, border-color 0.15s;
 }
 
-.pad.inactive { background: #1a1714; opacity: 0.35; }
-.pad.active   { background: #2e2820; border-color: #6a5a30; }
-.pad.root     { background: #3a2e10; border-color: #c8a96e; }
+.pad.inactive { background: var(--bg); opacity: 0.35; }
+.pad.active   { background: var(--raised); border-color: var(--accent-mid); }
+.pad.root     { background: var(--accent-bg); border-color: var(--accent); }
 
-.pad-label  { font-size: 0.7rem; color: #5a5040; font-weight: 600; letter-spacing: 0.1em; }
+.pad-label  { font-size: 0.7rem; color: var(--text4); font-weight: 600; letter-spacing: 0.1em; }
 .pad-note   { font-size: 1.5rem; font-weight: 700; line-height: 1; }
 
-.pad.inactive .pad-note { color: #4a4030; }
-.pad.active .pad-note   { color: #c8a96e; }
-.pad.root .pad-note     { color: #f0c87a; }
+.pad.inactive .pad-note { color: var(--text5); }
+.pad.active .pad-note   { color: var(--accent); }
+.pad.root .pad-note     { color: var(--accent-hi); }
 
-.pad-degree           { font-size: 0.72rem; color: #8a7850; }
-.pad.root .pad-degree { color: #c8a96e; }
+.pad-degree           { font-size: 0.72rem; color: var(--accent-dim); }
+.pad.root .pad-degree { color: var(--accent); }
 
 /* Notes mode chromatic strip */
 .chroma-strip {
@@ -392,21 +392,21 @@ select:focus { border-color: #c8a96e; }
   width: 3.2rem;
   height: 3.2rem;
   border-radius: 8px;
-  border: 1px solid #3a3228;
+  border: 1px solid var(--border);
   transition: background 0.15s, border-color 0.15s;
 }
 
-.chroma-tile.inactive { background: #1a1714; opacity: 0.35; }
-.chroma-tile.active   { background: #2e2820; border-color: #6a5a30; }
-.chroma-tile.root     { background: #3a2e10; border-color: #c8a96e; }
+.chroma-tile.inactive { background: var(--bg); opacity: 0.35; }
+.chroma-tile.active   { background: var(--raised); border-color: var(--accent-mid); }
+.chroma-tile.root     { background: var(--accent-bg); border-color: var(--accent); }
 
 .tile-note { font-size: 1.1rem; font-weight: 700; line-height: 1; }
-.chroma-tile.inactive .tile-note { color: #4a4030; }
-.chroma-tile.active .tile-note   { color: #c8a96e; }
-.chroma-tile.root .tile-note     { color: #f0c87a; }
+.chroma-tile.inactive .tile-note { color: var(--text5); }
+.chroma-tile.active .tile-note   { color: var(--accent); }
+.chroma-tile.root .tile-note     { color: var(--accent-hi); }
 
-.tile-degree           { font-size: 0.65rem; color: #8a7850; }
-.chroma-tile.root .tile-degree { color: #c8a96e; }
+.tile-degree           { font-size: 0.65rem; color: var(--accent-dim); }
+.chroma-tile.root .tile-degree { color: var(--accent); }
 
 /* Guitar neck */
 .guitar-neck-wrap {
@@ -424,13 +424,13 @@ select:focus { border-color: #c8a96e; }
 .neck-row {
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #2a2420;
+  border-bottom: 1px solid var(--border3);
 }
 
 .string-name {
   width: 1.8rem;
   font-size: 0.7rem;
-  color: #5a5040;
+  color: var(--text4);
   font-weight: 600;
   text-align: right;
   padding-right: 0.5rem;
@@ -443,25 +443,25 @@ select:focus { border-color: #c8a96e; }
   display: flex;
   align-items: center;
   justify-content: center;
-  border-right: 1px solid #2a2420;
+  border-right: 1px solid var(--border3);
   position: relative;
 }
 
 .neck-cell.open {
-  border-right: 3px solid #4a4030;
+  border-right: 3px solid var(--border2);
 }
 
 .neck-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #6a5a30;
+  background: var(--accent-mid);
   display: block;
 }
 
 .neck-dot.root {
-  background: #c8a96e;
-  box-shadow: 0 0 4px rgba(200,169,110,0.5);
+  background: var(--accent);
+  box-shadow: 0 0 4px var(--accent-glow);
 }
 
 .fret-numbers {
@@ -478,7 +478,7 @@ select:focus { border-color: #c8a96e; }
 .fret-num {
   flex: 1;
   font-size: 0.6rem;
-  color: #4a4030;
+  color: var(--text5);
   text-align: center;
 }
 
@@ -493,7 +493,7 @@ select:focus { border-color: #c8a96e; }
 
 .scale-label {
   font-size: 0.75rem;
-  color: #5a5040;
+  color: var(--text4);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-right: 0.25rem;
@@ -502,17 +502,17 @@ select:focus { border-color: #c8a96e; }
 .scale-note {
   padding: 0.25rem 0.6rem;
   border-radius: 4px;
-  background: #2e2820;
-  border: 1px solid #4a4030;
+  background: var(--raised);
+  border: 1px solid var(--border2);
   font-size: 0.85rem;
   font-weight: 600;
-  color: #a09080;
+  color: var(--text2);
 }
 
 .scale-note.root {
-  background: #3a2e10;
-  border-color: #c8a96e;
-  color: #f0c87a;
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent-hi);
 }
 
 @media (max-width: 600px) {

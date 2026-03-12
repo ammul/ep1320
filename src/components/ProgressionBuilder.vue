@@ -122,15 +122,15 @@ const chordCards = computed(() =>
 
 <style scoped>
 .prog-builder {
-  background: #242019;
-  border: 1px solid #3a3228;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 2rem;
 }
 
 .prog-builder-header h2 {
   font-size: 1.4rem;
-  color: #c8a96e;
+  color: var(--accent);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -138,7 +138,7 @@ const chordCards = computed(() =>
 .subtitle {
   margin-top: 0.3rem;
   font-size: 0.85rem;
-  color: #7a6f60;
+  color: var(--text3);
 }
 
 .input-row { margin: 1.5rem 0 0.6rem; }
@@ -146,10 +146,10 @@ const chordCards = computed(() =>
 .chord-input {
   width: 100%;
   box-sizing: border-box;
-  background: #1e1c18;
-  border: 1px solid #4a4030;
+  background: var(--input);
+  border: 1px solid var(--border2);
   border-radius: 8px;
-  color: #e8dcc8;
+  color: var(--text);
   font-size: 1.1rem;
   font-family: inherit;
   padding: 0.6rem 0.9rem;
@@ -158,15 +158,15 @@ const chordCards = computed(() =>
   transition: border-color 0.15s;
 }
 
-.chord-input:focus { border-color: #c8a96e; }
-.chord-input::placeholder { color: #4a4030; }
+.chord-input:focus { border-color: var(--accent); }
+.chord-input::placeholder { color: var(--text5); }
 
-.hint { font-size: 0.78rem; color: #5a5040; margin-bottom: 0.5rem; }
-.mono { font-family: monospace; color: #7a6f60; }
+.hint { font-size: 0.78rem; color: var(--text4); margin-bottom: 0.5rem; }
+.mono { font-family: monospace; color: var(--text3); }
 
 .parse-errors {
   font-size: 0.8rem;
-  color: #a07050;
+  color: var(--error-text2);
   margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
@@ -175,15 +175,15 @@ const chordCards = computed(() =>
 }
 
 .error-token {
-  background: #2e1c14;
-  border: 1px solid #6a3820;
+  background: var(--error-bg);
+  border: 1px solid var(--error-bd);
   border-radius: 4px;
   padding: 1px 6px;
   font-family: monospace;
-  color: #c07050;
+  color: var(--error-text);
 }
 
-.empty-hint { font-size: 0.85rem; color: #5a5040; font-style: italic; margin-top: 1rem; }
+.empty-hint { font-size: 0.85rem; color: var(--text4); font-style: italic; margin-top: 1rem; }
 
 .chord-row {
   display: flex;
@@ -200,8 +200,8 @@ const chordCards = computed(() =>
 .chord-card {
   flex: 1 1 120px;
   max-width: 160px;
-  background: #1e1c18;
-  border: 1px solid #3a3228;
+  background: var(--input);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.75rem 0.6rem;
   cursor: pointer;
@@ -221,12 +221,12 @@ const chordCards = computed(() =>
   gap: 1rem;
 }
 
-.chord-card:hover { background: #252219; border-color: #6a5a30; }
+.chord-card:hover { background: var(--hover); border-color: var(--accent-mid); }
 
 .chord-card.active {
-  border-color: #c8a96e;
-  background: #2a2318;
-  box-shadow: 0 0 0 1px #c8a96e44;
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  box-shadow: 0 0 0 1px var(--accent-glow);
 }
 
 .chord-info {
@@ -246,7 +246,7 @@ const chordCards = computed(() =>
   min-width: 0;
 }
 
-.chord-name { font-size: 1.1rem; font-weight: 700; color: #c8a96e; line-height: 1; }
+.chord-name { font-size: 1.1rem; font-weight: 700; color: var(--accent); line-height: 1; }
 
 @media (max-width: 600px) {
   .prog-builder { padding: 1.25rem 1rem; }
