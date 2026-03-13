@@ -4,7 +4,7 @@ import { NOTES, LABELS, SHARPS, NOTE_TO_SEMI } from '../musicConstants.js'
 import { noteOn, noteOff, activeInputNotes } from '../midiManager.js'
 
 const octave = ref(4)
-const rootIndex = ref(0) // index into NOTES (0 = A)
+const rootIndex = ref(3) // index into NOTES (3 = C), matches EP-1320 group A (MIDI 36–47)
 
 const rootMidi = computed(() => 12 * (octave.value + 1) + NOTE_TO_SEMI[rootIndex.value])
 
