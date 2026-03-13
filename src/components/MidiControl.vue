@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { midiStatus, midiOutputs, selectedOutputId, initMidi } from '../midiManager.js'
+import { midiStatus, midiOutputs, selectedOutputId, initMidi, disconnectMidi } from '../midiManager.js'
 
 function truncate(name, max = 20) {
   return name.length > max ? name.slice(0, max - 1) + '…' : name
@@ -14,11 +14,7 @@ const selectedDevice = computed({
 
 <template>
   <div v-if="midiStatus !== 'unsupported'" class="midi-control">
-    <button
-      v-if="midiStatus === 'idle'"
-      class="midi-btn"
-      @click="initMidi"
-    >MIDI</button>
+    <button v-if="midiStatus === 'idle'" class="midi-btn" @click="initMidi">MIDI</button>
 
     <template v-else-if="midiStatus === 'connected'">
       <span class="midi-dot connected"></span>
@@ -26,12 +22,13 @@ const selectedDevice = computed({
       <select v-else-if="midiOutputs.length > 1" v-model="selectedDevice" class="midi-select">
         <option v-for="o in midiOutputs" :key="o.id" :value="o.id">{{ truncate(o.name) }}</option>
       </select>
-      <span v-else class="midi-name muted">No device</span>
+      <button class="midi-disconnect" @click="disconnectMidi" aria-label="Disconnect MIDI">&#x2715;</button>
     </template>
 
     <template v-else-if="midiStatus === 'error'">
       <span class="midi-dot error"></span>
       <span class="midi-name muted">MIDI error</span>
+      <button class="midi-disconnect" @click="disconnectMidi" aria-label="Dismiss">&#x2715;</button>
     </template>
   </div>
 </template>
@@ -98,4 +95,20 @@ const selectedDevice = computed({
 }
 
 .midi-select:focus { border-color: var(--accent); }
+
+.midi-disconnect {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  color: var(--text4);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.midi-disconnect:hover { color: var(--text); }
 </style>

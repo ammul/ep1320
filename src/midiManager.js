@@ -7,6 +7,14 @@ export const midiChannel = ref(0)            // 0–3 = lanes A–D
 
 let _access = null
 
+export function disconnectMidi() {
+  if (_access) _access.onstatechange = null
+  _access = null
+  midiOutputs.value = []
+  selectedOutputId.value = null
+  midiStatus.value = 'idle'
+}
+
 export async function initMidi() {
   if (!navigator.requestMIDIAccess) { midiStatus.value = 'unsupported'; return }
   try {
