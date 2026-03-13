@@ -75,7 +75,7 @@ function selectTab(id) {
           </button>
         </div>
       </div>
-      <div v-if="midiStatus !== 'idle' && midiStatus !== 'unsupported'" class="midi-row">
+      <div v-if="midiStatus !== 'unsupported'" class="midi-row">
         <MidiControl />
       </div>
     </header>
@@ -94,7 +94,7 @@ function selectTab(id) {
       </ul>
     </nav>
 
-    <main :class="{ 'midi-active': midiStatus !== 'idle' && midiStatus !== 'unsupported' }">
+    <main :class="{ 'midi-active': midiStatus !== 'unsupported' }">
       <component :is="activeComponent" @navigate="selectTab" />
     </main>
   </div>
