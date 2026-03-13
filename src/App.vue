@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { displayMode } from './displayMode.js'
 import { colorMode } from './colorMode.js'
+import { midiStatus } from './midiManager.js'
 import StartPage from './components/StartPage.vue'
 import ClavesMode from './components/ClavesMode.vue'
 import ScaleVisualizer from './components/ScaleVisualizer.vue'
@@ -60,7 +61,6 @@ function selectTab(id) {
               <option value="piano">Piano</option>
             </select>
           </div>
-          <MidiControl />
           <button class="theme-btn" @click="colorMode = colorMode === 'dark' ? 'light' : 'dark'" :aria-label="colorMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
             <svg v-if="colorMode === 'dark'" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="7.5" cy="7.5" r="3" fill="currentColor"/>
@@ -74,6 +74,9 @@ function selectTab(id) {
             <span></span><span></span><span></span>
           </button>
         </div>
+      </div>
+      <div v-if="midiStatus !== 'idle' && midiStatus !== 'unsupported'" class="midi-row">
+        <MidiControl />
       </div>
     </header>
 
@@ -91,7 +94,7 @@ function selectTab(id) {
       </ul>
     </nav>
 
-    <main>
+    <main :class="{ 'midi-active': midiStatus !== 'idle' && midiStatus !== 'unsupported' }">
       <component :is="activeComponent" @navigate="selectTab" />
     </main>
   </div>
@@ -229,13 +232,28 @@ h1 {
   border-color: var(--accent);
 }
 
+.midi-row {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-top: 1px solid var(--border);
+  margin-top: 0.5rem;
+}
+
 main {
   padding-top: 4rem;
+}
+
+main.midi-active {
+  padding-top: 6.5rem;
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
   main {
     padding-top: 2.5rem;
+  }
+  main.midi-active {
+    padding-top: 4.5rem;
   }
 }
 
