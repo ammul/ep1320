@@ -4,6 +4,7 @@ import { displayMode } from '../displayMode.js'
 import { NOTES, LABELS, SHARPS, CHORD_TYPES, CHORD_SUFFIX } from '../musicConstants.js'
 import { buildRows } from '../musicUtils.js'
 import ChordCardBody from './ChordCardBody.vue'
+import { chordOn, chordOff } from '../midiManager.js'
 
 const PROGRESSIONS = {
   major: [
@@ -266,6 +267,14 @@ const mode          = ref('major')
 const progressionId = ref('I-V-vi-IV')
 const showInfoIdx   = ref(null)
 
+const chordOctave   = ref(4)
+const bpm           = ref(80)
+const beatsPerChord = ref(4)
+const loopActiveIdx = ref(null)
+const loopPlaying   = ref(false)
+let _loopTimer      = null
+let _currentMidis   = []
+
 const progressions = computed(() => PROGRESSIONS[mode.value])
 
 const selectedProgression = computed(
@@ -295,6 +304,47 @@ const chordCards = computed(() =>
     }
   })
 )
+
+function cardMidis(card) {
+  const aMidi = 12 * (chordOctave.value + 1) + 9
+  const root  = aMidi + card.chordRootIdx
+  return CHORD_TYPES[card.type].map(i => root + i)
+}
+
+function previewChord(card) {
+  chordOff(_currentMidis)
+  _currentMidis = cardMidis(card)
+  chordOn(_currentMidis)
+}
+function stopPreview(card) {
+  chordOff(cardMidis(card))
+}
+
+function playLoop() {
+  if (_loopTimer) { stopLoop(); return }
+  let idx = 0
+  const advance = () => {
+    chordOff(_currentMidis)
+    loopActiveIdx.value = idx
+    _currentMidis = cardMidis(chordCards.value[idx])
+    chordOn(_currentMidis)
+    idx = (idx + 1) % chordCards.value.length
+  }
+  advance()
+  const ms = (60000 / bpm.value) * beatsPerChord.value
+  _loopTimer = setInterval(advance, ms)
+  loopPlaying.value = true
+}
+function stopLoop() {
+  clearInterval(_loopTimer)
+  _loopTimer = null
+  loopPlaying.value = false
+  chordOff(_currentMidis)
+  _currentMidis = []
+  loopActiveIdx.value = null
+}
+
+watch([progressionId, selectedRoot, mode], stopLoop)
 </script>
 
 <template>
@@ -335,12 +385,43 @@ const chordCards = computed(() =>
 
     <p class="prog-description">{{ selectedProgression.description }}</p>
 
+    <div class="midi-playback">
+      <div class="midi-param">
+        <label>Octave</label>
+        <button @click="chordOctave = Math.max(2, chordOctave - 1)">−</button>
+        <span class="param-value">{{ chordOctave }}</span>
+        <button @click="chordOctave = Math.min(6, chordOctave + 1)">+</button>
+      </div>
+      <div class="midi-param">
+        <label>BPM</label>
+        <input type="number" v-model.number="bpm" min="40" max="200" class="bpm-input" />
+      </div>
+      <div class="midi-param">
+        <label>Beats</label>
+        <div class="beats-toggle">
+          <button
+            v-for="b in [1, 2, 4, 8]"
+            :key="b"
+            :class="{ active: beatsPerChord === b }"
+            @click="beatsPerChord = b"
+          >{{ b }}</button>
+        </div>
+      </div>
+      <button class="play-btn" :class="{ playing: loopPlaying }" @click="playLoop">
+        {{ _loopTimer !== null ? 'Stop' : 'Play' }}
+      </button>
+    </div>
+
     <div class="chord-row" :class="{ 'piano-mode': displayMode === 'piano' }">
       <div
         v-for="card in chordCards"
         :key="card.idx"
         class="chord-card"
-        :class="{ 'piano-mode': displayMode === 'piano' }"
+        :class="{ 'piano-mode': displayMode === 'piano', active: loopActiveIdx === card.idx }"
+        @pointerdown="previewChord(card)"
+        @pointerup="stopPreview(card)"
+        @pointerleave="stopPreview(card)"
+        @pointercancel="stopPreview(card)"
       >
         <div class="chord-info">
           <div class="chord-numeral">{{ card.numeral }}</div>
@@ -469,6 +550,110 @@ select {
 
 select:focus { border-color: var(--accent); }
 
+.midi-playback {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: var(--raised);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+}
+
+.midi-param {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.midi-param label {
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+.midi-param button {
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--accent);
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.midi-param button:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
+.param-value {
+  min-width: 1.4rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.bpm-input {
+  width: 4rem;
+  background: var(--input);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  color: var(--text);
+  padding: 0.2rem 0.4rem;
+  font-size: 0.85rem;
+  text-align: center;
+  outline: none;
+}
+
+.bpm-input:focus { border-color: var(--accent); }
+
+.beats-toggle {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.beats-toggle button {
+  width: 2rem;
+  height: 1.8rem;
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  background: var(--input);
+  color: var(--text2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.beats-toggle button:hover  { border-color: var(--accent); color: var(--text); }
+.beats-toggle button.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+.play-btn {
+  padding: 0.35rem 1.1rem;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  background: var(--input);
+  color: var(--text2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.play-btn:hover  { border-color: var(--accent); color: var(--accent); }
+.play-btn.playing { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
 .prog-description {
   font-size: 0.82rem;
   color: var(--text3);
@@ -514,6 +699,7 @@ select:focus { border-color: var(--accent); }
 }
 
 .chord-card:hover { background: var(--hover); border-color: var(--accent-mid); }
+.chord-card.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-bg); }
 
 .card-info-btn {
   position: absolute;

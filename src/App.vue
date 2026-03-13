@@ -9,6 +9,7 @@ import ChordProgressions from './components/ChordProgressions.vue'
 import ChordDetector from './components/ChordDetector.vue'
 import ProgressionBuilder from './components/ProgressionBuilder.vue'
 import JamMode from './components/JamMode.vue'
+import MidiControl from './components/MidiControl.vue'
 
 const allTabs = [
   { id: 'home',           label: 'Home',                component: StartPage },
@@ -59,6 +60,7 @@ function selectTab(id) {
               <option value="piano">Piano</option>
             </select>
           </div>
+          <MidiControl />
           <button class="theme-btn" @click="colorMode = colorMode === 'dark' ? 'light' : 'dark'" :aria-label="colorMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
             <svg v-if="colorMode === 'dark'" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="7.5" cy="7.5" r="3" fill="currentColor"/>

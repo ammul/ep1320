@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { NOTES, LABELS, SHARPS } from '../musicConstants.js'
+import { noteOn, noteOff } from '../midiManager.js'
 
 const octave = ref(4)
 
@@ -14,6 +15,18 @@ const pads = computed(() => {
     midi: aMidi + i,
   }))
 })
+
+const activePads = ref(new Set())
+
+function onDown(midi) {
+  activePads.value = new Set([...activePads.value, midi])
+  noteOn(midi)
+}
+function onUp(midi) {
+  const s = new Set(activePads.value); s.delete(midi)
+  activePads.value = s
+  noteOff(midi)
+}
 
 // Numpad layout (top→bottom): 7 8 9 / 4 5 6 / 1 2 3 / . 0 i
 // Notes ascend bottom→top: A on ., G# on 9
@@ -45,7 +58,11 @@ const rows = computed(() => [
           v-for="pad in row"
           :key="pad.number"
           class="pad"
-          :class="{ sharp: pad.isSharp }"
+          :class="{ sharp: pad.isSharp, active: activePads.has(pad.midi) }"
+          @pointerdown.prevent="onDown(pad.midi)"
+          @pointerup="onUp(pad.midi)"
+          @pointerleave="onUp(pad.midi)"
+          @pointercancel="onUp(pad.midi)"
         >
           <span class="pad-label">{{ pad.label }}</span>
           <span class="pad-note">{{ pad.note }}</span>
@@ -148,9 +165,16 @@ const rows = computed(() => [
   border-radius: 8px;
   border: 1px solid var(--border2);
   background: var(--raised);
-  cursor: default;
+  cursor: pointer;
+  touch-action: none;
   transition: background 0.15s;
   aspect-ratio: 1;
+  user-select: none;
+}
+
+.pad.active {
+  background: var(--accent-bg);
+  border-color: var(--accent);
 }
 
 .pad:hover {
