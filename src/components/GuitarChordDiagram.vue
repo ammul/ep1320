@@ -44,10 +44,24 @@ const props = defineProps({
   type:      { type: String, required: true },
 })
 
-const voicingIndex = ref(0)
+function bestVoicingIndex(shapesList, rootIndex) {
+  let best = 0
+  let bestFret = Infinity
+  shapesList.forEach((shape, i) => {
+    const openNote = OPEN_STRINGS[shape.rootString]
+    const rootFret = (rootIndex - openNote + 12) % 12
+    const frets    = shape.offsets.map(o => o === -1 ? -1 : rootFret + o)
+    const pressed  = frets.filter(f => f > 0)
+    const base     = pressed.length > 0 ? Math.min(...pressed) : 1
+    if (base < bestFret) { bestFret = base; best = i }
+  })
+  return best
+}
+
+const voicingIndex = ref(bestVoicingIndex(GUITAR_SHAPES[props.type] ?? GUITAR_SHAPES.maj, props.rootIndex))
 
 watch([() => props.rootIndex, () => props.type], () => {
-  voicingIndex.value = 0
+  voicingIndex.value = bestVoicingIndex(shapes.value, props.rootIndex)
 })
 
 const shapes = computed(() => GUITAR_SHAPES[props.type] ?? GUITAR_SHAPES.maj)

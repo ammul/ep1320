@@ -11,6 +11,7 @@ import ChordDetector from './components/ChordDetector.vue'
 import ProgressionBuilder from './components/ProgressionBuilder.vue'
 import JamMode from './components/JamMode.vue'
 import MidiControl from './components/MidiControl.vue'
+import LearnMode from './components/LearnMode.vue'
 
 const allTabs = [
   { id: 'home',           label: 'Home',                component: StartPage },
@@ -20,6 +21,7 @@ const allTabs = [
   { id: 'chords',         label: 'Chord Progressions',  component: ChordProgressions },
   { id: 'chord-detector', label: 'Chord Detector',      component: ChordDetector },
   { id: 'prog-builder',   label: 'Progression Builder', component: ProgressionBuilder },
+  { id: 'learn',          label: 'Learn',               component: LearnMode },
 ]
 
 const activeTab = ref('home')
@@ -238,6 +240,8 @@ h1 {
   padding: 0.4rem 0;
   border-top: 1px solid var(--border);
   margin-top: 0.5rem;
+  overflow: hidden;
+  transition: max-height 0.2s ease, padding 0.2s ease, margin 0.2s ease;
 }
 
 main {

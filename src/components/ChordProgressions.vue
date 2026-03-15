@@ -4,6 +4,7 @@ import { displayMode } from '../displayMode.js'
 import { NOTES, LABELS, SHARPS, CHORD_TYPES, CHORD_SUFFIX } from '../musicConstants.js'
 import { buildRows } from '../musicUtils.js'
 import ChordCardBody from './ChordCardBody.vue'
+import RootNotePicker from './RootNotePicker.vue'
 import { midiStatus, midiChannel, chordOn, chordOff } from '../midiManager.js'
 
 const PROGRESSIONS = {
@@ -357,14 +358,7 @@ watch([progressionId, selectedRoot, mode], stopLoop)
     <div class="controls">
       <div class="control-group">
         <label>Key</label>
-        <div class="note-picker">
-          <button
-            v-for="note in NOTES"
-            :key="note"
-            :class="{ active: selectedRoot === note, sharp: SHARPS.has(note) }"
-            @click="selectedRoot = note"
-          >{{ note }}</button>
-        </div>
+        <RootNotePicker v-model="selectedRoot" />
       </div>
 
       <div class="control-group">
@@ -385,42 +379,35 @@ watch([progressionId, selectedRoot, mode], stopLoop)
 
     <p class="prog-description">{{ selectedProgression.description }}</p>
 
-    <div v-if="midiStatus === 'connected'" class="midi-playback">
-      <div class="midi-param">
-        <label>Octave</label>
-        <button @click="chordOctave = Math.max(2, chordOctave - 1)">−</button>
-        <span class="param-value">{{ chordOctave }}</span>
-        <button @click="chordOctave = Math.min(6, chordOctave + 1)">+</button>
-      </div>
-      <div class="midi-param">
-        <label>BPM</label>
-        <input type="number" v-model.number="bpm" min="40" max="200" class="bpm-input" />
-      </div>
-      <div class="midi-param">
-        <label>Beats</label>
-        <div class="beats-toggle">
-          <button
-            v-for="b in [1, 2, 4, 8]"
-            :key="b"
-            :class="{ active: beatsPerChord === b }"
-            @click="beatsPerChord = b"
-          >{{ b }}</button>
-        </div>
-      </div>
-      <div class="midi-param">
-        <label>Lane</label>
-        <div class="beats-toggle">
-          <button
-            v-for="(lane, i) in ['A','B','C','D']"
-            :key="lane"
-            :class="{ active: midiChannel === i }"
-            @click="midiChannel = i"
-          >{{ lane }}</button>
-        </div>
-      </div>
+    <div v-if="midiStatus === 'connected'" class="midi-toolbar">
       <button class="play-btn" :class="{ playing: loopPlaying }" @click="playLoop">
         {{ loopPlaying ? 'Stop' : 'Play' }}
       </button>
+      <span class="midi-divider"></span>
+      <span class="midi-lbl">Oct</span>
+      <button class="mini-btn" @click="chordOctave = Math.max(2, chordOctave - 1)">−</button>
+      <span class="midi-val">{{ chordOctave }}</span>
+      <button class="mini-btn" @click="chordOctave = Math.min(6, chordOctave + 1)">+</button>
+      <span class="midi-divider"></span>
+      <input type="number" v-model.number="bpm" min="40" max="200" class="bpm-input" />
+      <span class="midi-lbl">BPM</span>
+      <span class="midi-divider"></span>
+      <button
+        v-for="b in [1, 2, 4, 8]"
+        :key="b"
+        class="mini-btn"
+        :class="{ active: beatsPerChord === b }"
+        @click="beatsPerChord = b"
+      >{{ b }}</button>
+      <span class="midi-divider"></span>
+      <span class="midi-lbl">Lane</span>
+      <button
+        v-for="(lane, i) in ['A','B','C','D']"
+        :key="lane"
+        class="mini-btn"
+        :class="{ active: midiChannel === i }"
+        @click="midiChannel = i"
+      >{{ lane }}</button>
     </div>
 
     <div class="chord-row" :class="{ 'piano-mode': displayMode === 'piano' }">
@@ -506,29 +493,6 @@ watch([progressionId, selectedRoot, mode], stopLoop)
   min-width: 5rem;
 }
 
-.note-picker {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.note-picker button {
-  padding: 0.3rem 0.6rem;
-  border-radius: 5px;
-  border: 1px solid var(--border2);
-  background: var(--input);
-  color: var(--text2);
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  min-width: 2.4rem;
-  text-align: center;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-}
-
-.note-picker button.sharp { background: var(--sharp); color: var(--text3); }
-.note-picker button:hover  { border-color: var(--accent); color: var(--text); }
-.note-picker button.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
 .mode-toggle { display: flex; gap: 0.35rem; }
 
@@ -561,100 +525,81 @@ select {
 
 select:focus { border-color: var(--accent); }
 
-.midi-playback {
+.midi-toolbar {
   display: flex;
   align-items: center;
-  gap: 1.2rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
-  margin-bottom: 1.25rem;
-  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  padding: 0.4rem 0.75rem;
   background: var(--raised);
   border: 1px solid var(--border2);
-  border-radius: 8px;
+  border-radius: 6px;
+  font-size: 0.82rem;
 }
 
-.midi-param {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-}
-
-.midi-param label {
+.midi-lbl {
   font-weight: 600;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
-.midi-param button {
-  width: 1.8rem;
-  height: 1.8rem;
-  border: 1px solid var(--border2);
-  border-radius: 5px;
-  background: var(--bg);
-  color: var(--accent);
-  font-size: 1rem;
-  cursor: pointer;
-  line-height: 1;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.midi-param button:hover {
-  background: var(--accent-bg);
-  border-color: var(--accent);
-}
-
-.param-value {
-  min-width: 1.4rem;
+.midi-val {
+  min-width: 1.2rem;
   text-align: center;
   font-weight: 700;
   color: var(--text);
 }
 
+.midi-divider {
+  width: 1px;
+  height: 1.2rem;
+  background: var(--border2);
+  margin: 0 0.2rem;
+  flex-shrink: 0;
+}
+
+.mini-btn {
+  height: 1.7rem;
+  min-width: 1.7rem;
+  padding: 0 0.35rem;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  background: var(--input);
+  color: var(--text2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.mini-btn:hover  { border-color: var(--accent); color: var(--text); }
+.mini-btn.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
 .bpm-input {
-  width: 4rem;
+  width: 3.5rem;
   background: var(--input);
   border: 1px solid var(--border2);
-  border-radius: 5px;
+  border-radius: 4px;
   color: var(--text);
-  padding: 0.2rem 0.4rem;
-  font-size: 0.85rem;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.82rem;
   text-align: center;
   outline: none;
 }
 
 .bpm-input:focus { border-color: var(--accent); }
 
-.beats-toggle {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.beats-toggle button {
-  width: 2rem;
-  height: 1.8rem;
+.play-btn {
+  padding: 0.3rem 0.9rem;
   border: 1px solid var(--border2);
   border-radius: 5px;
   background: var(--input);
   color: var(--text2);
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-}
-
-.beats-toggle button:hover  { border-color: var(--accent); color: var(--text); }
-.beats-toggle button.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-
-.play-btn {
-  padding: 0.35rem 1.1rem;
-  border: 1px solid var(--border2);
-  border-radius: 6px;
-  background: var(--input);
-  color: var(--text2);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;

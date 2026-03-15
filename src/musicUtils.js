@@ -18,6 +18,16 @@ export function buildRows(activeSet, rootPad) {
   ]
 }
 
+// Slice a 12-element pads array into 4 rows (top→bottom: [9-11], [6-8], [3-5], [0-2]).
+export function sliceRows(pads) {
+  return [
+    pads.slice(9, 12),
+    pads.slice(6, 9),
+    pads.slice(3, 6),
+    pads.slice(0, 3),
+  ]
+}
+
 // Build guitar neck data (6 strings, displayed high→low: e B G D A E).
 // cellExtras(noteIdx) → object of extra properties merged into each cell.
 export function buildGuitarNeck(cellExtras) {
