@@ -15,13 +15,13 @@ import LearnMode from './components/LearnMode.vue'
 
 const allTabs = [
   { id: 'home',           label: 'Home',                component: StartPage },
+  { id: 'learn',          label: 'Learn',               component: LearnMode },
   { id: 'claves',         label: 'Claves Mode',         component: ClavesMode,        ep1320Only: true },
   { id: 'jam',            label: 'Jam Mode',            component: JamMode },
   { id: 'scales',         label: 'Scale Visualizer',    component: ScaleVisualizer },
   { id: 'chords',         label: 'Chord Progressions',  component: ChordProgressions },
   { id: 'chord-detector', label: 'Chord Detector',      component: ChordDetector },
   { id: 'prog-builder',   label: 'Progression Builder', component: ProgressionBuilder },
-  { id: 'learn',          label: 'Learn',               component: LearnMode },
 ]
 
 const activeTab = ref('home')
@@ -51,7 +51,7 @@ function selectTab(id) {
     <header>
       <div class="header-row">
         <div class="title-block">
-          <h1>Tonarium</h1>
+          <h1 @click="selectTab('home')" class="home-link">Tonarium</h1>
         </div>
         <div class="header-controls">
           <div class="display-mode-control">
@@ -141,6 +141,10 @@ h1 {
 
 .title-block {
   min-width: 0;
+}
+
+.home-link {
+  cursor: pointer;
 }
 
 .header-controls {

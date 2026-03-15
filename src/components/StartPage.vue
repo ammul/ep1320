@@ -1,21 +1,18 @@
 <script setup>
-import { displayMode } from '../displayMode.js'
-
 const emit = defineEmits(['navigate'])
 
-const modes = [
-  { id: 'ep1320',  label: 'EP-1320', description: 'Chromatic pad grid layout, as on the TE EP-1320 synthesizer.', default: true },
-  { id: 'notes',   label: 'Notes',   description: 'Plain chromatic note name tiles.' },
-  { id: 'guitar',  label: 'Guitar',  description: '6-string fretboard or chord diagrams in standard tuning.' },
-  { id: 'piano',   label: 'Piano',   description: 'Piano keyboard layout.' },
-]
+const learnCard = {
+  id: 'learn',
+  label: 'Learn',
+  description: 'Step-by-step lessons on music theory fundamentals — intervals, scales, chords, and how they fit together.',
+  featured: true,
+}
 
 const tools = [
   {
     id: 'chords',
     label: 'Chord Progressions',
     description: 'Browse classic progressions — I–V–vi–IV, ii–V–I, Canon in D and more — transposed to any root key. Connect via MIDI to preview chords or loop a progression straight to your synth.',
-    featured: true,
     preview: ['I', 'V', 'vi', 'IV'],
   },
   {
@@ -56,28 +53,18 @@ const tools = [
       </p>
     </section>
 
-    <section class="modes-card">
-      <div class="modes-header">
-        <h2>Display Modes</h2>
-        <p>All tools render their content in the selected mode. Switch anytime using the Display dropdown in the header, or pick one below.</p>
+    <button class="tool-card learn-card" :class="{ featured: learnCard.featured }" @click="emit('navigate', learnCard.id)">
+      <div class="card-body">
+        <div class="card-text">
+          <span v-if="learnCard.featured" class="badge">Start here</span>
+          <h2>{{ learnCard.label }}</h2>
+          <p>{{ learnCard.description }}</p>
+        </div>
       </div>
-      <div class="modes-list">
-        <button
-          v-for="mode in modes"
-          :key="mode.id"
-          class="mode-row"
-          :class="{ active: displayMode === mode.id }"
-          @click="displayMode = mode.id"
-        >
-          <div class="mode-row-text">
-            <span class="mode-name">{{ mode.label }}</span>
-            <span v-if="mode.default" class="mode-default">default</span>
-            <span class="mode-desc">{{ mode.description }}</span>
-          </div>
-          <span class="mode-active-dot" v-if="displayMode === mode.id"></span>
-        </button>
-      </div>
-    </section>
+      <span class="open-label">Open &rarr;</span>
+    </button>
+
+    <p class="display-hint">Use the <strong>Display</strong> dropdown at the top to switch between EP-1320, Notes, Guitar, and Piano views. All tools adapt to the selected mode.</p>
 
     <section class="tools">
       <button
@@ -132,108 +119,21 @@ const tools = [
   max-width: 520px;
 }
 
-/* Display modes card */
-.modes-card {
-  background: var(--raised);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1.1rem 1.25rem;
+.learn-card {
   margin-bottom: 0.75rem;
 }
 
-.modes-header {
-  margin-bottom: 0.9rem;
-}
-
-.modes-header h2 {
+.display-hint {
   font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   color: var(--text3);
-  margin: 0 0 0.35rem;
-}
-
-.modes-header p {
-  font-size: 0.82rem;
-  color: var(--text3);
-  margin: 0;
   line-height: 1.5;
+  margin: 0 0 1.25rem;
+  padding: 0 0.25rem;
 }
 
-.modes-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.mode-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  background: transparent;
-  border: 1px solid var(--border3);
-  border-radius: 6px;
-  padding: 0.5rem 0.6rem;
-  cursor: pointer;
-  text-align: left;
-  width: 100%;
-  transition: background 0.12s, border-color 0.12s;
-}
-
-.mode-row:hover {
-  background: var(--hover);
-  border-color: var(--border2);
-}
-
-.mode-row.active {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-  border-color: color-mix(in srgb, var(--accent) 25%, transparent);
-}
-
-.mode-row-text {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  min-width: 0;
-}
-
-.mode-name {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--text);
-  white-space: nowrap;
-}
-
-.mode-row.active .mode-name {
-  color: var(--accent);
-}
-
-.mode-default {
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text3);
-  border: 1px solid var(--border2);
-  border-radius: 3px;
-  padding: 0.1rem 0.35rem;
-}
-
-.mode-desc {
-  font-size: 0.8rem;
-  color: var(--text3);
-  line-height: 1.4;
-}
-
-.mode-active-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  flex-shrink: 0;
+.display-hint strong {
+  color: var(--text2);
+  font-weight: 600;
 }
 
 /* Tool grid */
