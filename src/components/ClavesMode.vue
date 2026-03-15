@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { NOTES, LABELS, SHARPS, NOTE_TO_SEMI } from '../musicConstants.js'
+import { sliceRows } from '../musicUtils.js'
 import { noteOn, noteOff, activeInputNotes } from '../midiManager.js'
 
 const octave = ref(4)
@@ -35,12 +36,7 @@ function onUp(midi) {
 
 // Numpad layout (top→bottom): 7 8 9 / 4 5 6 / 1 2 3 / . 0 i
 // Notes ascend bottom→top: A on ., G# on 9
-const rows = computed(() => [
-  pads.value.slice(9, 12),
-  pads.value.slice(6, 9),
-  pads.value.slice(3, 6),
-  pads.value.slice(0, 3),
-])
+const rows = computed(() => sliceRows(pads.value))
 </script>
 
 <template>
@@ -174,6 +170,7 @@ const rows = computed(() => [
   flex-direction: column;
   gap: 0.6rem;
   max-width: 360px;
+  margin: 0 auto;
 }
 
 .row {

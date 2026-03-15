@@ -2,9 +2,12 @@
 import { ref, computed } from 'vue'
 import { displayMode } from '../displayMode.js'
 import { NOTES, LABELS, SHARPS, OPEN_STRINGS, STRING_NAMES, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
-import { buildGuitarNeck } from '../musicUtils.js'
+import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
 import { activeInputNotes } from '../midiManager.js'
 import PianoOctave from './PianoOctave.vue'
+import ScaleLegend from './ScaleLegend.vue'
+import RootNotePicker from './RootNotePicker.vue'
+import ModeLayout from './ModeLayout.vue'
 
 const SCALES = [
   {
@@ -83,12 +86,7 @@ const pads = computed(() =>
   }))
 )
 
-const rows = computed(() => [
-  pads.value.slice(9, 12),
-  pads.value.slice(6, 9),
-  pads.value.slice(3, 6),
-  pads.value.slice(0, 3),
-])
+const rows = computed(() => sliceRows(pads.value))
 
 const chromaTiles = computed(() =>
   NOTES.map((note, i) => ({
@@ -139,14 +137,7 @@ const scaleNotes = computed(() =>
     <div class="controls">
       <div class="control-group">
         <label>Key</label>
-        <div class="note-picker">
-          <button
-            v-for="note in NOTES"
-            :key="note"
-            :class="{ active: selectedRoot === note, sharp: SHARPS.has(note) }"
-            @click="selectedRoot = note"
-          >{{ note }}</button>
-        </div>
+        <RootNotePicker v-model="selectedRoot" />
       </div>
 
       <div class="control-group">
@@ -161,99 +152,91 @@ const scaleNotes = computed(() =>
       </div>
     </div>
 
-    <!-- EP-1320 pad grid -->
-    <template v-if="displayMode === 'ep1320'">
-      <div class="grid">
-        <div class="row" v-for="(row, ri) in rows" :key="ri">
-          <div
-            v-for="pad in row"
-            :key="pad.number"
-            class="pad"
-            :class="{
-              active:   pad.isActive && !pad.isAnchor && !pad.isRoot,
-              anchor:   pad.isAnchor && !pad.isRoot,
-              root:     pad.isRoot,
-              inactive: !pad.isActive,
-              pressed:  pressedIndices.has(pad.noteIndex),
-            }"
-          >
-            <span class="pad-label">{{ pad.label }}</span>
-            <span class="pad-note">{{ pad.note }}</span>
-          </div>
-        </div>
-      </div>
-    </template>
-
-    <!-- Notes mode -->
-    <template v-else-if="displayMode === 'notes'">
-      <div class="chroma-strip">
-        <div
-          v-for="tile in chromaTiles"
-          :key="tile.note"
-          class="chroma-tile"
-          :class="{
-            active:   tile.isActive && !tile.isAnchor && !tile.isRoot,
-            anchor:   tile.isAnchor && !tile.isRoot,
-            root:     tile.isRoot,
-            inactive: !tile.isActive,
-            pressed:  pressedIndices.has(tile.noteIndex),
-          }"
-        >
-          <span class="tile-note">{{ tile.note }}</span>
-        </div>
-      </div>
-    </template>
-
-    <!-- Piano mode -->
-    <template v-else-if="displayMode === 'piano'">
-      <PianoOctave
-        :activeIndices="activeIndices"
-        :rootIndex="rootIndex"
-        v-model:octave="pianoOctave"
-        :dimInactive="true"
-      />
-    </template>
-
-    <!-- Guitar mode -->
-    <template v-else>
-      <div class="guitar-neck-wrap">
-        <div class="guitar-neck">
-          <div v-for="(string, si) in guitarNeck" :key="si" class="neck-row">
-            <div class="string-name">{{ string.name }}</div>
+    <ModeLayout>
+      <template #ep1320>
+        <div class="grid">
+          <div class="row" v-for="(row, ri) in rows" :key="ri">
             <div
-              v-for="cell in string.cells"
-              :key="cell.fret"
-              class="neck-cell"
+              v-for="pad in row"
+              :key="pad.number"
+              class="pad"
               :class="{
-                active: cell.isActive,
-                root:   cell.isRoot,
-                open:   cell.isOpen,
+                active:   pad.isActive && !pad.isAnchor && !pad.isRoot,
+                anchor:   pad.isAnchor && !pad.isRoot,
+                root:     pad.isRoot,
+                inactive: !pad.isActive,
+                pressed:  pressedIndices.has(pad.noteIndex),
               }"
             >
-              <span
-                v-if="cell.isActive"
-                class="neck-dot"
-                :class="{ root: cell.isRoot, anchor: cell.isAnchor && !cell.isRoot }"
-              ></span>
-            </div>
-          </div>
-          <div class="fret-numbers">
-            <div class="string-name-spacer"></div>
-            <div v-for="f in FRET_COUNT + 1" :key="f" class="fret-num">
-              {{ f - 1 === 0 ? '' : f - 1 }}
+              <span class="pad-label">{{ pad.label }}</span>
+              <span class="pad-note">{{ pad.note }}</span>
             </div>
           </div>
         </div>
-      </div>
-    </template>
+      </template>
 
-    <div class="legend">
-      <span class="legend-item root">root</span>
-      <span class="legend-sep">·</span>
-      <span class="legend-item anchor">anchor — land here</span>
-      <span class="legend-sep">·</span>
-      <span class="legend-item safe">safe</span>
-    </div>
+      <template #notes>
+        <div class="chroma-strip">
+          <div
+            v-for="tile in chromaTiles"
+            :key="tile.note"
+            class="chroma-tile"
+            :class="{
+              active:   tile.isActive && !tile.isAnchor && !tile.isRoot,
+              anchor:   tile.isAnchor && !tile.isRoot,
+              root:     tile.isRoot,
+              inactive: !tile.isActive,
+              pressed:  pressedIndices.has(tile.noteIndex),
+            }"
+          >
+            <span class="tile-note">{{ tile.note }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #piano>
+        <PianoOctave
+          :activeIndices="activeIndices"
+          :rootIndex="rootIndex"
+          v-model:octave="pianoOctave"
+          :dimInactive="true"
+        />
+      </template>
+
+      <template #guitar>
+        <div class="guitar-neck-wrap">
+          <div class="guitar-neck">
+            <div v-for="(string, si) in guitarNeck" :key="si" class="neck-row">
+              <div class="string-name">{{ string.name }}</div>
+              <div
+                v-for="cell in string.cells"
+                :key="cell.fret"
+                class="neck-cell"
+                :class="{
+                  active: cell.isActive,
+                  root:   cell.isRoot,
+                  open:   cell.isOpen,
+                }"
+              >
+                <span
+                  v-if="cell.isActive"
+                  class="neck-dot"
+                  :class="{ root: cell.isRoot, anchor: cell.isAnchor && !cell.isRoot }"
+                ></span>
+              </div>
+            </div>
+            <div class="fret-numbers">
+              <div class="string-name-spacer"></div>
+              <div v-for="f in FRET_COUNT + 1" :key="f" class="fret-num">
+                {{ f - 1 === 0 ? '' : f - 1 }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </ModeLayout>
+
+    <ScaleLegend />
 
     <div class="scale-notes">
       <span class="scale-label">Notes</span>
@@ -311,29 +294,6 @@ const scaleNotes = computed(() =>
   min-width: 5rem;
 }
 
-.note-picker {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.note-picker button {
-  padding: 0.3rem 0.6rem;
-  border-radius: 5px;
-  border: 1px solid var(--border2);
-  background: var(--input);
-  color: var(--text2);
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-  min-width: 2.4rem;
-  text-align: center;
-}
-
-.note-picker button.sharp { background: var(--sharp); color: var(--text3); }
-.note-picker button:hover  { border-color: var(--accent); color: var(--text); }
-.note-picker button.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
 .scale-select-row {
   display: flex;
@@ -394,6 +354,7 @@ select:focus { border-color: var(--accent); }
   flex-direction: column;
   gap: 0.6rem;
   max-width: 360px;
+  margin: 0 auto;
 }
 
 .row {
@@ -507,15 +468,15 @@ select:focus { border-color: var(--accent); }
 }
 
 .neck-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: var(--border2);
+  background: var(--text3);
   display: block;
 }
 
 .neck-dot.anchor {
-  background: var(--accent-mid);
+  background: var(--accent-lo);
 }
 
 .neck-dot.root {
@@ -541,40 +502,6 @@ select:focus { border-color: var(--accent); }
   text-align: center;
 }
 
-/* Legend */
-.legend {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1.25rem;
-  flex-wrap: wrap;
-}
-
-.legend-sep {
-  color: var(--text5);
-  font-size: 0.75rem;
-}
-
-.legend-item {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text3);
-  letter-spacing: 0.03em;
-}
-
-.legend-item::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 0.3rem;
-  vertical-align: middle;
-}
-
-.legend-item.root::before   { background: var(--accent); }
-.legend-item.anchor::before { background: var(--accent-mid); }
-.legend-item.safe::before   { background: var(--border2); }
 
 /* Scale notes strip */
 .scale-notes {
@@ -665,13 +592,7 @@ select:focus { border-color: var(--accent); }
     white-space: nowrap;
   }
 
-  .note-picker button {
-    padding: 0.2rem 0.4rem;
-    font-size: 0.75rem;
-    min-width: 2rem;
-  }
-
-  .legend, .scale-notes {
+  .scale-notes {
     margin-top: 0.5rem;
   }
 }

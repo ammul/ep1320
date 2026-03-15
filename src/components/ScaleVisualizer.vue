@@ -2,8 +2,10 @@
 import { ref, computed } from 'vue'
 import { displayMode } from '../displayMode.js'
 import { NOTES, LABELS, SHARPS, OPEN_STRINGS, STRING_NAMES, FRET_COUNT } from '../musicConstants.js'
-import { buildGuitarNeck } from '../musicUtils.js'
+import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
 import PianoOctave from './PianoOctave.vue'
+import RootNotePicker from './RootNotePicker.vue'
+import ModeLayout from './ModeLayout.vue'
 
 const SCALES = [
   { id: '12t',  label: '12T — Chromatic',         intervals: [0,1,2,3,4,5,6,7,8,9,10,11], description: 'All 12 semitones. No inherent tonality — every key plays, nothing is highlighted. Useful for atonal passages or when you want full chromatic access.' },
@@ -52,12 +54,7 @@ const pads = computed(() =>
   }))
 )
 
-const rows = computed(() => [
-  pads.value.slice(9, 12),
-  pads.value.slice(6, 9),
-  pads.value.slice(3, 6),
-  pads.value.slice(0, 3),
-])
+const rows = computed(() => sliceRows(pads.value))
 
 const scaleNotes = computed(() =>
   selectedScale.value.intervals.map(i => NOTES[(rootIndex.value + i) % 12])
@@ -96,14 +93,7 @@ const guitarNeck = computed(() =>
     <div class="controls">
       <div class="control-group">
         <label>Root note</label>
-        <div class="note-picker">
-          <button
-            v-for="note in NOTES"
-            :key="note"
-            :class="{ active: selectedRoot === note, sharp: SHARPS.has(note) }"
-            @click="selectedRoot = note"
-          >{{ note }}</button>
-        </div>
+        <RootNotePicker v-model="selectedRoot" />
       </div>
 
       <div class="control-group">
@@ -118,88 +108,85 @@ const guitarNeck = computed(() =>
       </div>
     </div>
 
-    <!-- EP-1320 mode: pad grid -->
-    <template v-if="displayMode === 'ep1320'">
-      <div class="grid">
-        <div class="row" v-for="(row, ri) in rows" :key="ri">
-          <div
-            v-for="pad in row"
-            :key="pad.number"
-            class="pad"
-            :class="{
-              active: pad.isActive,
-              root: pad.isRoot,
-              sharp: pad.isSharp,
-              inactive: !pad.isActive,
-            }"
-          >
-            <span class="pad-label">{{ pad.label }}</span>
-            <span class="pad-note">{{ pad.note }}</span>
-            <span class="pad-degree" v-if="pad.isActive">{{ pad.isRoot ? '①' : pad.degree }}</span>
-          </div>
-        </div>
-      </div>
-    </template>
-
-    <!-- Notes mode: chromatic strip -->
-    <template v-else-if="displayMode === 'notes'">
-      <div class="chroma-strip">
-        <div
-          v-for="tile in chromaTiles"
-          :key="tile.note"
-          class="chroma-tile"
-          :class="{
-            active: tile.isActive,
-            root: tile.isRoot,
-            sharp: tile.isSharp,
-            inactive: !tile.isActive,
-          }"
-        >
-          <span class="tile-note">{{ tile.note }}</span>
-          <span class="tile-degree" v-if="tile.isActive">{{ tile.isRoot ? '①' : tile.degree }}</span>
-        </div>
-      </div>
-    </template>
-
-    <!-- Piano mode -->
-    <template v-else-if="displayMode === 'piano'">
-      <PianoOctave
-        :activeIndices="activeIndices"
-        :rootIndex="rootIndex"
-        v-model:octave="pianoOctave"
-        :dimInactive="true"
-      />
-    </template>
-
-    <!-- Guitar mode: neck -->
-    <template v-else>
-      <div class="guitar-neck-wrap">
-        <div class="guitar-neck">
-          <div v-for="(string, si) in guitarNeck" :key="si" class="neck-row">
-            <div class="string-name">{{ string.name }}</div>
+    <ModeLayout>
+      <template #ep1320>
+        <div class="grid">
+          <div class="row" v-for="(row, ri) in rows" :key="ri">
             <div
-              v-for="cell in string.cells"
-              :key="cell.fret"
-              class="neck-cell"
+              v-for="pad in row"
+              :key="pad.number"
+              class="pad"
               :class="{
-                active: cell.isActive,
-                root: cell.isRoot,
-                open: cell.isOpen,
+                active: pad.isActive,
+                root: pad.isRoot,
+                sharp: pad.isSharp,
+                inactive: !pad.isActive,
               }"
             >
-              <span v-if="cell.isActive" class="neck-dot" :class="{ root: cell.isRoot }"></span>
-            </div>
-          </div>
-          <!-- fret numbers -->
-          <div class="fret-numbers">
-            <div class="string-name-spacer"></div>
-            <div v-for="f in FRET_COUNT + 1" :key="f" class="fret-num">
-              {{ f - 1 === 0 ? '' : f - 1 }}
+              <span class="pad-label">{{ pad.label }}</span>
+              <span class="pad-note">{{ pad.note }}</span>
+              <span class="pad-degree" v-if="pad.isActive">{{ pad.isRoot ? '①' : pad.degree }}</span>
             </div>
           </div>
         </div>
-      </div>
-    </template>
+      </template>
+
+      <template #notes>
+        <div class="chroma-strip">
+          <div
+            v-for="tile in chromaTiles"
+            :key="tile.note"
+            class="chroma-tile"
+            :class="{
+              active: tile.isActive,
+              root: tile.isRoot,
+              sharp: tile.isSharp,
+              inactive: !tile.isActive,
+            }"
+          >
+            <span class="tile-note">{{ tile.note }}</span>
+            <span class="tile-degree" v-if="tile.isActive">{{ tile.isRoot ? '①' : tile.degree }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #piano>
+        <PianoOctave
+          :activeIndices="activeIndices"
+          :rootIndex="rootIndex"
+          v-model:octave="pianoOctave"
+          :dimInactive="true"
+        />
+      </template>
+
+      <template #guitar>
+        <div class="guitar-neck-wrap">
+          <div class="guitar-neck">
+            <div v-for="(string, si) in guitarNeck" :key="si" class="neck-row">
+              <div class="string-name">{{ string.name }}</div>
+              <div
+                v-for="cell in string.cells"
+                :key="cell.fret"
+                class="neck-cell"
+                :class="{
+                  active: cell.isActive,
+                  root: cell.isRoot,
+                  open: cell.isOpen,
+                }"
+              >
+                <span v-if="cell.isActive" class="neck-dot" :class="{ root: cell.isRoot }"></span>
+              </div>
+            </div>
+            <div class="fret-numbers">
+              <div class="string-name-spacer"></div>
+              <div v-for="f in FRET_COUNT + 1" :key="f" class="fret-num">
+                {{ f - 1 === 0 ? '' : f - 1 }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </ModeLayout>
 
     <div class="scale-notes">
       <span class="scale-label">Notes in scale</span>
@@ -257,29 +244,6 @@ const guitarNeck = computed(() =>
   min-width: 5rem;
 }
 
-.note-picker {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.note-picker button {
-  padding: 0.3rem 0.6rem;
-  border-radius: 5px;
-  border: 1px solid var(--border2);
-  background: var(--input);
-  color: var(--text2);
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-  min-width: 2.4rem;
-  text-align: center;
-}
-
-.note-picker button.sharp { background: var(--sharp); color: var(--text3); }
-.note-picker button:hover  { border-color: var(--accent); color: var(--text); }
-.note-picker button.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
 .scale-select-row {
   display: flex;
@@ -340,6 +304,7 @@ select:focus { border-color: var(--accent); }
   flex-direction: column;
   gap: 0.6rem;
   max-width: 360px;
+  margin: 0 auto;
 }
 
 .row {
@@ -452,10 +417,10 @@ select:focus { border-color: var(--accent); }
 }
 
 .neck-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: var(--accent-mid);
+  background: var(--accent-lo);
   display: block;
 }
 
@@ -563,12 +528,6 @@ select:focus { border-color: var(--accent); }
   .control-group label {
     min-width: unset;
     white-space: nowrap;
-  }
-
-  .note-picker button {
-    padding: 0.2rem 0.4rem;
-    font-size: 0.75rem;
-    min-width: 2rem;
   }
 
   .scale-notes {

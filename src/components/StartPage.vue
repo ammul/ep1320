@@ -173,7 +173,7 @@ const tools = [
   justify-content: space-between;
   gap: 0.75rem;
   background: transparent;
-  border: 1px solid transparent;
+  border: 1px solid var(--border3);
   border-radius: 6px;
   padding: 0.5rem 0.6rem;
   cursor: pointer;

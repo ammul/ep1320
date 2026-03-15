@@ -2,8 +2,9 @@
 import { ref, computed } from 'vue'
 import { displayMode } from '../displayMode.js'
 import { NOTES, LABELS, SHARPS, NOTE_TO_SEMI, SEMI_TO_NAME, CHORD_DETECT_TYPES, FRET_COUNT } from '../musicConstants.js'
-import { buildGuitarNeck } from '../musicUtils.js'
+import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
 import PianoOctave from './PianoOctave.vue'
+import ModeLayout from './ModeLayout.vue'
 
 function detectChord(noteIndices) {
   if (noteIndices.length < 2) return null
@@ -59,12 +60,7 @@ const pads = computed(() =>
   }))
 )
 
-const rows = computed(() => [
-  pads.value.slice(9, 12),
-  pads.value.slice(6, 9),
-  pads.value.slice(3, 6),
-  pads.value.slice(0, 3),
-])
+const rows = computed(() => sliceRows(pads.value))
 
 // Notes mode: 12 chromatic note buttons
 const noteButtons = computed(() =>
@@ -102,91 +98,100 @@ const chord = computed(() => detectChord([...selected.value]))
       <p class="subtitle" v-else>Click piano keys to select — chord identified instantly</p>
     </div>
 
-    <!-- EP-1320 mode: pad grid -->
-    <div v-if="displayMode === 'ep1320'" class="grid">
-      <div class="row" v-for="(row, ri) in rows" :key="ri">
-        <button
-          v-for="pad in row"
-          :key="pad.index"
-          class="pad"
-          :class="{ sharp: pad.isSharp, selected: pad.isSelected }"
-          @click="toggleNote(pad.index)"
-        >
-          <span class="pad-label">{{ pad.label }}</span>
-          <span class="pad-note">{{ pad.note }}</span>
+    <div class="detector-body">
+      <div class="input-col">
+        <ModeLayout>
+          <template #ep1320>
+            <div class="grid">
+              <div class="row" v-for="(row, ri) in rows" :key="ri">
+                <button
+                  v-for="pad in row"
+                  :key="pad.index"
+                  class="pad"
+                  :class="{ sharp: pad.isSharp, selected: pad.isSelected }"
+                  @click="toggleNote(pad.index)"
+                >
+                  <span class="pad-label">{{ pad.label }}</span>
+                  <span class="pad-note">{{ pad.note }}</span>
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <template #notes>
+            <div class="note-strip">
+              <button
+                v-for="btn in noteButtons"
+                :key="btn.index"
+                class="note-btn"
+                :class="{ sharp: btn.isSharp, selected: btn.isSelected }"
+                @click="toggleNote(btn.index)"
+              >
+                {{ btn.note }}
+              </button>
+            </div>
+          </template>
+
+          <template #piano>
+            <PianoOctave
+              :activeIndices="selected"
+              v-model:octave="pianoOctave"
+              :clickable="true"
+              @toggle="toggleNote"
+            />
+          </template>
+
+          <template #guitar>
+            <div class="guitar-neck-wrap">
+              <div class="guitar-neck">
+                <div v-for="(string, si) in guitarNeck" :key="si" class="neck-row">
+                  <div class="string-name">{{ string.name }}</div>
+                  <button
+                    v-for="cell in string.cells"
+                    :key="cell.fret"
+                    class="neck-cell"
+                    :class="{
+                      selected: cell.isSelected,
+                      sharp: cell.isSharp,
+                      open: cell.isOpen,
+                    }"
+                    @click="toggleNote(cell.noteIdx)"
+                  >
+                    <span v-if="cell.isSelected" class="neck-dot"></span>
+                    <span v-else class="neck-note">{{ cell.note }}</span>
+                  </button>
+                </div>
+                <div class="fret-numbers">
+                  <div class="string-name-spacer"></div>
+                  <div v-for="f in FRET_COUNT + 1" :key="f" class="fret-num">
+                    {{ f - 1 === 0 ? '' : f - 1 }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </ModeLayout>
+
+        <button class="clear-btn" @click="clearAll" :disabled="selected.size === 0">
+          Clear
         </button>
       </div>
-    </div>
 
-    <!-- Notes mode: chromatic note buttons -->
-    <div v-else-if="displayMode === 'notes'" class="note-strip">
-      <button
-        v-for="btn in noteButtons"
-        :key="btn.index"
-        class="note-btn"
-        :class="{ sharp: btn.isSharp, selected: btn.isSelected }"
-        @click="toggleNote(btn.index)"
-      >
-        {{ btn.note }}
-      </button>
-    </div>
-
-    <!-- Piano mode: clickable keyboard -->
-    <PianoOctave
-      v-else-if="displayMode === 'piano'"
-      :activeIndices="selected"
-      v-model:octave="pianoOctave"
-      :clickable="true"
-      @toggle="toggleNote"
-    />
-
-    <!-- Guitar mode: fretboard -->
-    <div v-else class="guitar-neck-wrap">
-      <div class="guitar-neck">
-        <div v-for="(string, si) in guitarNeck" :key="si" class="neck-row">
-          <div class="string-name">{{ string.name }}</div>
-          <button
-            v-for="cell in string.cells"
-            :key="cell.fret"
-            class="neck-cell"
-            :class="{
-              selected: cell.isSelected,
-              sharp: cell.isSharp,
-              open: cell.isOpen,
-            }"
-            @click="toggleNote(cell.noteIdx)"
-          >
-            <span v-if="cell.isSelected" class="neck-dot"></span>
-            <span v-else class="neck-note">{{ cell.note }}</span>
-          </button>
-        </div>
-        <div class="fret-numbers">
-          <div class="string-name-spacer"></div>
-          <div v-for="f in FRET_COUNT + 1" :key="f" class="fret-num">
-            {{ f - 1 === 0 ? '' : f - 1 }}
-          </div>
-        </div>
+      <div class="result" :class="{ empty: selected.size === 0 }">
+        <template v-if="selected.size === 0">
+          <p class="hint">Select two or more notes</p>
+        </template>
+        <template v-else-if="chord">
+          <div class="chord-name">{{ chord.display }}</div>
+          <div class="chord-quality">{{ chord.name }}<span v-if="chord.inversion" class="inversion-label"> · inversion</span></div>
+          <div class="chord-notes">{{ selectedNames.join('  ·  ') }}</div>
+        </template>
+        <template v-else>
+          <div class="chord-name unknown">?</div>
+          <div class="chord-quality">No matching chord</div>
+          <div class="chord-notes">{{ selectedNames.join('  ·  ') }}</div>
+        </template>
       </div>
-    </div>
-
-    <button class="clear-btn" @click="clearAll" :disabled="selected.size === 0">
-      Clear
-    </button>
-
-    <div class="result" :class="{ empty: selected.size === 0 }">
-      <template v-if="selected.size === 0">
-        <p class="hint">Select two or more notes</p>
-      </template>
-      <template v-else-if="chord">
-        <div class="chord-name">{{ chord.display }}</div>
-        <div class="chord-quality">{{ chord.name }}<span v-if="chord.inversion" class="inversion-label"> · inversion</span></div>
-        <div class="chord-notes">{{ selectedNames.join('  ·  ') }}</div>
-      </template>
-      <template v-else>
-        <div class="chord-name unknown">?</div>
-        <div class="chord-quality">No matching chord</div>
-        <div class="chord-notes">{{ selectedNames.join('  ·  ') }}</div>
-      </template>
     </div>
 
   </div>
@@ -203,6 +208,19 @@ const chord = computed(() => detectChord([...selected.value]))
   gap: 1.5rem;
 }
 
+.detector-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
 .header h2 {
   font-size: 1.4rem;
   color: var(--accent);
@@ -212,7 +230,7 @@ const chord = computed(() => detectChord([...selected.value]))
 .subtitle { margin-top: 0.3rem; font-size: 0.85rem; color: var(--text3); }
 
 /* EP-1320 pad grid */
-.grid { display: flex; flex-direction: column; gap: 0.6rem; max-width: 360px; }
+.grid { display: flex; flex-direction: column; gap: 0.6rem; max-width: 360px; margin: 0 auto; }
 .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
 
 .pad {
@@ -388,6 +406,27 @@ const chord = computed(() => detectChord([...selected.value]))
   align-items: flex-start;
   gap: 0.4rem;
   min-height: 100px;
+}
+
+@media (min-width: 600px) {
+  .detector-body {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .input-col {
+    flex-shrink: 0;
+  }
+
+  .result {
+    flex: 1;
+    border-top: none;
+    border-left: 1px solid var(--border);
+    padding-top: 0;
+    padding-left: 2rem;
+    min-height: 0;
+  }
 }
 
 .result.empty { opacity: 0.4; }
