@@ -27,12 +27,20 @@
   --text4: #5a5040;
   --text5: #4a4030;
 
-  --accent: #c8a96e;
-  --accent-hi: #f0c87a;
-  --accent-lo: #a08858;
-  --accent-dim: #8a7850;
-  --accent-mid: #6a5a30;
+  --accent: #d4b84c;
+  --accent-hi: #f0d848;
+  --accent-lo: #b09840;
+  --accent-dim: #887832;
+  --accent-mid: #6a5e28;
   --on-accent: #1a1714;
+
+  --dot-scale: #7a6c38;
+  --dot-root: #e07840;
+
+  --rust: #c85a28;
+  --rust-hi: #e07840;
+  --rust-bg: #2e1a10;
+  --rust-glow: rgba(200, 90, 40, 0.3);
 
   --error-bg: #2e1c14;
   --error-bd: #6a3820;
@@ -40,25 +48,25 @@
   --error-text2: #a07050;
 
   --overlay: rgba(0, 0, 0, 0.6);
-  --accent-glow: rgba(200, 169, 110, 0.25);
+  --accent-glow: rgba(212, 184, 76, 0.28);
 
   /* Piano keys */
   --pk-white: #ddd5be;
   --pk-white-h: #ece4d0;
   --pk-white-bd: #8a7850;
   --pk-white-active: #c89420;
-  --pk-white-root: #f0c020;
+  --pk-white-root: #c85a28;
   --pk-white-lbl: #7a6848;
   --pk-white-lbl-a: #2a1400;
-  --pk-white-lbl-r: #1a0a00;
+  --pk-white-lbl-r: #1a0600;
   --pk-black: #1e1a14;
   --pk-black-bd: #0e0c08;
   --pk-black-h: #2e2820;
   --pk-black-active: #b07a10;
-  --pk-black-root: #d49800;
+  --pk-black-root: #a84018;
   --pk-black-lbl: #5a4830;
   --pk-black-lbl-a: #1a0a00;
-  --pk-black-lbl-r: #0a0600;
+  --pk-black-lbl-r: #1a0600;
   --pk-dim-w: #7a7268;
   --pk-dim-w-lbl: #4a4438;
   --pk-dim-b: #302c28;
@@ -86,12 +94,20 @@ html.light {
   --text4: #8a7e70;
   --text5: #a09080;
 
-  --accent: #9a7030;
-  --accent-hi: #b88838;
-  --accent-lo: #806040;
-  --accent-dim: #9a8858;
-  --accent-mid: #9a8448;
+  --accent: #7a5218;
+  --accent-hi: #9a6820;
+  --accent-lo: #624010;
+  --accent-dim: #8a6434;
+  --accent-mid: #7a5a28;
   --on-accent: #f5ede0;
+
+  --dot-scale: #c8a860;
+  --dot-root: #b84818;
+
+  --rust: #b84818;
+  --rust-hi: #8c3412;
+  --rust-bg: #f5e8e0;
+  --rust-glow: rgba(184, 72, 24, 0.2);
 
   --error-bg: #f8eae4;
   --error-bd: #d09080;
@@ -99,22 +115,22 @@ html.light {
   --error-text2: #a04030;
 
   --overlay: rgba(0, 0, 0, 0.4);
-  --accent-glow: rgba(154, 112, 48, 0.2);
+  --accent-glow: rgba(122, 82, 24, 0.22);
 
   /* Piano keys */
   --pk-white: #f0e8d8;
   --pk-white-h: #f8f2e8;
   --pk-white-bd: #a09070;
   --pk-white-active: #c89420;
-  --pk-white-root: #f0c020;
+  --pk-white-root: #c85a28;
   --pk-white-lbl: #806848;
   --pk-white-lbl-a: #2a1400;
-  --pk-white-lbl-r: #1a0a00;
+  --pk-white-lbl-r: #1a0600;
   --pk-black: #2a2418;
   --pk-black-bd: #1a1610;
   --pk-black-h: #3a3428;
   --pk-black-active: #b07a10;
-  --pk-black-root: #d49800;
+  --pk-black-root: #a84018;
   --pk-black-lbl: #7a6848;
   --pk-black-lbl-a: #2a1400;
   --pk-black-lbl-r: #1a0a00;

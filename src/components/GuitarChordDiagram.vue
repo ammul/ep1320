@@ -207,13 +207,13 @@ const voicing = computed(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--dot-scale);
   display: block;
 }
 
 .finger-dot.root {
-  background: var(--accent-hi);
-  box-shadow: 0 0 3px var(--accent-glow);
+  background: var(--dot-root);
+  box-shadow: 0 0 3px var(--rust-glow);
 }
 
 .voicing-selector {

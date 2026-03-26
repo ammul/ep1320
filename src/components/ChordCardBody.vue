@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { displayMode } from '../displayMode.js'
-import { NOTES, SHARPS } from '../musicConstants.js'
+import { NOTES } from '../musicConstants.js'
 import GuitarChordDiagram from './GuitarChordDiagram.vue'
 import PianoOctave from './PianoOctave.vue'
 
@@ -52,7 +52,7 @@ const pianoActiveIndices = computed(() =>
         v-for="n in noteNames"
         :key="n"
         class="note-badge"
-        :class="{ root: n === NOTES[chordRootIdx], sharp: SHARPS.has(n) }"
+        :class="{ root: n === NOTES[chordRootIdx] }"
       >{{ n }}</span>
     </div>
   </template>
@@ -93,14 +93,14 @@ const pianoActiveIndices = computed(() =>
 
 .mini-pad.inactive { background: var(--bg); opacity: 0.3; }
 .mini-pad.active   { background: var(--raised); border-color: var(--accent-mid); }
-.mini-pad.root     { background: var(--accent-bg); border-color: var(--accent); }
+.mini-pad.root     { background: var(--rust-bg); border-color: var(--rust); }
 
 .mini-label { font-size: 0.6rem; font-weight: 700; color: var(--text5); line-height: 1; }
 .mini-pad.active .mini-label { color: var(--accent-dim); }
-.mini-pad.root   .mini-label { color: var(--accent); }
+.mini-pad.root   .mini-label { color: var(--rust); }
 
 .mini-note { font-size: 0.62rem; font-weight: 700; line-height: 1; color: var(--accent); }
-.mini-pad.root .mini-note { color: var(--accent-hi); }
+.mini-pad.root .mini-note { color: var(--rust-hi); }
 
 /* Press labels */
 .press-labels { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; justify-content: center; }
@@ -120,9 +120,7 @@ const pianoActiveIndices = computed(() =>
   color: var(--accent);
 }
 
-.note-badge.root  { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-hi); }
-.note-badge.sharp { background: var(--input); color: var(--accent-lo); border-color: var(--border); }
-.note-badge.root.sharp { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-hi); }
+.note-badge.root  { background: var(--rust-bg); border-color: var(--rust); color: var(--rust-hi); }
 
 @media (max-width: 600px) {
   .mini-pad { width: 30px; height: 30px; }

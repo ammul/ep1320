@@ -379,7 +379,7 @@ select:focus { border-color: var(--accent); }
 .pad.inactive { background: var(--bg); opacity: 0.35; }
 .pad.active   { background: var(--raised); border-color: var(--border2); }
 .pad.anchor   { background: var(--accent-bg); border-color: var(--accent-mid); }
-.pad.root     { background: var(--accent-bg); border-color: var(--accent); }
+.pad.root     { background: var(--rust-bg); border-color: var(--rust); }
 .pad.pressed  { background: var(--accent-bg); border-color: var(--accent); opacity: 1; }
 
 .pad-label { font-size: 0.7rem; color: var(--text4); font-weight: 600; letter-spacing: 0.1em; }
@@ -388,7 +388,7 @@ select:focus { border-color: var(--accent); }
 .pad.inactive .pad-note { color: var(--text5); }
 .pad.active   .pad-note { color: var(--text2); }
 .pad.anchor   .pad-note { color: var(--accent); }
-.pad.root     .pad-note { color: var(--accent-hi); }
+.pad.root     .pad-note { color: var(--rust-hi); }
 .pad.pressed  .pad-note { color: var(--accent); }
 
 /* Notes mode */
@@ -410,10 +410,10 @@ select:focus { border-color: var(--accent); }
   transition: background 0.15s, border-color 0.15s;
 }
 
-.chroma-tile.inactive { background: var(--bg); opacity: 0.35; }
+.chroma-tile.inactive { background: transparent; border-color: transparent; opacity: 0.4; }
 .chroma-tile.active   { background: var(--raised); border-color: var(--border2); }
 .chroma-tile.anchor   { background: var(--accent-bg); border-color: var(--accent-mid); }
-.chroma-tile.root     { background: var(--accent-bg); border-color: var(--accent); }
+.chroma-tile.root     { background: var(--rust-bg); border-color: var(--rust); }
 .chroma-tile.pressed  { background: var(--accent-bg); border-color: var(--accent); opacity: 1; }
 
 .tile-note { font-size: 1.1rem; font-weight: 700; line-height: 1; }
@@ -421,7 +421,7 @@ select:focus { border-color: var(--accent); }
 .chroma-tile.inactive .tile-note { color: var(--text5); }
 .chroma-tile.active   .tile-note { color: var(--text2); }
 .chroma-tile.anchor   .tile-note { color: var(--accent); }
-.chroma-tile.root     .tile-note { color: var(--accent-hi); }
+.chroma-tile.root     .tile-note { color: var(--rust-hi); }
 .chroma-tile.pressed  .tile-note { color: var(--accent); }
 
 /* Guitar neck */
@@ -480,8 +480,8 @@ select:focus { border-color: var(--accent); }
 }
 
 .neck-dot.root {
-  background: var(--accent);
-  box-shadow: 0 0 4px var(--accent-glow);
+  background: var(--dot-root);
+  box-shadow: 0 0 4px var(--rust-glow);
 }
 
 .fret-numbers {
@@ -537,9 +537,9 @@ select:focus { border-color: var(--accent); }
 }
 
 .scale-note.root {
-  background: var(--accent-bg);
-  border-color: var(--accent);
-  color: var(--accent-hi);
+  background: var(--rust-bg);
+  border-color: var(--rust);
+  color: var(--rust-hi);
 }
 
 @media (max-width: 600px) {

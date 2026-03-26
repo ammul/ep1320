@@ -246,7 +246,7 @@ const chordCards = computed(() =>
   min-width: 0;
 }
 
-.chord-name { font-size: 1.1rem; font-weight: 700; color: var(--accent); line-height: 1; }
+.chord-name { font-size: 1.1rem; font-weight: 700; color: var(--rust); line-height: 1; }
 
 @media (max-width: 600px) {
   .prog-builder { padding: 1.25rem 1rem; }

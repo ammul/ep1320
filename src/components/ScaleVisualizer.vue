@@ -56,10 +56,6 @@ const pads = computed(() =>
 
 const rows = computed(() => sliceRows(pads.value))
 
-const scaleNotes = computed(() =>
-  selectedScale.value.intervals.map(i => NOTES[(rootIndex.value + i) % 12])
-)
-
 // Notes mode: all 12 chromatic notes as tiles
 const chromaTiles = computed(() =>
   NOTES.map((note, i) => ({
@@ -188,15 +184,6 @@ const guitarNeck = computed(() =>
       </template>
     </ModeLayout>
 
-    <div class="scale-notes">
-      <span class="scale-label">Notes in scale</span>
-      <span
-        v-for="note in scaleNotes"
-        :key="note"
-        class="scale-note"
-        :class="{ root: note === selectedRoot }"
-      >{{ note }}</span>
-    </div>
   </div>
 </template>
 
@@ -328,17 +315,17 @@ select:focus { border-color: var(--accent); }
 
 .pad.inactive { background: var(--bg); opacity: 0.35; }
 .pad.active   { background: var(--raised); border-color: var(--accent-mid); }
-.pad.root     { background: var(--accent-bg); border-color: var(--accent); }
+.pad.root     { background: var(--rust-bg); border-color: var(--rust); }
 
 .pad-label  { font-size: 0.7rem; color: var(--text4); font-weight: 600; letter-spacing: 0.1em; }
 .pad-note   { font-size: 1.5rem; font-weight: 700; line-height: 1; }
 
 .pad.inactive .pad-note { color: var(--text5); }
 .pad.active .pad-note   { color: var(--accent); }
-.pad.root .pad-note     { color: var(--accent-hi); }
+.pad.root .pad-note     { color: var(--rust-hi); }
 
 .pad-degree           { font-size: 0.72rem; color: var(--accent-dim); }
-.pad.root .pad-degree { color: var(--accent); }
+.pad.root .pad-degree { color: var(--rust); }
 
 /* Notes mode chromatic strip */
 .chroma-strip {
@@ -361,17 +348,17 @@ select:focus { border-color: var(--accent); }
   transition: background 0.15s, border-color 0.15s;
 }
 
-.chroma-tile.inactive { background: var(--bg); opacity: 0.35; }
+.chroma-tile.inactive { background: transparent; border-color: transparent; opacity: 0.4; }
 .chroma-tile.active   { background: var(--raised); border-color: var(--accent-mid); }
-.chroma-tile.root     { background: var(--accent-bg); border-color: var(--accent); }
+.chroma-tile.root     { background: var(--rust-bg); border-color: var(--rust); }
 
 .tile-note { font-size: 1.1rem; font-weight: 700; line-height: 1; }
 .chroma-tile.inactive .tile-note { color: var(--text5); }
 .chroma-tile.active .tile-note   { color: var(--accent); }
-.chroma-tile.root .tile-note     { color: var(--accent-hi); }
+.chroma-tile.root .tile-note     { color: var(--rust-hi); }
 
 .tile-degree           { font-size: 0.65rem; color: var(--accent-dim); }
-.chroma-tile.root .tile-degree { color: var(--accent); }
+.chroma-tile.root .tile-degree { color: var(--rust); }
 
 /* Guitar neck */
 .guitar-neck-wrap {
@@ -420,13 +407,13 @@ select:focus { border-color: var(--accent); }
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--accent-lo);
+  background: var(--dot-scale);
   display: block;
 }
 
 .neck-dot.root {
-  background: var(--accent);
-  box-shadow: 0 0 4px var(--accent-glow);
+  background: var(--dot-root);
+  box-shadow: 0 0 5px var(--rust-glow);
 }
 
 .fret-numbers {
@@ -447,38 +434,6 @@ select:focus { border-color: var(--accent); }
   text-align: center;
 }
 
-/* Scale notes strip */
-.scale-notes {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.scale-label {
-  font-size: 0.75rem;
-  color: var(--text4);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-right: 0.25rem;
-}
-
-.scale-note {
-  padding: 0.25rem 0.6rem;
-  border-radius: 4px;
-  background: var(--raised);
-  border: 1px solid var(--border2);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text2);
-}
-
-.scale-note.root {
-  background: var(--accent-bg);
-  border-color: var(--accent);
-  color: var(--accent-hi);
-}
 
 @media (max-width: 600px) {
   .scale-viz {
@@ -530,8 +485,5 @@ select:focus { border-color: var(--accent); }
     white-space: nowrap;
   }
 
-  .scale-notes {
-    margin-top: 0.5rem;
-  }
 }
 </style>

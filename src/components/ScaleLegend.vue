@@ -39,7 +39,7 @@
   vertical-align: middle;
 }
 
-.legend-item.root::before   { background: var(--accent); }
+.legend-item.root::before   { background: var(--rust); }
 .legend-item.anchor::before { background: var(--accent-mid); }
 .legend-item.safe::before   { background: var(--border2); }
 

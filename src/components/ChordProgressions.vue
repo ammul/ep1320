@@ -726,7 +726,7 @@ select:focus { border-color: var(--accent); }
 .chord-name {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--rust);
   line-height: 1;
 }
 
