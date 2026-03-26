@@ -1,8 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { displayMode } from './displayMode.js'
-import { colorMode } from './colorMode.js'
-import { midiStatus } from './midiManager.js'
 import StartPage from './components/StartPage.vue'
 import ClavesMode from './components/ClavesMode.vue'
 import ScaleVisualizer from './components/ScaleVisualizer.vue'
@@ -10,8 +8,8 @@ import ChordProgressions from './components/ChordProgressions.vue'
 import ChordDetector from './components/ChordDetector.vue'
 import ProgressionBuilder from './components/ProgressionBuilder.vue'
 import JamMode from './components/JamMode.vue'
-import MidiControl from './components/MidiControl.vue'
 import LearnMode from './components/LearnMode.vue'
+import SettingsPage from './components/SettingsPage.vue'
 
 const allTabs = [
   { id: 'home',           label: 'Home',                component: StartPage },
@@ -22,6 +20,7 @@ const allTabs = [
   { id: 'chords',         label: 'Chord Progressions',  component: ChordProgressions },
   { id: 'chord-detector', label: 'Chord Detector',      component: ChordDetector },
   { id: 'prog-builder',   label: 'Progression Builder', component: ProgressionBuilder },
+  { id: 'settings',       label: 'Settings',            component: SettingsPage },
 ]
 
 const activeTab = ref('home')
@@ -54,31 +53,16 @@ function selectTab(id) {
           <h1 @click="selectTab('home')" class="home-link">Tonarium</h1>
         </div>
         <div class="header-controls">
-          <div class="display-mode-control">
-            <label class="mode-label">Display</label>
-            <select v-model="displayMode">
-              <option value="ep1320">EP-1320</option>
-              <option value="notes">Notes</option>
-              <option value="guitar">Guitar</option>
-              <option value="piano">Piano</option>
-            </select>
-          </div>
-          <button class="theme-btn" @click="colorMode = colorMode === 'dark' ? 'light' : 'dark'" :aria-label="colorMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
-            <svg v-if="colorMode === 'dark'" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="7.5" cy="7.5" r="3" fill="currentColor"/>
-              <path d="M7.5 1V2.5M7.5 12.5V14M1 7.5H2.5M12.5 7.5H14M2.9 2.9L3.96 3.96M11.04 11.04L12.1 12.1M12.1 2.9L11.04 3.96M3.96 11.04L2.9 12.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            </svg>
-            <svg v-else width="15" height="15" viewBox="0 0 15 15" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12.5 9A6 6 0 1 1 6 2.5a4.5 4.5 0 0 0 6.5 6.5z"/>
+          <button class="icon-btn" @click="selectTab('settings')" :class="{ active: activeTab === 'settings' }" aria-label="Settings">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+              <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.474l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
             </svg>
           </button>
           <button class="burger-btn" @click="menuOpen = true" aria-label="Open menu">
             <span></span><span></span><span></span>
           </button>
         </div>
-      </div>
-      <div v-if="midiStatus !== 'unsupported'" class="midi-row">
-        <MidiControl />
       </div>
     </header>
 
@@ -96,7 +80,7 @@ function selectTab(id) {
       </ul>
     </nav>
 
-    <main :class="{ 'midi-active': midiStatus !== 'unsupported' }">
+    <main>
       <component :is="activeComponent" @navigate="selectTab" />
     </main>
   </div>
@@ -154,43 +138,8 @@ h1 {
   flex-shrink: 0;
 }
 
-.display-mode-control {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.mode-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-@media (max-width: 480px) {
-  .mode-label {
-    display: none;
-  }
-}
-
-.display-mode-control select {
-  background: var(--input);
-  border: 1px solid var(--border2);
-  border-radius: 6px;
-  color: var(--text);
-  padding: 0.35rem 0.7rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  outline: none;
-}
-
-.display-mode-control select:focus {
-  border-color: var(--accent);
-}
-
-/* Theme toggle */
-.theme-btn {
+/* Settings / icon button */
+.icon-btn {
   width: 36px;
   height: 36px;
   background: transparent;
@@ -203,13 +152,11 @@ h1 {
   justify-content: center;
   color: var(--text3);
   flex-shrink: 0;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
-.theme-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
+.icon-btn:hover  { border-color: var(--accent); color: var(--accent); }
+.icon-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
 
 /* Burger button */
 .burger-btn {
@@ -238,30 +185,13 @@ h1 {
   border-color: var(--accent);
 }
 
-.midi-row {
-  display: flex;
-  align-items: center;
-  padding: 0.4rem 0;
-  border-top: 1px solid var(--border);
-  margin-top: 0.5rem;
-  overflow: hidden;
-  transition: max-height 0.2s ease, padding 0.2s ease, margin 0.2s ease;
-}
-
 main {
   padding-top: 4rem;
-}
-
-main.midi-active {
-  padding-top: 6.5rem;
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
   main {
     padding-top: 2.5rem;
-  }
-  main.midi-active {
-    padding-top: 4.5rem;
   }
 }
 
