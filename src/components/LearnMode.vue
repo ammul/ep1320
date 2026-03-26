@@ -1,151 +1,369 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { playNote, playChord } from '../audioEngine.js'
 
-const expanded = ref(null)
+const CHROMATIC = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+const IS_SHARP  = new Set([1,3,6,8,10])
 
-function toggle(id) {
-  expanded.value = expanded.value === id ? null : id
+const INTERVALS = [
+  { semi: 1,  name: 'Minor 2nd',   feel: 'Tense, dissonant' },
+  { semi: 2,  name: 'Major 2nd',   feel: 'Stepwise, melodic' },
+  { semi: 3,  name: 'Minor 3rd',   feel: 'Dark, minor feel' },
+  { semi: 4,  name: 'Major 3rd',   feel: 'Bright, major feel' },
+  { semi: 5,  name: 'Perfect 4th', feel: 'Open, stable' },
+  { semi: 6,  name: 'Tritone',     feel: 'Unstable, dramatic' },
+  { semi: 7,  name: 'Perfect 5th', feel: 'Strong, powerful' },
+  { semi: 8,  name: 'Minor 6th',   feel: 'Bittersweet' },
+  { semi: 9,  name: 'Major 6th',   feel: 'Warm, uplifting' },
+  { semi: 10, name: 'Minor 7th',   feel: 'Bluesy, unresolved' },
+  { semi: 11, name: 'Major 7th',   feel: 'Dreamy, tense' },
+]
+
+const SCALES = [
+  { name: 'Major',         steps: [0,2,4,5,7,9,11], feel: 'Bright and resolved' },
+  { name: 'Natural Minor', steps: [0,2,3,5,7,8,10], feel: 'Dark and emotional' },
+  { name: 'Minor Pent.',   steps: [0,3,5,7,10],      feel: '5 notes — easy to improvise over' },
+  { name: 'Major Pent.',   steps: [0,2,4,7,9],       feel: '5 notes — always sounds positive' },
+  { name: 'Dorian',        steps: [0,2,3,5,7,9,10],  feel: 'Soulful, funky minor' },
+  { name: 'Mixolydian',    steps: [0,2,4,5,7,9,10],  feel: 'Bluesy, rock feel' },
+]
+
+const MAJOR_SCALE = [0,2,4,5,7,9,11]
+const DIA_TYPES   = ['maj','min','min','maj','maj','min','dim']
+const ROMAN       = ['I','ii','iii','IV','V','vi','vii°']
+const CHORD_ITVS  = { maj:[0,4,7], min:[0,3,7], dim:[0,3,6] }
+
+const PROGS = [
+  { name:'I – V – vi – IV',  degIdx:[0,4,5,3], feel:'Pop anthem',  songs:'Let It Be · No Woman No Cry' },
+  { name:'I – IV – V',       degIdx:[0,3,4],   feel:'Blues / rock', songs:'Johnny B. Goode · Wild Thing' },
+  { name:'ii – V – I',       degIdx:[1,4,0],   feel:'Jazz',         songs:'Autumn Leaves · most standards' },
+  { name:'I – vi – IV – V',  degIdx:[0,5,3,4], feel:'50s doo-wop', songs:'Stand By Me · Blue Moon' },
+]
+
+const IMPROV = [
+  { chord:'Major chord',   color:'#c8a96e', scales:[
+    { name:'Major pentatonic', desc:'always safe' },
+    { name:'Major scale',      desc:'full palette' },
+    { name:'Mixolydian',       desc:'bluesy edge' },
+  ]},
+  { chord:'Minor chord',   color:'#8a7a9e', scales:[
+    { name:'Minor pentatonic', desc:'easy, no clashes' },
+    { name:'Natural minor',    desc:'dark and expressive' },
+    { name:'Dorian',           desc:'soulful minor' },
+  ]},
+  { chord:'Dominant 7th',  color:'#9e7a5a', scales:[
+    { name:'Mixolydian',       desc:'natural match' },
+    { name:'Blues scale',      desc:'gritty tension' },
+  ]},
+]
+
+const STEPS = ['Intervals', 'Scales', 'Progressions', 'Improvising']
+const step  = ref(0)
+
+// ── Step 1: Intervals ────────────────────────────────────────────────────────
+const fromIdx = ref(null)
+const toIdx   = ref(null)
+
+function pickNote(i) {
+  playNote(60 + i)
+  if (fromIdx.value === null) {
+    fromIdx.value = i
+  } else if (toIdx.value === null && i !== fromIdx.value) {
+    toIdx.value = i
+  } else {
+    fromIdx.value = i
+    toIdx.value   = null
+  }
 }
 
-const cards = [
-  {
-    id: 'intervals',
-    title: 'Intervals & Tone Steps',
-    teaser: 'How notes relate to each other — the building blocks of melody and harmony',
-    content: `
-      <p>An <strong>interval</strong> is the distance between two notes, measured in semitones (the smallest step on the EP-1320 or piano). Understanding intervals lets you build any scale, chord, or melody from first principles.</p>
+const intervalInfo = computed(() => {
+  if (fromIdx.value === null || toIdx.value === null) return null
+  const semi = ((toIdx.value - fromIdx.value) + 12) % 12
+  return INTERVALS.find(iv => iv.semi === semi) ?? null
+})
 
-      <p><strong>Half step</strong> (1 semitone) — the smallest interval, e.g. C to C#.<br>
-      <strong>Whole step</strong> (2 semitones) — e.g. C to D.</p>
+// ── Step 2: Scales ───────────────────────────────────────────────────────────
+const scaleRoot = ref(0)
+const scaleIdx  = ref(0)
 
-      <table>
-        <thead><tr><th>Semitones</th><th>Name</th><th>Example from C</th></tr></thead>
-        <tbody>
-          <tr><td>1</td><td>Minor 2nd</td><td>C → C#</td></tr>
-          <tr><td>2</td><td>Major 2nd</td><td>C → D</td></tr>
-          <tr><td>3</td><td>Minor 3rd</td><td>C → D#</td></tr>
-          <tr><td>4</td><td>Major 3rd</td><td>C → E</td></tr>
-          <tr><td>5</td><td>Perfect 4th</td><td>C → F</td></tr>
-          <tr><td>6</td><td>Tritone</td><td>C → F#</td></tr>
-          <tr><td>7</td><td>Perfect 5th</td><td>C → G</td></tr>
-          <tr><td>8</td><td>Minor 6th</td><td>C → G#</td></tr>
-          <tr><td>9</td><td>Major 6th</td><td>C → A</td></tr>
-          <tr><td>10</td><td>Minor 7th</td><td>C → A#</td></tr>
-          <tr><td>11</td><td>Major 7th</td><td>C → B</td></tr>
-          <tr><td>12</td><td>Octave</td><td>C → C</td></tr>
-        </tbody>
-      </table>
+const scaleNotes = computed(() =>
+  SCALES[scaleIdx.value].steps.map(s => (scaleRoot.value + s) % 12)
+)
 
-      <p>On the EP-1320, each pad is one semitone apart. Moving up one row increases pitch by 3 semitones (pads 1–12 map to a chromatic octave, low→high).</p>
-    `,
-  },
-  {
-    id: 'scales',
-    title: 'Scales',
-    teaser: 'Ordered sets of notes that give music its mood and colour',
-    content: `
-      <p>A <strong>scale</strong> is a selection of notes from the 12 available, arranged by pitch. The intervals between scale steps define whether a scale feels major (bright), minor (dark), or modal (somewhere between).</p>
+function pickScaleRoot(i) {
+  scaleRoot.value = i
+  playNote(60 + i)
+}
 
-      <p><strong>Major scale</strong> — whole, whole, half, whole, whole, whole, half (W W H W W W H). Bright and resolved. C major: C D E F G A B.</p>
+function playScale() {
+  const { steps } = SCALES[scaleIdx.value]
+  steps.forEach((s, i) =>
+    setTimeout(() => playNote(60 + scaleRoot.value + s, 0.5), i * 190)
+  )
+  setTimeout(() => playNote(72 + scaleRoot.value, 0.8), steps.length * 190)
+}
 
-      <p><strong>Natural minor</strong> — W H W W H W W. Dark and emotional. A minor: A B C D E F G.</p>
+// ── Step 3: Progressions ─────────────────────────────────────────────────────
+const progRoot   = ref(0)
+const activeProg = ref(null)
+let   _progTimers = []
 
-      <p><strong>Pentatonic scales</strong> remove two "tension" notes from the 7-note scale, leaving 5 notes that all work safely together. Great starting point for improvising.</p>
+function chordLabel(rootC, di) {
+  const semi = (rootC + MAJOR_SCALE[di]) % 12
+  const suf  = DIA_TYPES[di] === 'maj' ? '' : DIA_TYPES[di] === 'min' ? 'm' : '°'
+  return CHROMATIC[semi] + suf
+}
 
-      <table>
-        <thead><tr><th>Scale</th><th>Differs from major at</th><th>Character</th></tr></thead>
-        <tbody>
-          <tr><td>Major (Ionian)</td><td>—</td><td>Bright, resolved</td></tr>
-          <tr><td>Dorian</td><td>b3, b7</td><td>Soulful, funky minor</td></tr>
-          <tr><td>Phrygian</td><td>b2, b3, b6, b7</td><td>Dark, Spanish/flamenco</td></tr>
-          <tr><td>Lydian</td><td>#4</td><td>Dreamy, floating</td></tr>
-          <tr><td>Mixolydian</td><td>b7</td><td>Bluesy, rock</td></tr>
-          <tr><td>Natural Minor (Aeolian)</td><td>b3, b6, b7</td><td>Dark, emotional</td></tr>
-          <tr><td>Locrian</td><td>b2, b3, b5, b6, b7</td><td>Dissonant, unstable</td></tr>
-        </tbody>
-      </table>
+function chordMidis(rootC, di) {
+  const semi = (rootC + MAJOR_SCALE[di]) % 12
+  return CHORD_ITVS[DIA_TYPES[di]].map(i => 60 + semi + i)
+}
 
-      <p>Try scales in <strong>Jam Mode</strong> — pick a key and scale to see which pads are safe to play.</p>
-    `,
-  },
-  {
-    id: 'progressions',
-    title: 'Chord Progressions',
-    teaser: 'How chords move together — the backbone of most songs',
-    content: `
-      <p>A <strong>chord progression</strong> is a sequence of chords that repeat throughout a song. Chords are built from the notes of a scale, so a progression in C major uses chords made of C major scale notes.</p>
+function tapDiatonic(di) {
+  playChord(chordMidis(progRoot.value, di))
+}
 
-      <p>Chords are labelled with <strong>Roman numerals</strong> based on which scale degree they're built on. Uppercase = major, lowercase = minor.</p>
+function tapProg(pi) {
+  _progTimers.forEach(clearTimeout)
+  _progTimers = []
+  activeProg.value = activeProg.value === pi ? null : pi
+  if (activeProg.value === null) return
+  PROGS[pi].degIdx.forEach((deg, i) => {
+    _progTimers.push(
+      setTimeout(() => playChord(chordMidis(progRoot.value, deg), 0.9), i * 900)
+    )
+  })
+}
 
-      <p><strong>I – V – vi – IV</strong> (e.g. C – G – Am – F) is the most common pop progression. It underpins hundreds of songs because each chord naturally leads to the next.</p>
-
-      <table>
-        <thead><tr><th>Progression</th><th>Feel</th><th>Examples</th></tr></thead>
-        <tbody>
-          <tr><td>I – V – vi – IV</td><td>Pop / anthemic</td><td>Let It Be, No Woman No Cry</td></tr>
-          <tr><td>I – IV – V</td><td>Blues, rock</td><td>12-bar foundation</td></tr>
-          <tr><td>ii – V – I</td><td>Jazz resolution</td><td>Autumn Leaves, most jazz standards</td></tr>
-          <tr><td>i – VII – VI – VII</td><td>Andalusian, flamenco</td><td>Hit the Road Jack, Stairway intro</td></tr>
-          <tr><td>I – vi – IV – V</td><td>50s doo-wop</td><td>Stand By Me, Every Breath You Take</td></tr>
-        </tbody>
-      </table>
-
-      <p>Try these in the <strong>Chord Progressions</strong> tab — tap cards to preview chords, or loop the progression via MIDI.</p>
-    `,
-  },
-  {
-    id: 'improv',
-    title: 'Improvising',
-    teaser: 'How to solo confidently over any chord or progression',
-    content: `
-      <p>Improvising is about choosing notes that sound intentional over a chord or progression. The good news: a few simple rules cover 90% of situations.</p>
-
-      <p><strong>Start with the minor pentatonic.</strong> Five notes, no clashes — every note works over almost any minor chord or minor-key progression. In Jam Mode, pick your key and set the scale to "mi.p".</p>
-
-      <p><strong>Target chord tones.</strong> The root, 3rd, and 5th of each chord are the safest landing spots — they sound resolved when you hold them. Other scale notes work best as passing notes (moving through rather than landing on).</p>
-
-      <p><strong>Match scale to chord type:</strong></p>
-      <table>
-        <thead><tr><th>Chord type</th><th>Safe scale choice</th></tr></thead>
-        <tbody>
-          <tr><td>Major chord</td><td>Major pentatonic, major scale, Mixolydian</td></tr>
-          <tr><td>Minor chord</td><td>Minor pentatonic, natural minor, Dorian</td></tr>
-          <tr><td>Dominant 7th</td><td>Mixolydian, blues scale</td></tr>
-          <tr><td>Any chord in a major key</td><td>Major pentatonic (always safe)</td></tr>
-          <tr><td>Any chord in a minor key</td><td>Minor pentatonic (always safe)</td></tr>
-        </tbody>
-      </table>
-
-      <p><strong>On the EP-1320:</strong> in Claves Mode, the 12 pads are a chromatic octave from your root note. Use Jam Mode to see which pads belong to your chosen scale — lit pads are safe, anchor pads (slightly brighter) are the best landing spots.</p>
-
-      <p>Start with simple rhythmic patterns — one or two notes — before adding more pitches. Rhythm is more important than note choice when starting out.</p>
-    `,
-  },
-]
+const activeDegrees = computed(() =>
+  activeProg.value === null ? new Set() : new Set(PROGS[activeProg.value].degIdx)
+)
 </script>
 
 <template>
   <div class="learn-mode">
-    <div class="learn-header">
-      <h2>Learn</h2>
-      <p class="subtitle">music theory essentials — tap a card to expand</p>
+
+    <!-- Step navigation -->
+    <div class="step-nav">
+      <button
+        v-for="(s, i) in STEPS"
+        :key="i"
+        class="step-btn"
+        :class="{ active: step === i, done: step > i }"
+        @click="step = i"
+      >
+        <span class="step-num">{{ i + 1 }}</span>
+        <span class="step-label">{{ s }}</span>
+      </button>
     </div>
 
-    <div class="card-grid">
-      <div
-        v-for="card in cards"
-        :key="card.id"
-        class="card"
-        :class="{ expanded: expanded === card.id }"
-      >
-        <button class="card-header" @click="toggle(card.id)" :aria-expanded="expanded === card.id">
-          <span class="card-title">{{ card.title }}</span>
-          <span class="card-chevron" :class="{ open: expanded === card.id }">&#9660;</span>
-        </button>
-        <p class="card-teaser" v-if="expanded !== card.id">{{ card.teaser }}</p>
-        <div v-if="expanded === card.id" class="card-body" v-html="card.content"></div>
+    <!-- ── Step 1: Intervals ─────────────────────────────────────────────── -->
+    <div v-if="step === 0" class="step-content">
+      <p class="step-intro">Tap any two notes — hear the sound and see the <strong>interval</strong> between them.</p>
+
+      <div class="note-strip">
+        <button
+          v-for="(note, i) in CHROMATIC"
+          :key="i"
+          class="note-pill"
+          :class="{
+            sharp:  IS_SHARP.has(i),
+            from:   fromIdx === i,
+            to:     toIdx === i,
+          }"
+          @click="pickNote(i)"
+        >{{ note }}</button>
+      </div>
+
+      <div class="interval-result">
+        <template v-if="intervalInfo">
+          <div class="iv-name">{{ intervalInfo.name }}</div>
+          <div class="iv-semi">{{ intervalInfo.semi }} semitone{{ intervalInfo.semi !== 1 ? 's' : '' }}</div>
+          <div class="iv-feel">{{ intervalInfo.feel }}</div>
+          <div class="iv-path">
+            {{ CHROMATIC[fromIdx] }} → {{ CHROMATIC[toIdx] }}
+          </div>
+        </template>
+        <template v-else-if="fromIdx !== null">
+          <div class="iv-hint">Now pick a second note</div>
+          <div class="iv-hint-sub">{{ CHROMATIC[fromIdx] }} selected</div>
+        </template>
+        <template v-else>
+          <div class="iv-hint">Pick a starting note</div>
+        </template>
+      </div>
+
+      <div class="iv-reference">
+        <div class="ref-label">All intervals from root</div>
+        <div class="ref-grid">
+          <div v-for="iv in INTERVALS" :key="iv.semi" class="ref-item"
+            :class="{ highlight: intervalInfo && intervalInfo.semi === iv.semi }">
+            <span class="ref-semi">{{ iv.semi }}</span>
+            <span class="ref-name">{{ iv.name }}</span>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- ── Step 2: Scales ────────────────────────────────────────────────── -->
+    <div v-if="step === 1" class="step-content">
+      <p class="step-intro">A <strong>scale</strong> is a set of notes that all sound good together. Pick a root, choose a scale — hear which notes light up.</p>
+
+      <div class="picker-row">
+        <span class="picker-label">Root</span>
+        <div class="note-strip small">
+          <button
+            v-for="(note, i) in CHROMATIC"
+            :key="i"
+            class="note-pill"
+            :class="{ sharp: IS_SHARP.has(i), from: scaleRoot === i }"
+            @click="pickScaleRoot(i)"
+          >{{ note }}</button>
+        </div>
+      </div>
+
+      <div class="picker-row">
+        <span class="picker-label">Scale</span>
+        <div class="scale-tabs">
+          <button
+            v-for="(sc, si) in SCALES"
+            :key="si"
+            class="scale-tab"
+            :class="{ active: scaleIdx === si }"
+            @click="scaleIdx = si"
+          >{{ sc.name }}</button>
+        </div>
+      </div>
+
+      <div class="scale-display">
+        <div
+          v-for="(note, i) in CHROMATIC"
+          :key="i"
+          class="scale-tile"
+          :class="{
+            active: scaleNotes.includes(i),
+            root:   i === scaleRoot,
+            sharp:  IS_SHARP.has(i),
+          }"
+        >{{ note }}</div>
+      </div>
+
+      <div class="scale-meta">
+        <span class="scale-feel">{{ SCALES[scaleIdx].feel }}</span>
+        <button class="play-scale-btn" @click="playScale">Play scale</button>
+      </div>
+    </div>
+
+    <!-- ── Step 3: Progressions ──────────────────────────────────────────── -->
+    <div v-if="step === 2" class="step-content">
+      <p class="step-intro">Chords are labelled with <strong>Roman numerals</strong> based on the scale they come from. Tap any chord to hear it, or tap a progression to play it.</p>
+
+      <div class="picker-row">
+        <span class="picker-label">Key</span>
+        <div class="note-strip small">
+          <button
+            v-for="(note, i) in CHROMATIC"
+            :key="i"
+            class="note-pill"
+            :class="{ sharp: IS_SHARP.has(i), from: progRoot === i }"
+            @click="progRoot = i; activeProg = null"
+          >{{ note }}</button>
+        </div>
+      </div>
+
+      <div class="diatonic-row">
+        <button
+          v-for="(roman, di) in ROMAN"
+          :key="di"
+          class="diatonic-chord"
+          :class="{
+            maj:       DIA_TYPES[di] === 'maj',
+            min:       DIA_TYPES[di] === 'min',
+            dim:       DIA_TYPES[di] === 'dim',
+            highlight: activeDegrees.has(di),
+          }"
+          @click="tapDiatonic(di)"
+        >
+          <span class="dc-roman">{{ roman }}</span>
+          <span class="dc-name">{{ chordLabel(progRoot, di) }}</span>
+        </button>
+      </div>
+
+      <div class="prog-list">
+        <button
+          v-for="(prog, pi) in PROGS"
+          :key="pi"
+          class="prog-item"
+          :class="{ active: activeProg === pi }"
+          @click="tapProg(pi)"
+        >
+          <div class="prog-top">
+            <span class="prog-name">{{ prog.name }}</span>
+            <span class="prog-feel">{{ prog.feel }}</span>
+          </div>
+          <div v-if="activeProg === pi" class="prog-bottom">
+            <div class="prog-chords">
+              <span
+                v-for="deg in prog.degIdx"
+                :key="deg"
+                class="prog-chord-pill"
+                :class="DIA_TYPES[deg]"
+              >{{ chordLabel(progRoot, deg) }}</span>
+            </div>
+            <div class="prog-songs">{{ prog.songs }}</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Step 4: Improvising ───────────────────────────────────────────── -->
+    <div v-if="step === 3" class="step-content">
+      <p class="step-intro">Improvising is about choosing notes that sound <strong>intentional</strong>. The key: match your scale to the chord type.</p>
+
+      <div class="improv-grid">
+        <div
+          v-for="card in IMPROV"
+          :key="card.chord"
+          class="improv-card"
+          :style="{ '--card-color': card.color }"
+        >
+          <div class="ic-chord">{{ card.chord }}</div>
+          <div class="ic-scales">
+            <div v-for="sc in card.scales" :key="sc.name" class="ic-scale">
+              <span class="ic-name">{{ sc.name }}</span>
+              <span class="ic-desc">{{ sc.desc }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tips">
+        <div class="tip">
+          <span class="tip-num">1</span>
+          <span>Start with <strong>minor pentatonic</strong> — 5 notes, no clashes, works over almost anything minor.</span>
+        </div>
+        <div class="tip">
+          <span class="tip-num">2</span>
+          <span>Land on <strong>chord tones</strong> (root, 3rd, 5th) — they resolve. Other notes work best as passing notes.</span>
+        </div>
+        <div class="tip">
+          <span class="tip-num">3</span>
+          <span><strong>Rhythm beats note choice.</strong> One confident two-note groove sounds better than a hundred random pitches.</span>
+        </div>
+      </div>
+
+      <div class="improv-cta">
+        Try it in <strong>Jam Mode</strong> — pick a key and scale to see safe pads highlighted.
+      </div>
+    </div>
+
+    <!-- Step footer -->
+    <div class="step-footer">
+      <button class="nav-btn" @click="step--" :disabled="step === 0">← Back</button>
+      <span class="step-counter">{{ step + 1 }} / {{ STEPS.length }}</span>
+      <button class="nav-btn" @click="step++" :disabled="step === STEPS.length - 1">Next →</button>
+    </div>
+
   </div>
 </template>
 
@@ -154,166 +372,654 @@ const cards = [
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 2rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.learn-header h2 {
-  font-size: 1.4rem;
-  color: var(--accent);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+/* ── Step navigation ──────────────────────────────────────────────────────── */
+.step-nav {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
-.subtitle {
-  margin-top: 0.3rem;
-  font-size: 0.85rem;
-  color: var(--text3);
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-@media (max-width: 600px) {
-  .card-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.card {
-  background: var(--raised);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  overflow: hidden;
-  transition: border-color 0.15s;
-}
-
-.card.expanded {
-  border-color: var(--accent-mid);
-  grid-column: 1 / -1;
-}
-
-.card-header {
-  width: 100%;
+.step-btn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.9rem 1rem;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
   background: transparent;
-  border: none;
+  color: var(--text3);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
-  text-align: left;
-}
-
-.card-header:hover {
-  background: var(--hover);
-}
-
-.card-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--accent);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
   letter-spacing: 0.03em;
 }
 
-.card-chevron {
-  font-size: 0.65rem;
-  color: var(--text4);
-  flex-shrink: 0;
-  transition: transform 0.2s;
-  display: inline-block;
+.step-btn:hover {
+  border-color: var(--accent-mid);
+  color: var(--text2);
 }
 
-.card-chevron.open {
-  transform: rotate(180deg);
+.step-btn.active {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
-.card-teaser {
-  padding: 0 1rem 0.9rem;
-  margin: 0;
-  font-size: 0.82rem;
+.step-btn.done {
+  color: var(--accent-mid);
+  border-color: var(--border2);
+}
+
+.step-num {
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: var(--border2);
   color: var(--text3);
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-btn.active .step-num {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.step-btn.done .step-num {
+  background: var(--accent-mid);
+  color: var(--bg);
+}
+
+/* ── Step content ─────────────────────────────────────────────────────────── */
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-intro {
+  font-size: 0.87rem;
+  color: var(--text2);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.step-intro strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Note strip ───────────────────────────────────────────────────────────── */
+.note-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.note-pill {
+  padding: 0.45rem 0.55rem;
+  min-width: 2.4rem;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--raised);
+  color: var(--accent);
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.1s, border-color 0.1s, transform 0.07s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.note-pill:hover { background: var(--border); }
+.note-pill:active { transform: scale(0.93); }
+.note-pill.sharp { background: var(--input); color: var(--accent-lo); font-size: 0.8rem; }
+.note-pill.sharp:hover { background: var(--border3); }
+
+.note-pill.from {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+.note-pill.to {
+  background: var(--selected);
+  border-color: var(--accent);
+  color: var(--accent-hi);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
+/* ── Interval result ──────────────────────────────────────────────────────── */
+.interval-result {
+  min-height: 7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 1rem;
+  background: var(--raised);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+}
+
+.iv-name {
+  font-size: clamp(1.5rem, 6vw, 2.2rem);
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.iv-semi {
+  font-size: 0.82rem;
+  color: var(--accent-mid);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.iv-feel {
+  font-size: 0.88rem;
+  color: var(--text2);
+}
+
+.iv-path {
+  font-size: 0.78rem;
+  color: var(--text4);
+  margin-top: 0.2rem;
+  letter-spacing: 0.05em;
+}
+
+.iv-hint {
+  font-size: 1rem;
+  color: var(--text3);
+  font-weight: 600;
+}
+
+.iv-hint-sub {
+  font-size: 0.82rem;
+  color: var(--accent-mid);
+}
+
+/* ── Interval reference ───────────────────────────────────────────────────── */
+.iv-reference {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ref-label {
+  font-size: 0.72rem;
+  color: var(--text4);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 600;
+}
+
+.ref-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.ref-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  font-size: 0.75rem;
+  transition: border-color 0.15s;
+}
+
+.ref-item.highlight {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.ref-semi {
+  color: var(--accent-mid);
+  font-weight: 700;
+  font-size: 0.7rem;
+  min-width: 0.8rem;
+}
+
+.ref-name {
+  color: var(--text3);
+}
+
+.ref-item.highlight .ref-semi { color: var(--accent); }
+.ref-item.highlight .ref-name { color: var(--text2); }
+
+/* ── Picker row ───────────────────────────────────────────────────────────── */
+.picker-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.picker-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding-top: 0.5rem;
+  flex-shrink: 0;
+  min-width: 2.5rem;
+}
+
+/* ── Scale tabs ───────────────────────────────────────────────────────────── */
+.scale-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.scale-tab {
+  padding: 0.35rem 0.7rem;
+  border-radius: 5px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text3);
+  font-size: 0.8rem;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.scale-tab:hover { background: var(--raised); color: var(--text2); }
+.scale-tab.active {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Scale display ────────────────────────────────────────────────────────── */
+.scale-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.scale-tile {
+  min-width: 2.8rem;
+  padding: 0.6rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text5);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  user-select: none;
+}
+
+.scale-tile.active {
+  background: var(--raised);
+  border-color: var(--border2);
+  color: var(--text2);
+}
+
+.scale-tile.root {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+.scale-tile.sharp { font-size: 0.75rem; }
+.scale-tile.active.sharp { color: var(--text3); }
+.scale-tile.root.sharp { color: var(--accent); font-size: 0.82rem; }
+
+.scale-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.scale-feel {
+  font-size: 0.85rem;
+  color: var(--text3);
+  flex: 1;
+}
+
+.play-scale-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--accent-mid);
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.play-scale-btn:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
+/* ── Diatonic row ─────────────────────────────────────────────────────────── */
+.diatonic-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.diatonic-chord {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.55rem 0.5rem;
+  min-width: 3.2rem;
+  border-radius: 7px;
+  border: 1px solid var(--border2);
+  background: var(--raised);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s, border-color 0.12s, transform 0.08s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.diatonic-chord:hover { background: var(--border); }
+.diatonic-chord:active { transform: scale(0.94); }
+
+.diatonic-chord.highlight {
+  background: var(--selected);
+  border-color: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
+.diatonic-chord.min { border-color: var(--border); }
+.diatonic-chord.dim { opacity: 0.7; }
+
+.dc-roman {
+  font-size: 0.68rem;
+  color: var(--text4);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.dc-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.diatonic-chord.min .dc-name { color: var(--accent-lo); }
+.diatonic-chord.dim .dc-name { color: var(--text3); }
+.diatonic-chord.highlight .dc-roman { color: var(--accent-mid); }
+.diatonic-chord.highlight .dc-name { color: var(--accent-hi); }
+
+/* ── Progression list ─────────────────────────────────────────────────────── */
+.prog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.prog-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--raised);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.12s, background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.prog-item:hover { background: var(--border); }
+
+.prog-item.active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.prog-top {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.prog-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+
+.prog-feel {
+  font-size: 0.78rem;
+  color: var(--text4);
+}
+
+.prog-bottom {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.prog-chords {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.prog-chord-pill {
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: var(--input);
+  color: var(--accent);
+  border: 1px solid var(--border2);
+}
+
+.prog-chord-pill.min { color: var(--accent-lo); }
+.prog-chord-pill.dim { color: var(--text3); }
+
+.prog-songs {
+  font-size: 0.76rem;
+  color: var(--text4);
+  letter-spacing: 0.02em;
+}
+
+/* ── Improv grid ──────────────────────────────────────────────────────────── */
+.improv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.improv-card {
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--raised);
+  overflow: hidden;
+}
+
+.ic-chord {
+  padding: 0.55rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--card-color);
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.03em;
+}
+
+.ic-scales {
+  padding: 0.5rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ic-scale {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.ic-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+.ic-desc {
+  font-size: 0.7rem;
+  color: var(--text4);
+}
+
+/* ── Tips ─────────────────────────────────────────────────────────────────── */
+.tips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.85rem;
+  color: var(--text2);
   line-height: 1.5;
 }
 
-.card-body {
-  padding: 0 1rem 1rem;
-  font-size: 0.85rem;
-  color: var(--text2);
-  line-height: 1.65;
-}
+.tip strong { color: var(--accent); font-weight: 600; }
 
-.card-body :deep(p) {
-  margin: 0 0 0.85rem;
-}
-
-.card-body :deep(p:last-child) {
-  margin-bottom: 0;
-}
-
-.card-body :deep(strong) {
+.tip-num {
+  flex-shrink: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-mid);
   color: var(--accent);
-  font-weight: 600;
-}
-
-.card-body :deep(table) {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 0.75rem 0;
-  font-size: 0.8rem;
-}
-
-.card-body :deep(th) {
-  text-align: left;
-  padding: 0.35rem 0.6rem;
-  background: var(--input);
-  color: var(--accent);
-  font-weight: 600;
   font-size: 0.72rem;
-  text-transform: uppercase;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1rem;
+}
+
+.improv-cta {
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  border: 1px dashed var(--border2);
+  font-size: 0.83rem;
+  color: var(--text3);
+  text-align: center;
+}
+
+.improv-cta strong { color: var(--accent); }
+
+/* ── Step footer ──────────────────────────────────────────────────────────── */
+.step-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.nav-btn {
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text3);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.nav-btn:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent-mid);
+  background: var(--accent-bg);
+}
+
+.nav-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.step-counter {
+  font-size: 0.78rem;
+  color: var(--text4);
   letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border2);
 }
 
-.card-body :deep(td) {
-  padding: 0.35rem 0.6rem;
-  color: var(--text2);
-  border-bottom: 1px solid var(--border);
-}
-
-.card-body :deep(tr:last-child td) {
-  border-bottom: none;
-}
-
-.card-body :deep(tr:nth-child(even) td) {
-  background: var(--input);
-}
-
+/* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .learn-mode {
-    padding: 1.25rem 1rem;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .improv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .diatonic-row {
+    gap: 0.3rem;
+  }
+
+  .diatonic-chord {
+    min-width: 2.6rem;
+    padding: 0.45rem 0.35rem;
   }
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
   .learn-mode {
     padding: 0.75rem 1rem;
+    gap: 0.75rem;
   }
 
-  .learn-header h2 {
-    font-size: 1.1rem;
-  }
-
-  .subtitle {
+  .step-label {
     display: none;
   }
 
-  .card-grid {
-    margin-top: 0.75rem;
+  .improv-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 </style>

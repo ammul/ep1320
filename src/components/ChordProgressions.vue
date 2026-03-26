@@ -6,6 +6,7 @@ import { buildRows } from '../musicUtils.js'
 import ChordCardBody from './ChordCardBody.vue'
 import RootNotePicker from './RootNotePicker.vue'
 import { midiStatus, midiChannel, chordOn, chordOff } from '../midiManager.js'
+import { startNote, stopNote, stopAllNotes, playNote } from '../audioEngine.js'
 
 const GENRES = [
   { id: 'all',       label: 'All' },
@@ -394,11 +395,14 @@ function cardMidis(card) {
 
 function previewChord(card) {
   chordOff(_currentMidis)
+  _currentMidis.forEach(m => stopNote(m))
   _currentMidis = cardMidis(card)
   chordOn(_currentMidis)
+  _currentMidis.forEach(m => startNote(m))
 }
 function stopPreview(card) {
   chordOff(cardMidis(card))
+  cardMidis(card).forEach(m => stopNote(m))
 }
 
 function playLoop() {
@@ -406,9 +410,12 @@ function playLoop() {
   let idx = 0
   const advance = () => {
     chordOff(_currentMidis)
+    _currentMidis.forEach(m => stopNote(m))
     loopActiveIdx.value = idx
     _currentMidis = cardMidis(chordCards.value[idx])
     chordOn(_currentMidis)
+    const beatSec = Math.max(0.1, (60 / bpm.value) * beatsPerChord.value - 0.05)
+    _currentMidis.forEach(m => playNote(m, beatSec))
     idx = (idx + 1) % chordCards.value.length
   }
   advance()
@@ -421,6 +428,7 @@ function stopLoop() {
   _loopTimer = null
   loopPlaying.value = false
   chordOff(_currentMidis)
+  stopAllNotes()
   _currentMidis = []
   loopActiveIdx.value = null
 }
@@ -510,10 +518,10 @@ watch([selectedId, selectedRoot], stopLoop)
         :key="card.idx"
         class="chord-card"
         :class="{ 'piano-mode': displayMode === 'piano', active: loopActiveIdx === card.idx }"
-        @pointerdown="midiStatus === 'connected' && previewChord(card)"
-        @pointerup="midiStatus === 'connected' && stopPreview(card)"
-        @pointerleave="midiStatus === 'connected' && stopPreview(card)"
-        @pointercancel="midiStatus === 'connected' && stopPreview(card)"
+        @pointerdown="previewChord(card)"
+        @pointerup="stopPreview(card)"
+        @pointerleave="stopPreview(card)"
+        @pointercancel="stopPreview(card)"
       >
         <div class="chord-info">
           <div class="chord-numeral">{{ card.numeral }}</div>

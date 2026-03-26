@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { NOTES, LABELS, SHARPS, NOTE_TO_SEMI } from '../musicConstants.js'
 import { sliceRows } from '../musicUtils.js'
 import { noteOn, noteOff, activeInputNotes } from '../midiManager.js'
+import { startNote, stopNote } from '../audioEngine.js'
 
 const octave = ref(4)
 const rootIndex = ref(3) // index into NOTES (3 = C), matches EP-1320 group A (MIDI 36–47)
@@ -27,11 +28,13 @@ const activePads = ref(new Set())
 function onDown(midi) {
   activePads.value = new Set([...activePads.value, midi])
   noteOn(midi)
+  startNote(midi)
 }
 function onUp(midi) {
   const s = new Set(activePads.value); s.delete(midi)
   activePads.value = s
   noteOff(midi)
+  stopNote(midi)
 }
 
 // Numpad layout (top→bottom): 7 8 9 / 4 5 6 / 1 2 3 / . 0 i

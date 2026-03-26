@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { displayMode } from '../displayMode.js'
 import { NOTES, LABELS, SHARPS, NOTE_TO_SEMI, SEMI_TO_NAME, CHORD_DETECT_TYPES, FRET_COUNT } from '../musicConstants.js'
+import { playNote } from '../audioEngine.js'
 import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
 import PianoOctave from './PianoOctave.vue'
 import ModeLayout from './ModeLayout.vue'
@@ -41,7 +42,12 @@ const pianoOctave = ref(4)
 
 function toggleNote(noteIndex) {
   const next = new Set(selected.value)
-  next.has(noteIndex) ? next.delete(noteIndex) : next.add(noteIndex)
+  if (next.has(noteIndex)) {
+    next.delete(noteIndex)
+  } else {
+    next.add(noteIndex)
+    playNote(60 + NOTE_TO_SEMI[noteIndex])
+  }
   selected.value = next
 }
 
