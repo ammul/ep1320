@@ -47,6 +47,9 @@
   --error-text: #c07050;
   --error-text2: #a07050;
 
+  --midi-ok: #5cb85c;
+  --midi-err: #d9534f;
+
   --overlay: rgba(0, 0, 0, 0.6);
   --accent-glow: rgba(212, 184, 76, 0.28);
 

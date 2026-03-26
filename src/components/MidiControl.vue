@@ -68,8 +68,8 @@ const selectedDevice = computed({
   flex-shrink: 0;
 }
 
-.midi-dot.connected { background: #5cb85c; }
-.midi-dot.error     { background: #d9534f; }
+.midi-dot.connected { background: var(--midi-ok); }
+.midi-dot.error     { background: var(--midi-err); }
 
 .midi-name {
   font-size: 0.78rem;

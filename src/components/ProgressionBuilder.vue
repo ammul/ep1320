@@ -21,16 +21,18 @@ function parseToken(token) {
   const noteIndex = NOTES.indexOf(note)
   if (noteIndex === -1) return null
 
-  let type
-  if      (suffix === '' || suffix === 'maj')          type = 'maj'
-  else if (suffix === 'm' || suffix === 'min')         type = 'min'
-  else if (suffix === 'm7' || suffix === 'min7')       type = 'min7'
-  else if (suffix === 'maj7')                          type = 'maj7'
-  else if (suffix === '7')                             type = 'dom7'
-  else if (suffix === 'dim' || suffix === '°')         type = 'dim'
-  else if (suffix === 'aug' || suffix === '+')         type = 'aug'
-  else if (suffix === 'sus4')                          type = 'sus4'
-  else return null
+  const SUFFIX_MAP = {
+    '': 'maj', 'maj': 'maj',
+    'm': 'min', 'min': 'min',
+    'm7': 'min7', 'min7': 'min7',
+    'maj7': 'maj7',
+    '7': 'dom7',
+    'dim': 'dim', '°': 'dim',
+    'aug': 'aug', '+': 'aug',
+    'sus4': 'sus4',
+  }
+  const type = SUFFIX_MAP[suffix]
+  if (!type) return null
 
   return { noteIndex, note, type }
 }

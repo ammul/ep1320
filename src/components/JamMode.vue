@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { displayMode } from '../displayMode.js'
-import { NOTES, LABELS, SHARPS, OPEN_STRINGS, STRING_NAMES, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
+import { NOTES, LABELS, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
 import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
 import { activeInputNotes } from '../midiManager.js'
 import PianoOctave from './PianoOctave.vue'
@@ -55,6 +55,9 @@ const selectedRoot   = ref('A')
 const selectedScaleId = ref('mi.p')
 const showInfo       = ref(false)
 const pianoOctave    = ref(4)
+
+const SUBTITLE = { ep1320: 'lit pads', notes: 'highlighted notes', guitar: 'highlighted frets', piano: 'highlighted keys' }
+const subtitle = computed(() => `pick a key and scale — ${SUBTITLE[displayMode.value] ?? 'highlighted items'} are safe to play`)
 
 const selectedScale = computed(() => SCALES.find(s => s.id === selectedScaleId.value))
 const rootIndex     = computed(() => NOTES.indexOf(selectedRoot.value))
@@ -128,10 +131,7 @@ const scaleNotes = computed(() =>
   <div class="jam-mode">
     <div class="jam-header">
       <h2>Jam Mode</h2>
-      <p class="subtitle" v-if="displayMode === 'ep1320'">pick a key and scale — lit pads are safe to play</p>
-      <p class="subtitle" v-else-if="displayMode === 'notes'">pick a key and scale — highlighted notes are safe to play</p>
-      <p class="subtitle" v-else-if="displayMode === 'guitar'">pick a key and scale — highlighted frets are safe to play</p>
-      <p class="subtitle" v-else>pick a key and scale — highlighted keys are safe to play</p>
+      <p class="subtitle">{{ subtitle }}</p>
     </div>
 
     <div class="controls">
