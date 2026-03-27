@@ -1,7 +1,10 @@
 <script setup>
 import { computed } from 'vue'
+
+const emit = defineEmits(['close'])
 import { displayMode } from '../displayMode.js'
 import { colorMode } from '../colorMode.js'
+import { soundEnabled } from '../soundEnabled.js'
 import { midiStatus, midiOutputs, selectedOutputId, initMidi, disconnectMidi } from '../midiManager.js'
 
 const DISPLAY_OPTIONS = [
@@ -27,6 +30,7 @@ const selectedDevice = computed({
   <div class="settings-page">
     <div class="settings-header">
       <h2>Settings</h2>
+      <button class="close-btn" @click="emit('close')" aria-label="Close settings">&#x2715;</button>
     </div>
 
     <section class="settings-section">
@@ -42,6 +46,15 @@ const selectedDevice = computed({
         >{{ opt.label }}</button>
       </div>
       <p class="option-desc">{{ selectedDesc }}</p>
+    </section>
+
+    <section class="settings-section">
+      <h3>Audio</h3>
+      <p class="section-desc">Play sound when tapping notes, chords, and pads.</p>
+      <div class="option-group">
+        <button class="option-btn" :class="{ active: soundEnabled }" @click="soundEnabled = true">On</button>
+        <button class="option-btn" :class="{ active: !soundEnabled }" @click="soundEnabled = false">Off</button>
+      </div>
     </section>
 
     <section class="settings-section">
@@ -95,13 +108,38 @@ const selectedDevice = computed({
   max-width: 480px;
 }
 
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+}
+
 .settings-header h2 {
   font-size: 1.4rem;
   color: var(--accent);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  margin-bottom: 1.75rem;
 }
+
+.close-btn {
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text3);
+  font-size: 1rem;
+  line-height: 1;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.12s, color 0.12s;
+}
+
+.close-btn:hover { border-color: var(--accent); color: var(--text); }
 
 .settings-section {
   padding: 1.25rem 0;

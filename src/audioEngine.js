@@ -1,4 +1,5 @@
 import { midiStatus } from './midiManager.js'
+import { soundEnabled } from './soundEnabled.js'
 
 let _ctx = null
 let _compressor = null
@@ -25,7 +26,7 @@ function midiToFreq(note) {
 }
 
 export function startNote(midiNote) {
-  if (midiStatus.value === 'connected') return 0
+  if (!soundEnabled.value || midiStatus.value === 'connected') return 0
   stopNote(midiNote)
 
   const ctx = getCtx()
@@ -81,12 +82,12 @@ export function stopAllNotes() {
 }
 
 export function playNote(midiNote, duration = 1.4) {
-  if (midiStatus.value === 'connected') return
+  if (!soundEnabled.value || midiStatus.value === 'connected') return
   const gen = startNote(midiNote)
   if (gen) setTimeout(() => stopNote(midiNote, gen), Math.round(duration * 1000))
 }
 
 export function playChord(midiNotes, duration = 1.8) {
-  if (midiStatus.value === 'connected') return
+  if (!soundEnabled.value || midiStatus.value === 'connected') return
   midiNotes.forEach(n => playNote(n, duration))
 }

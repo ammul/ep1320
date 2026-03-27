@@ -115,7 +115,7 @@ const chord = computed(() => detectChord([...selected.value]))
                   :key="pad.index"
                   class="pad"
                   :class="{ sharp: pad.isSharp, selected: pad.isSelected }"
-                  @click="toggleNote(pad.index)"
+                  @pointerdown="toggleNote(pad.index)"
                 >
                   <span class="pad-label">{{ pad.label }}</span>
                   <span class="pad-note">{{ pad.note }}</span>
@@ -131,7 +131,7 @@ const chord = computed(() => detectChord([...selected.value]))
                 :key="btn.index"
                 class="note-btn"
                 :class="{ sharp: btn.isSharp, selected: btn.isSelected }"
-                @click="toggleNote(btn.index)"
+                @pointerdown="toggleNote(btn.index)"
               >
                 {{ btn.note }}
               </button>
@@ -161,7 +161,7 @@ const chord = computed(() => detectChord([...selected.value]))
                       sharp: cell.isSharp,
                       open: cell.isOpen,
                     }"
-                    @click="toggleNote(cell.noteIdx)"
+                    @pointerdown="toggleNote(cell.noteIdx)"
                   >
                     <span v-if="cell.isSelected" class="neck-dot"></span>
                     <span v-else class="neck-note">{{ cell.note }}</span>

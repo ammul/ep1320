@@ -171,7 +171,7 @@ const activeDegrees = computed(() =>
             from:   fromIdx === i,
             to:     toIdx === i,
           }"
-          @click="pickNote(i)"
+          @pointerdown="pickNote(i)"
         >{{ note }}</button>
       </div>
 
@@ -217,7 +217,7 @@ const activeDegrees = computed(() =>
             :key="i"
             class="note-pill"
             :class="{ sharp: IS_SHARP.has(i), from: scaleRoot === i }"
-            @click="pickScaleRoot(i)"
+            @pointerdown="pickScaleRoot(i)"
           >{{ note }}</button>
         </div>
       </div>
@@ -282,7 +282,7 @@ const activeDegrees = computed(() =>
             dim:       DIA_TYPES[di] === 'dim',
             highlight: activeDegrees.has(di),
           }"
-          @click="tapDiatonic(di)"
+          @pointerdown="tapDiatonic(di)"
         >
           <span class="dc-roman">{{ roman }}</span>
           <span class="dc-name">{{ chordLabel(progRoot, di) }}</span>
