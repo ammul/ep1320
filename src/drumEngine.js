@@ -178,7 +178,7 @@ export function pause() {
 }
 
 export function clearPattern() {
-  pattern.value = Array.from({ length: 8 }, () => new Array(8).fill(false))
+  pattern.value = Array.from({ length: 8 }, () => new Array(16).fill(false))
 }
 
 export function toggleCell(inst, step) {
