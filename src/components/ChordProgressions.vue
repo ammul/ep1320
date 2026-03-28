@@ -518,7 +518,7 @@ watch([selectedId, selectedRoot], stopLoop)
         :key="card.idx"
         class="chord-card"
         :class="{ 'piano-mode': displayMode === 'piano', active: loopActiveIdx === card.idx }"
-        @pointerdown="previewChord(card)"
+        @pointerdown.prevent="previewChord(card)"
         @pointerup="stopPreview(card)"
         @pointerleave="stopPreview(card)"
         @pointercancel="stopPreview(card)"
@@ -799,6 +799,8 @@ watch([selectedId, selectedRoot], stopLoop)
   border-radius: 8px;
   padding: 0.75rem 0.6rem;
   cursor: default;
+  user-select: none;
+  touch-action: none;
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
   display: flex;
   flex-direction: column;

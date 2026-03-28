@@ -115,7 +115,7 @@ const chord = computed(() => detectChord([...selected.value]))
                   :key="pad.index"
                   class="pad"
                   :class="{ sharp: pad.isSharp, selected: pad.isSelected }"
-                  @pointerdown="toggleNote(pad.index)"
+                  @pointerdown.prevent="toggleNote(pad.index)"
                 >
                   <span class="pad-label">{{ pad.label }}</span>
                   <span class="pad-note">{{ pad.note }}</span>
@@ -131,7 +131,7 @@ const chord = computed(() => detectChord([...selected.value]))
                 :key="btn.index"
                 class="note-btn"
                 :class="{ sharp: btn.isSharp, selected: btn.isSelected }"
-                @pointerdown="toggleNote(btn.index)"
+                @pointerdown.prevent="toggleNote(btn.index)"
               >
                 {{ btn.note }}
               </button>
@@ -161,7 +161,7 @@ const chord = computed(() => detectChord([...selected.value]))
                       sharp: cell.isSharp,
                       open: cell.isOpen,
                     }"
-                    @pointerdown="toggleNote(cell.noteIdx)"
+                    @pointerdown.prevent="toggleNote(cell.noteIdx)"
                   >
                     <span v-if="cell.isSelected" class="neck-dot"></span>
                     <span v-else class="neck-note">{{ cell.note }}</span>
@@ -251,6 +251,8 @@ const chord = computed(() => detectChord([...selected.value]))
   background: var(--raised);
   cursor: pointer;
   aspect-ratio: 1;
+  user-select: none;
+  touch-action: none;
   transition: background 0.1s, border-color 0.1s, transform 0.08s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -287,6 +289,8 @@ const chord = computed(() => detectChord([...selected.value]))
   cursor: pointer;
   min-width: 3rem;
   text-align: center;
+  user-select: none;
+  touch-action: none;
   transition: background 0.1s, border-color 0.1s, transform 0.08s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -338,6 +342,8 @@ const chord = computed(() => detectChord([...selected.value]))
   border: none;
   background: var(--input);
   cursor: pointer;
+  user-select: none;
+  touch-action: none;
   position: relative;
   transition: background 0.1s;
   border-right: 1px solid var(--border3);

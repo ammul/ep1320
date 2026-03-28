@@ -54,7 +54,7 @@ function onToggle(noteIdx) {
         :key="key.noteIdx"
         class="white-key"
         :class="{ active: key.isActive, root: key.isRoot }"
-        @pointerdown="onToggle(key.noteIdx)"
+        @pointerdown.prevent="onToggle(key.noteIdx)"
       >
         <span class="key-label">{{ key.note }}</span>
       </button>
@@ -65,7 +65,7 @@ function onToggle(noteIdx) {
         class="black-key"
         :class="{ active: key.isActive, root: key.isRoot }"
         :style="key.style"
-        @pointerdown.stop="onToggle(key.noteIdx)"
+        @pointerdown.stop.prevent="onToggle(key.noteIdx)"
       >
         <span class="key-label">{{ key.note }}</span>
       </button>
@@ -130,6 +130,7 @@ function onToggle(noteIdx) {
   height: 120px;
   max-width: 420px;
   user-select: none;
+  touch-action: none;
 }
 
 /* White keys */

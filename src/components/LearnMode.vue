@@ -210,7 +210,7 @@ const activeDegrees = computed(() =>
             from:   fromIdx === i,
             to:     toIdx === i,
           }"
-          @pointerdown="pickNote(i)"
+          @pointerdown.prevent="pickNote(i)"
         >{{ note }}</button>
       </div>
 
@@ -256,7 +256,7 @@ const activeDegrees = computed(() =>
             :key="i"
             class="note-pill"
             :class="{ sharp: IS_SHARP.has(i), from: scaleRoot === i }"
-            @pointerdown="pickScaleRoot(i)"
+            @pointerdown.prevent="pickScaleRoot(i)"
           >{{ note }}</button>
         </div>
       </div>
@@ -321,7 +321,7 @@ const activeDegrees = computed(() =>
             dim:       DIA_TYPES[di] === 'dim',
             highlight: activeDegrees.has(di),
           }"
-          @pointerdown="tapDiatonic(di)"
+          @pointerdown.prevent="tapDiatonic(di)"
         >
           <span class="dc-roman">{{ roman }}</span>
           <span class="dc-name">{{ chordLabel(progRoot, di) }}</span>
@@ -562,6 +562,8 @@ const activeDegrees = computed(() =>
   font-family: inherit;
   cursor: pointer;
   text-align: center;
+  user-select: none;
+  touch-action: none;
   transition: background 0.1s, border-color 0.1s, transform 0.07s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -823,6 +825,8 @@ const activeDegrees = computed(() =>
   background: var(--raised);
   cursor: pointer;
   font-family: inherit;
+  user-select: none;
+  touch-action: none;
   transition: background 0.12s, border-color 0.12s, transform 0.08s;
   -webkit-tap-highlight-color: transparent;
 }
