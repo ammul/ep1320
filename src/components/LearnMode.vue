@@ -284,6 +284,7 @@ const activeDegrees = computed(() =>
             root:   i === scaleRoot,
             sharp:  IS_SHARP.has(i),
           }"
+          @pointerdown.prevent="playNote(60 + i)"
         >{{ note }}</div>
       </div>
 
@@ -305,7 +306,7 @@ const activeDegrees = computed(() =>
             :key="i"
             class="note-pill"
             :class="{ sharp: IS_SHARP.has(i), from: progRoot === i }"
-            @click="progRoot = i; activeProg = null"
+            @pointerdown.prevent="progRoot = i; activeProg = null; playNote(60 + i)"
           >{{ note }}</button>
         </div>
       </div>
@@ -754,6 +755,8 @@ const activeDegrees = computed(() =>
   text-align: center;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
   user-select: none;
+  touch-action: none;
+  cursor: pointer;
 }
 
 .scale-tile.active {
