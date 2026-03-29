@@ -1,9 +1,9 @@
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 import { displayMode } from '../displayMode.js'
-import { NOTES, LABELS, SHARPS, OPEN_STRINGS, STRING_NAMES, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
+import { NOTES, LABELS, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
 import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
-import { startNote, stopNote } from '../audioEngine.js'
+import { useNotePlayback } from '../composables/useNotePlayback.js'
 import PianoOctave from './PianoOctave.vue'
 import RootNotePicker from './RootNotePicker.vue'
 import ModeLayout from './ModeLayout.vue'
@@ -77,56 +77,19 @@ const guitarNeck = computed(() =>
 )
 
 const STRING_BASE_MIDI = [40, 45, 50, 55, 59, 64]
-const pressedMidi = ref(new Map())
+const { pressDown, pressUp, pressToggle } = useNotePlayback()
 
 function padMidi(noteIndex) {
   return 12 * 5 + NOTE_TO_SEMI[noteIndex]
 }
 
-function onPadDown(noteIndex) {
-  const midi = padMidi(noteIndex)
-  pressedMidi.value = new Map([...pressedMidi.value, [midi, true]])
-  startNote(midi)
-}
+function onPadDown(noteIndex) { pressDown(padMidi(noteIndex)) }
+function onPadUp(noteIndex)   { pressUp(padMidi(noteIndex)) }
 
-function onPadUp(noteIndex) {
-  const midi = padMidi(noteIndex)
-  const m = new Map(pressedMidi.value)
-  m.delete(midi)
-  pressedMidi.value = m
-  stopNote(midi)
-}
+function onCellDown(stringIdx, fret) { pressDown(STRING_BASE_MIDI[stringIdx] + fret) }
+function onCellUp(stringIdx, fret)   { pressUp(STRING_BASE_MIDI[stringIdx] + fret) }
 
-function onCellDown(stringIdx, fret) {
-  const midi = STRING_BASE_MIDI[stringIdx] + fret
-  pressedMidi.value = new Map([...pressedMidi.value, [midi, true]])
-  startNote(midi)
-}
-
-function onCellUp(stringIdx, fret) {
-  const midi = STRING_BASE_MIDI[stringIdx] + fret
-  const m = new Map(pressedMidi.value)
-  m.delete(midi)
-  pressedMidi.value = m
-  stopNote(midi)
-}
-
-function onPianoToggle(noteIdx) {
-  const midi = padMidi(noteIdx)
-  if (pressedMidi.value.has(midi)) {
-    const m = new Map(pressedMidi.value)
-    m.delete(midi)
-    pressedMidi.value = m
-    stopNote(midi)
-  } else {
-    pressedMidi.value = new Map([...pressedMidi.value, [midi, true]])
-    startNote(midi)
-  }
-}
-
-onUnmounted(() => {
-  for (const midi of pressedMidi.value.keys()) stopNote(midi)
-})
+function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx)) }
 </script>
 
 <template>
