@@ -7,7 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:5173/tonarium/',
+    baseURL: 'http://localhost:5174/tonarium/',
     trace: 'on-first-retry',
   },
   projects: [
@@ -18,7 +18,7 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:5173/tonarium/',
-    reuseExistingServer: !process.env.CI,
+    url: 'http://localhost:5174/tonarium/',
+    reuseExistingServer: true,
   },
 })
