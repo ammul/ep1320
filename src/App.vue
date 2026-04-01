@@ -2,7 +2,6 @@
 import { ref, computed, watch } from 'vue'
 import { displayMode } from './displayMode.js'
 import StartPage from './components/StartPage.vue'
-import ClavesMode from './components/ClavesMode.vue'
 import ScaleVisualizer from './components/ScaleVisualizer.vue'
 import ChordProgressions from './components/ChordProgressions.vue'
 import ChordDetector from './components/ChordDetector.vue'
@@ -15,7 +14,6 @@ import DrumComputer from './components/DrumComputer.vue'
 const allTabs = [
   { id: 'home',           label: 'Home',                component: StartPage },
   { id: 'learn',          label: 'Learn',               component: LearnMode },
-  { id: 'claves',         label: 'Claves Mode',         component: ClavesMode,        ep1320Only: true },
   { id: 'jam',            label: 'Jam Mode',            component: JamMode },
   { id: 'scales',         label: 'Scale Visualizer',    component: ScaleVisualizer },
   { id: 'chords',         label: 'Chord Progressions',  component: ChordProgressions },

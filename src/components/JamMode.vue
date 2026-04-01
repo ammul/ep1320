@@ -3,7 +3,8 @@ import { ref, computed } from 'vue'
 import { displayMode } from '../displayMode.js'
 import { NOTES, LABELS, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
 import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
-import { activeInputNotes } from '../midiManager.js'
+import { activeInputNotes, midiStatus } from '../midiManager.js'
+import { octave } from '../octave.js'
 import { useNotePlayback } from '../composables/useNotePlayback.js'
 import PianoOctave from './PianoOctave.vue'
 import ScaleLegend from './ScaleLegend.vue'
@@ -47,6 +48,12 @@ const SCALES = [
     intervals: [0, 2, 4, 5, 7, 9, 10],
     description: 'Major with a bluesy, unresolved edge — the flat 7th adds a rock and roll feel. Works perfectly over dominant 7th chords or a classic rock jam.',
   },
+  {
+    id: 'chr',
+    label: 'chr — Chromatic',
+    intervals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    description: 'All 12 notes — no filtering. Every note is available. Useful for playing chromatically or sending any MIDI note to a connected device.',
+  },
 ]
 
 // Semitone offsets from root considered "anchor" notes (root, minor 3rd, major 3rd, 5th)
@@ -87,6 +94,7 @@ const pads = computed(() =>
     isActive: activeIndices.value.has(i),
     isAnchor: anchorIndices.value.has(i),
     isRoot:   i === rootIndex.value,
+    midi:     12 * (octave.value + 1) + NOTE_TO_SEMI[i],
   }))
 )
 
@@ -135,8 +143,8 @@ function padMidi(noteIndex, octave) {
   return 12 * (octave + 1) + NOTE_TO_SEMI[noteIndex]
 }
 
-function onPadDown(noteIndex, octave) { pressDown(padMidi(noteIndex, octave)) }
-function onPadUp(noteIndex, octave)   { pressUp(padMidi(noteIndex, octave)) }
+function onPadDown(noteIndex) { pressDown(padMidi(noteIndex, octave.value)) }
+function onPadUp(noteIndex)   { pressUp(padMidi(noteIndex, octave.value)) }
 
 function onCellDown(stringIdx, fret) { pressDown(STRING_BASE_MIDI[stringIdx] + fret) }
 function onCellUp(stringIdx, fret)   { pressUp(STRING_BASE_MIDI[stringIdx] + fret) }
@@ -184,13 +192,14 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx, pianoOctave.value
                 inactive: !pad.isActive,
                 pressed:  pressedIndices.has(pad.noteIndex),
               }"
-              @pointerdown.prevent="onPadDown(pad.noteIndex, 4)"
-              @pointerup="onPadUp(pad.noteIndex, 4)"
-              @pointerleave="onPadUp(pad.noteIndex, 4)"
-              @pointercancel="onPadUp(pad.noteIndex, 4)"
+              @pointerdown.prevent="onPadDown(pad.noteIndex)"
+              @pointerup="onPadUp(pad.noteIndex)"
+              @pointerleave="onPadUp(pad.noteIndex)"
+              @pointercancel="onPadUp(pad.noteIndex)"
             >
               <span class="pad-label">{{ pad.label }}</span>
               <span class="pad-note">{{ pad.note }}</span>
+              <span v-if="midiStatus === 'connected'" class="pad-midi">{{ pad.midi }}</span>
             </div>
           </div>
         </div>
@@ -209,10 +218,10 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx, pianoOctave.value
               inactive: !tile.isActive,
               pressed:  pressedIndices.has(tile.noteIndex),
             }"
-            @pointerdown.prevent="onPadDown(tile.noteIndex, 4)"
-            @pointerup="onPadUp(tile.noteIndex, 4)"
-            @pointerleave="onPadUp(tile.noteIndex, 4)"
-            @pointercancel="onPadUp(tile.noteIndex, 4)"
+            @pointerdown.prevent="onPadDown(tile.noteIndex)"
+            @pointerup="onPadUp(tile.noteIndex)"
+            @pointerleave="onPadUp(tile.noteIndex)"
+            @pointercancel="onPadUp(tile.noteIndex)"
           >
             <span class="tile-note">{{ tile.note }}</span>
           </div>
@@ -418,6 +427,7 @@ select:focus { border-color: var(--accent); }
 
 .pad-label { font-size: 0.7rem; color: var(--text4); font-weight: 600; letter-spacing: 0.1em; }
 .pad-note  { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+.pad-midi  { font-size: 0.6rem; color: var(--text5); letter-spacing: 0.03em; }
 
 .pad.inactive .pad-note { color: var(--text5); }
 .pad.active   .pad-note { color: var(--text2); }

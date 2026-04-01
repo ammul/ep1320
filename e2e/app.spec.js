@@ -37,6 +37,14 @@ test.describe('App loads and navigates', () => {
     await expect(nav.getByRole('button', { name: 'Chord Detector' })).toBeVisible()
     await expect(nav.getByRole('button', { name: 'Drum Computer' })).toBeVisible()
     await expect(nav.getByRole('button', { name: 'Chord Progressions' })).toBeVisible()
+    await expect(nav.getByRole('button', { name: 'Jam Mode' })).toBeVisible()
+  })
+
+  test('Claves Mode is not in the side nav', async ({ page }) => {
+    await page.goto('/')
+    await page.locator('.burger-btn').click()
+    const nav = page.locator('nav.side-menu')
+    await expect(nav.getByRole('button', { name: 'Claves Mode' })).not.toBeVisible()
   })
 
   test('navigating to Scale Visualizer shows its content', async ({ page }) => {
@@ -80,6 +88,23 @@ test.describe('Scale Visualizer flow', () => {
     await scaleSelect.selectOption('min')
     const activePads = page.locator('.pad.active')
     await expect(activePads).toHaveCount(7)
+  })
+})
+
+test.describe('Jam Mode flow', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+    await navigateTo(page, 'Jam Mode')
+  })
+
+  test('shows key and scale controls', async ({ page }) => {
+    await expect(page.locator('select').first()).toBeVisible()
+  })
+
+  test('Chromatic is available as a scale option', async ({ page }) => {
+    const scaleSelect = page.locator('select').first()
+    await scaleSelect.selectOption('chr')
+    await expect(scaleSelect).toHaveValue('chr')
   })
 })
 

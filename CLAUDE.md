@@ -37,3 +37,5 @@ Claves Mode is `ep1320Only: true` — hidden in Notes/Guitar modes.
 - Dark warm palette: background `#242019`, accent `#c8a96e`, muted `#7a6f60`
 - Scoped CSS in every SFC; no global stylesheet beyond `src/style.css`
 - No emojis, no unnecessary comments
+
+@ROADMAP.md

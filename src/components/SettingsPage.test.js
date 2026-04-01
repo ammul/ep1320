@@ -2,23 +2,28 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
-vi.mock('../midiManager.js', () => ({
-  midiStatus: { value: 'unavailable' },
-  midiOutputs: { value: [] },
-  selectedOutputId: { value: null },
-  initMidi: vi.fn(),
-  disconnectMidi: vi.fn(),
-}))
+vi.mock('../midiManager.js', async () => {
+  const { ref } = await import('vue')
+  return {
+    midiStatus: ref('unavailable'),
+    midiOutputs: ref([]),
+    selectedOutputId: ref(null),
+    initMidi: vi.fn(),
+    disconnectMidi: vi.fn(),
+  }
+})
 
 import SettingsPage from './SettingsPage.vue'
 import { displayMode } from '../displayMode.js'
 import { soundEnabled } from '../soundEnabled.js'
 import { soundStyle } from '../soundStyle.js'
+import { octave } from '../octave.js'
 
 beforeEach(() => {
   displayMode.value = 'ep1320'
   soundEnabled.value = true
   soundStyle.value = 'synth'
+  octave.value = 4
 })
 
 describe('SettingsPage', () => {
@@ -92,6 +97,70 @@ describe('SettingsPage', () => {
       const offBtn = audioSection.findAll('.option-btn').find(b => b.text() === 'Off')
       await offBtn.trigger('click')
       expect(soundEnabled.value).toBe(false)
+    })
+  })
+
+  describe('octave control', () => {
+    it('is not visible when MIDI is not connected', () => {
+      const wrapper = mount(SettingsPage)
+      expect(wrapper.find('.octave-row').exists()).toBe(false)
+    })
+
+    it('is visible when MIDI is connected', async () => {
+      const { midiStatus } = await import('../midiManager.js')
+      midiStatus.value = 'connected'
+      const wrapper = mount(SettingsPage)
+      await nextTick()
+      expect(wrapper.find('.octave-row').exists()).toBe(true)
+      midiStatus.value = 'unavailable'
+    })
+
+    it('increments octave when + is clicked', async () => {
+      const { midiStatus } = await import('../midiManager.js')
+      midiStatus.value = 'connected'
+      octave.value = 4
+      const wrapper = mount(SettingsPage)
+      await nextTick()
+      const buttons = wrapper.find('.octave-row').findAll('.octave-btn')
+      await buttons[1].trigger('click')
+      expect(octave.value).toBe(5)
+      midiStatus.value = 'unavailable'
+    })
+
+    it('decrements octave when − is clicked', async () => {
+      const { midiStatus } = await import('../midiManager.js')
+      midiStatus.value = 'connected'
+      octave.value = 4
+      const wrapper = mount(SettingsPage)
+      await nextTick()
+      const buttons = wrapper.find('.octave-row').findAll('.octave-btn')
+      await buttons[0].trigger('click')
+      expect(octave.value).toBe(3)
+      midiStatus.value = 'unavailable'
+    })
+
+    it('does not go below 0', async () => {
+      const { midiStatus } = await import('../midiManager.js')
+      midiStatus.value = 'connected'
+      octave.value = 0
+      const wrapper = mount(SettingsPage)
+      await nextTick()
+      const buttons = wrapper.find('.octave-row').findAll('.octave-btn')
+      await buttons[0].trigger('click')
+      expect(octave.value).toBe(0)
+      midiStatus.value = 'unavailable'
+    })
+
+    it('does not go above 9', async () => {
+      const { midiStatus } = await import('../midiManager.js')
+      midiStatus.value = 'connected'
+      octave.value = 9
+      const wrapper = mount(SettingsPage)
+      await nextTick()
+      const buttons = wrapper.find('.octave-row').findAll('.octave-btn')
+      await buttons[1].trigger('click')
+      expect(octave.value).toBe(9)
+      midiStatus.value = 'unavailable'
     })
   })
 })
