@@ -566,7 +566,7 @@ const activeDegrees = computed(() =>
   user-select: none;
   touch-action: none;
   transition: background 0.1s, border-color 0.1s, transform 0.07s;
-  - webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .note-pill:hover { background: var(--border); }
@@ -831,7 +831,7 @@ const activeDegrees = computed(() =>
   user-select: none;
   touch-action: none;
   transition: background 0.12s, border-color 0.12s, transform 0.08s;
-  - webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .diatonic-chord:hover { background: var(--border); }
@@ -882,7 +882,7 @@ const activeDegrees = computed(() =>
   cursor: pointer;
   font-family: inherit;
   transition: border-color 0.12s, background 0.12s;
-  - webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .prog-item:hover { background: var(--border); }
