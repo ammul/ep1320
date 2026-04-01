@@ -1117,7 +1117,7 @@ const activeDegrees = computed(() =>
   flex-direction: column;
   gap: 0.25rem;
   overflow-x: auto;
-  - webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch;
 }
 
 .bp-beat-nums,
