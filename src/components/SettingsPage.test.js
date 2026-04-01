@@ -20,7 +20,7 @@ import { soundStyle } from '../soundStyle.js'
 import { octave } from '../octave.js'
 
 beforeEach(() => {
-  displayMode.value = 'ep1320'
+  displayMode.value = 'pad'
   soundEnabled.value = true
   soundStyle.value = 'synth'
   octave.value = 4
@@ -46,11 +46,11 @@ describe('SettingsPage', () => {
       expect(buttons.length).toBeGreaterThanOrEqual(4)
     })
 
-    it('ep1320 button is active by default', () => {
+    it('pad button is active by default', () => {
       const wrapper = mount(SettingsPage)
       const buttons = wrapper.findAll('.option-btn')
       const activeLabels = buttons.filter(b => b.classes('active')).map(b => b.text())
-      expect(activeLabels).toContain('EP-1320')
+      expect(activeLabels).toContain('Pad')
     })
 
     it('clicking Notes updates displayMode', async () => {
@@ -75,7 +75,7 @@ describe('SettingsPage', () => {
       soundEnabled.value = true
       const wrapper = mount(SettingsPage)
       const sections = wrapper.findAll('.settings-section')
-      const audioSection = sections[1]
+      const audioSection = sections.find(s => s.find('h3').text() === 'Audio')
       const onBtn = audioSection.findAll('.option-btn').find(b => b.text() === 'On')
       expect(onBtn.classes()).toContain('active')
     })
@@ -85,7 +85,7 @@ describe('SettingsPage', () => {
       const wrapper = mount(SettingsPage)
       await nextTick()
       const sections = wrapper.findAll('.settings-section')
-      const audioSection = sections[1]
+      const audioSection = sections.find(s => s.find('h3').text() === 'Audio')
       const offBtn = audioSection.findAll('.option-btn').find(b => b.text() === 'Off')
       expect(offBtn.classes()).toContain('active')
     })
@@ -93,7 +93,7 @@ describe('SettingsPage', () => {
     it('clicking Off disables sound', async () => {
       const wrapper = mount(SettingsPage)
       const sections = wrapper.findAll('.settings-section')
-      const audioSection = sections[1]
+      const audioSection = sections.find(s => s.find('h3').text() === 'Audio')
       const offBtn = audioSection.findAll('.option-btn').find(b => b.text() === 'Off')
       await offBtn.trigger('click')
       expect(soundEnabled.value).toBe(false)

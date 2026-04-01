@@ -1,6 +1,6 @@
-// Chromatic scale starting from A (matches EP-1320 pad layout)
+// Chromatic scale starting from A (A-based index 0-11)
 export const NOTES  = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
-export const LABELS = ['.',  '0',  'i', '1', '2',  '3', '4',  '5', '6', '7',  '8', '9']
+export const LABELS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
 export const SHARPS = new Set(['A#', 'C#', 'D#', 'F#', 'G#'])
 
 // Chord type interval arrays (semitones from root)
@@ -41,7 +41,7 @@ export const CHORD_DETECT_TYPES = [
   { intervals: [0, 3, 7, 10, 2], suffix: 'm9',     name: 'Minor 9th' },
 ]
 
-// Flat → sharp enharmonic equivalents
+// Flat -> sharp enharmonic equivalents
 export const FLAT_MAP = { Ab: 'G#', Bb: 'A#', Cb: 'B', Db: 'C#', Eb: 'D#', Fb: 'E', Gb: 'F#' }
 
 // Guitar standard tuning: open string note indices (E2, A2, D3, G3, B3, E4)
@@ -49,7 +49,7 @@ export const OPEN_STRINGS = [7, 0, 5, 10, 2, 7]
 export const STRING_NAMES = ['E', 'A', 'D', 'G', 'B', 'e']
 export const FRET_COUNT = 12
 
-// Semitone conversion: A-based index (0–11) ↔ C-based semitone (0–11)
+// Semitone conversion: A-based index (0-11) <-> C-based semitone (0-11)
 export const NOTE_TO_SEMI = [9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8]
 export const SEMI_TO_NAME = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 

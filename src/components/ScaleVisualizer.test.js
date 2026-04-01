@@ -13,7 +13,7 @@ import { displayMode } from '../displayMode.js'
 import { NOTES } from '../musicConstants.js'
 
 beforeEach(() => {
-  displayMode.value = 'ep1320'
+  displayMode.value = 'pad'
 })
 
 const SCALES = {
@@ -35,7 +35,7 @@ describe('ScaleVisualizer', () => {
     expect(wrapper.findComponent({ name: 'RootNotePicker' }).exists()).toBe(true)
   })
 
-  describe('ep1320 mode', () => {
+  describe('pad mode', () => {
     it('renders 4 rows of 3 pads', () => {
       const wrapper = mount(ScaleVisualizer)
       const rows = wrapper.findAll('.row')
@@ -45,7 +45,7 @@ describe('ScaleVisualizer', () => {
     it('major scale from A highlights correct 7 notes', async () => {
       const wrapper = mount(ScaleVisualizer)
       await nextTick()
-      // default is A major — 7 active pads
+      // default is A major - 7 active pads
       const activePads = wrapper.findAll('.pad.active')
       expect(activePads).toHaveLength(7)
     })

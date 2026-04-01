@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { displayMode } from '../displayMode.js'
-import { NOTES, LABELS, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
+import { padSize } from '../padSize.js'
+import { NOTES, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
 import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
 import { activeInputNotes, midiStatus } from '../midiManager.js'
 import { octave } from '../octave.js'
@@ -14,45 +15,45 @@ import ModeLayout from './ModeLayout.vue'
 const SCALES = [
   {
     id: 'mi.p',
-    label: 'mi.p — Minor Pentatonic',
+    label: 'mi.p - Minor Pentatonic',
     intervals: [0, 3, 5, 7, 10],
-    description: 'The most forgiving scale for improv. 5 notes, zero clashes — every one works over almost any minor chord or progression. Start here if you\'re new to soloing.',
+    description: 'The most forgiving scale for improv. 5 notes, zero clashes - every one works over almost any minor chord or progression. Start here if you\'re new to soloing.',
   },
   {
     id: 'ma.p',
-    label: 'ma.p — Major Pentatonic',
+    label: 'ma.p - Major Pentatonic',
     intervals: [0, 2, 4, 7, 9],
-    description: '5 open, consonant notes that sound good over almost any major chord. Bright and uplifting — nothing feels out of place. Great for country, pop, and folk melodies.',
+    description: '5 open, consonant notes that sound good over almost any major chord. Bright and uplifting - nothing feels out of place. Great for country, pop, and folk melodies.',
   },
   {
     id: 'min',
-    label: 'min — Minor (Natural)',
+    label: 'min - Minor (Natural)',
     intervals: [0, 2, 3, 5, 7, 8, 10],
-    description: 'Minor pentatonic with 2 extra notes, adding more colour and expression. Dark and emotional. A couple of notes need more care — avoid landing on the 2nd or 6th for too long.',
+    description: 'Minor pentatonic with 2 extra notes, adding more colour and expression. Dark and emotional. A couple of notes need more care - avoid landing on the 2nd or 6th for too long.',
   },
   {
     id: 'maj',
-    label: 'maj — Major (Ionian)',
+    label: 'maj - Major (Ionian)',
     intervals: [0, 2, 4, 5, 7, 9, 11],
-    description: 'Major pentatonic with 2 extra notes, giving more melodic options. Bright and resolved. The 4th can sound slightly tense if held — use it as a passing note.',
+    description: 'Major pentatonic with 2 extra notes, giving more melodic options. Bright and resolved. The 4th can sound slightly tense if held - use it as a passing note.',
   },
   {
     id: 'dor',
-    label: 'dor — Dorian',
+    label: 'dor - Dorian',
     intervals: [0, 2, 3, 5, 7, 9, 10],
-    description: 'Minor but slightly brighter — a raised 6th gives it a soulful, funky edge. Works well over minor chord jams. Think Santana, Oye Como Va, or modal jazz leads.',
+    description: 'Minor but slightly brighter - a raised 6th gives it a soulful, funky edge. Works well over minor chord jams. Think Santana, Oye Como Va, or modal jazz leads.',
   },
   {
     id: 'mix',
-    label: 'mix — Mixolydian',
+    label: 'mix - Mixolydian',
     intervals: [0, 2, 4, 5, 7, 9, 10],
-    description: 'Major with a bluesy, unresolved edge — the flat 7th adds a rock and roll feel. Works perfectly over dominant 7th chords or a classic rock jam.',
+    description: 'Major with a bluesy, unresolved edge - the flat 7th adds a rock and roll feel. Works perfectly over dominant 7th chords or a classic rock jam.',
   },
   {
     id: 'chr',
-    label: 'chr — Chromatic',
+    label: 'chr - Chromatic',
     intervals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-    description: 'All 12 notes — no filtering. Every note is available. Useful for playing chromatically or sending any MIDI note to a connected device.',
+    description: 'All 12 notes - no filtering. Every note is available. Useful for playing chromatically or sending any MIDI note to a connected device.',
   },
 ]
 
@@ -64,8 +65,8 @@ const selectedScaleId = ref('mi.p')
 const showInfo       = ref(false)
 const pianoOctave    = ref(4)
 
-const SUBTITLE = { ep1320: 'lit pads', notes: 'highlighted notes', guitar: 'highlighted frets', piano: 'highlighted keys' }
-const subtitle = computed(() => `pick a key and scale — ${SUBTITLE[displayMode.value] ?? 'highlighted items'} are safe to play`)
+const SUBTITLE = { pad: 'lit pads', notes: 'highlighted notes', guitar: 'highlighted frets', piano: 'highlighted keys' }
+const subtitle = computed(() => `pick a key and scale - ${SUBTITLE[displayMode.value] ?? 'highlighted items'} are safe to play`)
 
 const selectedScale = computed(() => SCALES.find(s => s.id === selectedScaleId.value))
 const rootIndex     = computed(() => NOTES.indexOf(selectedRoot.value))
@@ -84,21 +85,28 @@ const anchorIndices = computed(() => {
   )
 })
 
+const cols = computed(() => padSize.value === '4x4' ? 4 : 3)
+
 const pads = computed(() =>
-  NOTES.map((note, i) => ({
-    number: i + 1,
-    label:    LABELS[i],
-    note,
-    noteIndex: i,
-    isSharp:  SHARPS.has(note),
-    isActive: activeIndices.value.has(i),
-    isAnchor: anchorIndices.value.has(i),
-    isRoot:   i === rootIndex.value,
-    midi:     12 * (octave.value + 1) + NOTE_TO_SEMI[i],
-  }))
+  Array.from({ length: 4 * cols.value }, (_, i) => {
+    const noteIndex = i % 12
+    const octaveOffset = Math.floor(i / 12)
+    return {
+      number:      i + 1,
+      label:       String(i + 1),
+      note:        NOTES[noteIndex],
+      noteIndex,
+      octaveOffset,
+      isSharp:     SHARPS.has(NOTES[noteIndex]),
+      isActive:    activeIndices.value.has(noteIndex),
+      isAnchor:    anchorIndices.value.has(noteIndex),
+      isRoot:      noteIndex === rootIndex.value,
+      midi:        12 * (octave.value + 1 + octaveOffset) + NOTE_TO_SEMI[noteIndex],
+    }
+  })
 )
 
-const rows = computed(() => sliceRows(pads.value))
+const rows = computed(() => sliceRows(pads.value, cols.value))
 
 const chromaTiles = computed(() =>
   NOTES.map((note, i) => ({
@@ -143,8 +151,8 @@ function padMidi(noteIndex, octave) {
   return 12 * (octave + 1) + NOTE_TO_SEMI[noteIndex]
 }
 
-function onPadDown(noteIndex) { pressDown(padMidi(noteIndex, octave.value)) }
-function onPadUp(noteIndex)   { pressUp(padMidi(noteIndex, octave.value)) }
+function onPadDown(noteIndex, octaveOffset = 0) { pressDown(12 * (octave.value + 1 + octaveOffset) + NOTE_TO_SEMI[noteIndex]) }
+function onPadUp(noteIndex, octaveOffset = 0)   { pressUp(12 * (octave.value + 1 + octaveOffset) + NOTE_TO_SEMI[noteIndex]) }
 
 function onCellDown(stringIdx, fret) { pressDown(STRING_BASE_MIDI[stringIdx] + fret) }
 function onCellUp(stringIdx, fret)   { pressUp(STRING_BASE_MIDI[stringIdx] + fret) }
@@ -178,9 +186,9 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx, pianoOctave.value
     </div>
 
     <ModeLayout>
-      <template #ep1320>
+      <template #pad>
         <div class="grid">
-          <div class="row" v-for="(row, ri) in rows" :key="ri">
+          <div class="row" v-for="(row, ri) in rows" :key="ri" :style="{ gridTemplateColumns: `repeat(${row.length}, 1fr)` }">
             <div
               v-for="pad in row"
               :key="pad.number"
@@ -192,10 +200,10 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx, pianoOctave.value
                 inactive: !pad.isActive,
                 pressed:  pressedIndices.has(pad.noteIndex),
               }"
-              @pointerdown.prevent="onPadDown(pad.noteIndex)"
-              @pointerup="onPadUp(pad.noteIndex)"
-              @pointerleave="onPadUp(pad.noteIndex)"
-              @pointercancel="onPadUp(pad.noteIndex)"
+              @pointerdown.prevent="onPadDown(pad.noteIndex, pad.octaveOffset)"
+              @pointerup="onPadUp(pad.noteIndex, pad.octaveOffset)"
+              @pointerleave="onPadUp(pad.noteIndex, pad.octaveOffset)"
+              @pointercancel="onPadUp(pad.noteIndex, pad.octaveOffset)"
             >
               <span class="pad-label">{{ pad.label }}</span>
               <span class="pad-note">{{ pad.note }}</span>
@@ -388,18 +396,17 @@ select {
 
 select:focus { border-color: var(--accent); }
 
-/* EP-1320 grid */
+/* Pad grid */
 .grid {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  max-width: 360px;
+  max-width: 420px;
   margin: 0 auto;
 }
 
 .row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 0.6rem;
 }
 

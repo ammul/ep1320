@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { displayMode } from '../displayMode.js'
-import { NOTES, LABELS, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
+import { padSize } from '../padSize.js'
+import { NOTES, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
 import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
 import { useNotePlayback } from '../composables/useNotePlayback.js'
 import PianoOctave from './PianoOctave.vue'
@@ -9,16 +10,16 @@ import RootNotePicker from './RootNotePicker.vue'
 import ModeLayout from './ModeLayout.vue'
 
 const SCALES = [
-  { id: '12t',  label: '12T — Chromatic',         intervals: [0,1,2,3,4,5,6,7,8,9,10,11], description: 'All 12 semitones. No inherent tonality — every key plays, nothing is highlighted. Useful for atonal passages or when you want full chromatic access.' },
-  { id: 'maj',  label: 'maj — Major (Ionian)',     intervals: [0,2,4,5,7,9,11],             description: 'The familiar "happy" scale. Bright, stable, and resolved. The default western scale — works for pop, folk, classical, and most upbeat music.' },
-  { id: 'min',  label: 'min — Minor (Aeolian)',    intervals: [0,2,3,5,7,8,10],             description: 'Natural minor. Dark, melancholic, and introspective. The most common minor scale — great for moody, emotional, or dramatic pieces.' },
-  { id: 'dor',  label: 'dor — Dorian',             intervals: [0,2,3,5,7,9,10],             description: 'Minor with a raised 6th. Slightly brighter and jazzier than natural minor — sounds soulful and funky. Think "Scarborough Fair" or modal jazz.' },
-  { id: 'phr',  label: 'phr — Phrygian',           intervals: [0,1,3,5,7,8,10],             description: 'Minor with a flattened 2nd. Very dark and tense, with a distinctly Spanish or flamenco flavour. Creates a brooding, exotic feel.' },
-  { id: 'lyd',  label: 'lyd — Lydian',             intervals: [0,2,4,6,7,9,11],             description: 'Major with a raised 4th. Dreamy, ethereal, and floating — the raised 4th gives it an otherworldly quality. Common in film scores and ambient music.' },
-  { id: 'mix',  label: 'mix — Mixolydian',         intervals: [0,2,4,5,7,9,10],             description: 'Major with a flattened 7th. Bright but slightly unresolved — sounds bluesy and rock-oriented. Think classic rock, Celtic, and blues-inflected pop.' },
-  { id: 'loc',  label: 'loc — Locrian',            intervals: [0,1,3,5,6,8,10],             description: 'The most dissonant mode — minor with a flattened 2nd and 5th. Extremely unstable and tense; rarely used as a tonic but effective for dark, unsettling textures.' },
-  { id: 'ma.p', label: 'ma.p — Major Pentatonic',  intervals: [0,2,4,7,9],                  description: 'Five-note major scale (no 4th or 7th). Open, consonant, and universally pleasing — nothing clashes. Common in folk, country, and East Asian music.' },
-  { id: 'mi.p', label: 'mi.p — Minor Pentatonic',  intervals: [0,3,5,7,10],                 description: 'Five-note minor scale. The backbone of blues, rock, and R&B. Every note works over almost any chord — great for expressive leads and improvisation.' },
+  { id: '12t',  label: '12T - Chromatic',         intervals: [0,1,2,3,4,5,6,7,8,9,10,11], description: 'All 12 semitones. No inherent tonality - every key plays, nothing is highlighted. Useful for atonal passages or when you want full chromatic access.' },
+  { id: 'maj',  label: 'maj - Major (Ionian)',     intervals: [0,2,4,5,7,9,11],             description: 'The familiar "happy" scale. Bright, stable, and resolved. The default western scale - works for pop, folk, classical, and most upbeat music.' },
+  { id: 'min',  label: 'min - Minor (Aeolian)',    intervals: [0,2,3,5,7,8,10],             description: 'Natural minor. Dark, melancholic, and introspective. The most common minor scale - great for moody, emotional, or dramatic pieces.' },
+  { id: 'dor',  label: 'dor - Dorian',             intervals: [0,2,3,5,7,9,10],             description: 'Minor with a raised 6th. Slightly brighter and jazzier than natural minor - sounds soulful and funky. Think "Scarborough Fair" or modal jazz.' },
+  { id: 'phr',  label: 'phr - Phrygian',           intervals: [0,1,3,5,7,8,10],             description: 'Minor with a flattened 2nd. Very dark and tense, with a distinctly Spanish or flamenco flavour. Creates a brooding, exotic feel.' },
+  { id: 'lyd',  label: 'lyd - Lydian',             intervals: [0,2,4,6,7,9,11],             description: 'Major with a raised 4th. Dreamy, ethereal, and floating - the raised 4th gives it an otherworldly quality. Common in film scores and ambient music.' },
+  { id: 'mix',  label: 'mix - Mixolydian',         intervals: [0,2,4,5,7,9,10],             description: 'Major with a flattened 7th. Bright but slightly unresolved - sounds bluesy and rock-oriented. Think classic rock, Celtic, and blues-inflected pop.' },
+  { id: 'loc',  label: 'loc - Locrian',            intervals: [0,1,3,5,6,8,10],             description: 'The most dissonant mode - minor with a flattened 2nd and 5th. Extremely unstable and tense; rarely used as a tonic but effective for dark, unsettling textures.' },
+  { id: 'ma.p', label: 'ma.p - Major Pentatonic',  intervals: [0,2,4,7,9],                  description: 'Five-note major scale (no 4th or 7th). Open, consonant, and universally pleasing - nothing clashes. Common in folk, country, and East Asian music.' },
+  { id: 'mi.p', label: 'mi.p - Minor Pentatonic',  intervals: [0,3,5,7,10],                 description: 'Five-note minor scale. The backbone of blues, rock, and R&B. Every note works over almost any chord - great for expressive leads and improvisation.' },
 ]
 
 const selectedRoot = ref('A')
@@ -43,19 +44,26 @@ const degreeMap = computed(() => {
   return map
 })
 
+const cols = computed(() => padSize.value === '4x4' ? 4 : 3)
+
 const pads = computed(() =>
-  NOTES.map((note, i) => ({
-    number: i + 1,
-    label: LABELS[i],
-    note,
-    isSharp: SHARPS.has(note),
-    isActive: activeIndices.value.has(i),
-    isRoot: i === rootIndex.value,
-    degree: degreeMap.value[i] ?? null,
-  }))
+  Array.from({ length: 4 * cols.value }, (_, i) => {
+    const noteIndex = i % 12
+    return {
+      number:      i + 1,
+      label:       String(i + 1),
+      note:        NOTES[noteIndex],
+      noteIndex,
+      octaveOffset: Math.floor(i / 12),
+      isSharp:     SHARPS.has(NOTES[noteIndex]),
+      isActive:    activeIndices.value.has(noteIndex),
+      isRoot:      noteIndex === rootIndex.value,
+      degree:      degreeMap.value[noteIndex] ?? null,
+    }
+  })
 )
 
-const rows = computed(() => sliceRows(pads.value))
+const rows = computed(() => sliceRows(pads.value, cols.value))
 
 // Notes mode: all 12 chromatic notes as tiles
 const chromaTiles = computed(() =>
@@ -79,12 +87,8 @@ const guitarNeck = computed(() =>
 const STRING_BASE_MIDI = [40, 45, 50, 55, 59, 64]
 const { pressDown, pressUp, pressToggle } = useNotePlayback()
 
-function padMidi(noteIndex) {
-  return 12 * 5 + NOTE_TO_SEMI[noteIndex]
-}
-
-function onPadDown(noteIndex) { pressDown(padMidi(noteIndex)) }
-function onPadUp(noteIndex)   { pressUp(padMidi(noteIndex)) }
+function onPadDown(noteIndex, octaveOffset = 0) { pressDown(12 * (5 + octaveOffset) + NOTE_TO_SEMI[noteIndex]) }
+function onPadUp(noteIndex, octaveOffset = 0)   { pressUp(12 * (5 + octaveOffset) + NOTE_TO_SEMI[noteIndex]) }
 
 function onCellDown(stringIdx, fret) { pressDown(STRING_BASE_MIDI[stringIdx] + fret) }
 function onCellUp(stringIdx, fret)   { pressUp(STRING_BASE_MIDI[stringIdx] + fret) }
@@ -96,10 +100,10 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx)) }
   <div class="scale-viz">
     <div class="scale-viz-header">
       <h2>Scale Visualizer</h2>
-      <p class="subtitle" v-if="displayMode === 'ep1320'">see which pads are active for any scale · matches EP‑1320 scale names</p>
-      <p class="subtitle" v-else-if="displayMode === 'notes'">chromatic note strip — scale notes highlighted</p>
-      <p class="subtitle" v-else-if="displayMode === 'guitar'">guitar neck (standard tuning) — scale positions highlighted</p>
-      <p class="subtitle" v-else>piano keyboard — scale notes highlighted</p>
+      <p class="subtitle" v-if="displayMode === 'pad'">see which pads are active for any scale</p>
+      <p class="subtitle" v-else-if="displayMode === 'notes'">chromatic note strip - scale notes highlighted</p>
+      <p class="subtitle" v-else-if="displayMode === 'guitar'">guitar neck (standard tuning) - scale positions highlighted</p>
+      <p class="subtitle" v-else>piano keyboard - scale notes highlighted</p>
     </div>
 
     <div class="controls">
@@ -121,9 +125,9 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx)) }
     </div>
 
     <ModeLayout>
-      <template #ep1320>
+      <template #pad>
         <div class="grid">
-          <div class="row" v-for="(row, ri) in rows" :key="ri">
+          <div class="row" v-for="(row, ri) in rows" :key="ri" :style="{ gridTemplateColumns: `repeat(${row.length}, 1fr)` }">
             <div
               v-for="pad in row"
               :key="pad.number"
@@ -134,10 +138,10 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx)) }
                 sharp: pad.isSharp,
                 inactive: !pad.isActive,
               }"
-              @pointerdown.prevent="onPadDown(pad.number - 1)"
-              @pointerup="onPadUp(pad.number - 1)"
-              @pointerleave="onPadUp(pad.number - 1)"
-              @pointercancel="onPadUp(pad.number - 1)"
+              @pointerdown.prevent="onPadDown(pad.noteIndex, pad.octaveOffset)"
+              @pointerup="onPadUp(pad.noteIndex, pad.octaveOffset)"
+              @pointerleave="onPadUp(pad.noteIndex, pad.octaveOffset)"
+              @pointercancel="onPadUp(pad.noteIndex, pad.octaveOffset)"
             >
               <span class="pad-label">{{ pad.label }}</span>
               <span class="pad-note">{{ pad.note }}</span>
@@ -315,18 +319,17 @@ select {
 
 select:focus { border-color: var(--accent); }
 
-/* EP-1320 grid */
+/* Pad grid */
 .grid {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  max-width: 360px;
+  max-width: 420px;
   margin: 0 auto;
 }
 
 .row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 0.6rem;
 }
 

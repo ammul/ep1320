@@ -4,7 +4,7 @@ const emit = defineEmits(['navigate'])
 const learnCard = {
   id: 'learn',
   label: 'Learn',
-  description: 'Step-by-step lessons on intervals, scales, chords, and rhythm — including how to build a beat from scratch.',
+  description: 'Step-by-step lessons on intervals, scales, chords, and rhythm - including how to build a beat from scratch.',
   featured: true,
 }
 
@@ -12,23 +12,23 @@ const tools = [
   {
     id: 'chords',
     label: 'Chord Progressions',
-    description: 'Browse classic progressions — I–V–vi–IV, ii–V–I, Canon in D and more — transposed to any root key. Connect via MIDI to preview chords or loop a progression straight to your synth.',
+    description: 'Browse classic progressions (I-V-vi-IV, ii-V-I, Canon in D and more) transposed to any root key. Connect via MIDI to preview chords or loop a progression straight to your synth.',
     preview: ['I', 'V', 'vi', 'IV'],
   },
   {
     id: 'claves',
     label: 'Claves Mode',
-    description: 'Chromatic 4×3 pad layout matching the EP-1320. Connect via MIDI and tap pads to play notes directly on your synth — hold for sustain.',
+    description: 'Chromatic pad grid. Connect via MIDI and tap pads to play notes directly on your synth - hold for sustain.',
   },
   {
     id: 'jam',
     label: 'Jam Mode',
-    description: 'Pick a key and scale — see exactly which notes are safe to play. Anchor notes (root, 3rd, 5th) are highlighted. Tap pads to hear the notes, then layer over a running drum beat.',
+    description: 'Pick a key and scale - see exactly which notes are safe to play. Anchor notes (root, 3rd, 5th) are highlighted. Tap pads to hear the notes, then layer over a running drum beat.',
   },
   {
     id: 'drums',
     label: 'Drum Computer',
-    description: 'Build a drum loop from 8 instruments across 16 steps. The beat keeps running while you switch to other tools — set it going and improvise over it.',
+    description: 'Build a drum loop from 8 instruments across 16 steps. The beat keeps running while you switch to other tools - set it going and improvise over it.',
     preview: ['1', '2', '3', '4'],
   },
   {
@@ -39,7 +39,7 @@ const tools = [
   {
     id: 'chord-detector',
     label: 'Chord Detector',
-    description: 'Select a set of notes and instantly see what chord they form — useful for ear training and reverse engineering songs.',
+    description: 'Select a set of notes and instantly see what chord they form - useful for ear training and reverse engineering songs.',
   },
   {
     id: 'prog-builder',
@@ -55,8 +55,8 @@ const tools = [
       <p class="tagline">Play music. No sheet music required.</p>
       <p class="sub">
         Tonarium is a free toolkit for people who love music but never learned to read it.
-        Explore scales, chords, and progressions visually — then jam over a beat you built yourself.
-        Works with synths, guitars, and the TE EP-1320.
+        Explore scales, chords, and progressions visually - then jam over a beat you built yourself.
+        Works with synths and guitars.
       </p>
     </section>
 
@@ -71,7 +71,7 @@ const tools = [
       <span class="open-label">Open &rarr;</span>
     </button>
 
-    <p class="display-hint">Use <strong>Settings</strong> (⚙ in the header) to choose your instrument view — EP-1320, Notes, Guitar, or Piano. All tools adapt to the selected mode.</p>
+    <p class="display-hint">Use <strong>Settings</strong> (⚙ in the header) to choose your instrument view - Pad, Notes, Guitar, or Piano. All tools adapt to the selected mode.</p>
 
     <section class="tools">
       <button
@@ -96,7 +96,7 @@ const tools = [
     </section>
 
     <section class="about">
-      <p>Built by <a href="https://github.com/ammul" target="_blank" rel="noopener">ammul</a> — lazy music fan.</p>
+      <p>Built by <a href="https://github.com/ammul" target="_blank" rel="noopener">ammul</a>.</p>
       <a href="https://github.com/ammul/tonarium" target="_blank" rel="noopener" class="github-btn">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>

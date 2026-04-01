@@ -186,7 +186,7 @@ describe('stopNote', () => {
     // Get the note's gainNode (always index 0) and record call count after startNote
     const gainNode = ctx().createGain.mock.results[0].value
     const callsBefore = gainNode.gain.exponentialRampToValueAtTime.mock.calls.length
-    stopNote(55, 999999) // wrong gen — should be ignored
+    stopNote(55, 999999) // wrong gen - should be ignored
     const callsAfter = gainNode.gain.exponentialRampToValueAtTime.mock.calls.length
     expect(callsAfter).toBe(callsBefore) // no new fadeout calls
   })

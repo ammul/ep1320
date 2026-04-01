@@ -14,10 +14,10 @@ const baseProps = {
 }
 
 beforeEach(() => {
-  displayMode.value = 'ep1320'
+  displayMode.value = 'pad'
 })
 
-describe('ChordCardBody — ep1320 mode', () => {
+describe('ChordCardBody - pad mode', () => {
   it('renders the mini pad grid', () => {
     const wrapper = mount(ChordCardBody, { props: baseProps })
     expect(wrapper.find('.mini-grid').exists()).toBe(true)
@@ -52,7 +52,7 @@ describe('ChordCardBody — ep1320 mode', () => {
   })
 })
 
-describe('ChordCardBody — notes mode', () => {
+describe('ChordCardBody - notes mode', () => {
   it('renders note badges', async () => {
     displayMode.value = 'notes'
     const wrapper = mount(ChordCardBody, { props: baseProps })
@@ -89,8 +89,8 @@ describe('ChordCardBody — notes mode', () => {
   })
 })
 
-describe('ChordCardBody — display mode switching', () => {
-  it('switches from ep1320 to notes mode', async () => {
+describe('ChordCardBody - display mode switching', () => {
+  it('switches from pad to notes mode', async () => {
     const wrapper = mount(ChordCardBody, { props: baseProps })
     expect(wrapper.find('.mini-grid').exists()).toBe(true)
 

@@ -7,7 +7,7 @@ function noteIndices(...names) {
   return names.map(n => NOTES.indexOf(n))
 }
 
-// Helper: C major in A-based indices = C(3), E(5), G(10) — wait, let's compute properly
+// Helper: C major in A-based indices = C(3), E(5), G(10) - wait, let's compute properly
 // NOTES = ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#']
 // C=3, E=7 (wait: A=0,A#=1,B=2,C=3,C#=4,D=5,D#=6,E=7,F=8,F#=9,G=10,G#=11)
 
@@ -111,7 +111,7 @@ describe('detectChord', () => {
     })
 
     it('detects C minor 7th', () => {
-      // Cm7 = C, D#, G, A# — C (semi 0) is lowest, so root position is unambiguous
+      // Cm7 = C, D#, G, A# - C (semi 0) is lowest, so root position is unambiguous
       const result = detectChord(noteIndices('C', 'D#', 'G', 'A#'))
       expect(result).not.toBeNull()
       expect(result.root).toBe('C')
@@ -121,9 +121,9 @@ describe('detectChord', () => {
   })
 
   describe('inversions', () => {
-    it('detects B minor inversion (B D F# — D is lowest semitone)', () => {
+    it('detects B minor inversion (B D F# - D is lowest semitone)', () => {
       // Bm = B(semi 11), D(semi 2), F#(semi 6)
-      // Sorted semis: [2, 6, 11] — D is lowest, but root is B → inversion /D
+      // Sorted semis: [2, 6, 11] - D is lowest, but root is B → inversion /D
       const result = detectChord(noteIndices('B', 'D', 'F#'))
       expect(result).not.toBeNull()
       expect(result.root).toBe('B')
@@ -140,7 +140,7 @@ describe('detectChord', () => {
 
   describe('unrecognized note combinations', () => {
     it('returns null for notes with no matching chord type', () => {
-      // C, C#, D — chromatic cluster, not a chord
+      // C, C#, D - chromatic cluster, not a chord
       expect(detectChord(noteIndices('C', 'C#', 'D'))).toBeNull()
     })
 
@@ -151,7 +151,7 @@ describe('detectChord', () => {
 
   describe('duplicate note indices', () => {
     it('treats duplicate semitones as one note (C major octave doubled)', () => {
-      // C=3, E=7, G=10, C=3 — duplicate C
+      // C=3, E=7, G=10, C=3 - duplicate C
       const result = detectChord([3, 7, 10, 3])
       expect(result).not.toBeNull()
       expect(result.root).toBe('C')

@@ -1,35 +1,41 @@
 import { NOTES, LABELS, SHARPS, OPEN_STRINGS, STRING_NAMES, FRET_COUNT } from './musicConstants.js'
 
-// Build 4×3 numpad-layout rows from a set of active pad indices.
-// Row order top→bottom maps to high→low pitch: [9-11], [6-8], [3-5], [0-2]
-export function buildRows(activeSet, rootPad) {
-  const pads = NOTES.map((note, i) => ({
-    label: LABELS[i],
-    note,
-    isSharp: SHARPS.has(note),
-    isActive: activeSet.has(i),
-    isRoot: i === rootPad,
-  }))
-  return [
-    pads.slice(9, 12),
-    pads.slice(6, 9),
-    pads.slice(3, 6),
-    pads.slice(0, 3),
-  ]
+// Build a 4xN pad grid from a set of active note indices.
+// cols=3 gives 4x3 (12 pads), cols=4 gives 4x4 (16 pads).
+// Row order top->bottom maps to high->low pitch.
+// Pads beyond index 11 wrap around the chromatic octave with octaveOffset=1.
+export function buildRows(activeSet, rootPad, cols = 3) {
+  const total = 4 * cols
+  const pads = Array.from({ length: total }, (_, i) => {
+    const noteIdx = i % 12
+    return {
+      label:        String(i + 1),
+      note:         NOTES[noteIdx],
+      noteIndex:    noteIdx,
+      octaveOffset: Math.floor(i / 12),
+      isSharp:      SHARPS.has(NOTES[noteIdx]),
+      isActive:     activeSet.has(noteIdx),
+      isRoot:       noteIdx === rootPad,
+    }
+  })
+  const rows = []
+  for (let r = 3; r >= 0; r--) {
+    rows.push(pads.slice(r * cols, (r + 1) * cols))
+  }
+  return rows
 }
 
-// Slice a 12-element pads array into 4 rows (top→bottom: [9-11], [6-8], [3-5], [0-2]).
-export function sliceRows(pads) {
-  return [
-    pads.slice(9, 12),
-    pads.slice(6, 9),
-    pads.slice(3, 6),
-    pads.slice(0, 3),
-  ]
+// Slice a pre-built pads array into 4 rows (top->bottom: high->low pitch).
+export function sliceRows(pads, cols = 3) {
+  const rows = []
+  for (let r = 3; r >= 0; r--) {
+    rows.push(pads.slice(r * cols, (r + 1) * cols))
+  }
+  return rows
 }
 
-// Build guitar neck data (6 strings, displayed high→low: e B G D A E).
-// cellExtras(noteIdx) → object of extra properties merged into each cell.
+// Build guitar neck data (6 strings, displayed high->low: e B G D A E).
+// cellExtras(noteIdx) -> object of extra properties merged into each cell.
 export function buildGuitarNeck(cellExtras) {
   const neck = []
   for (let s = 5; s >= 0; s--) {

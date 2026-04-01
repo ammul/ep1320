@@ -19,10 +19,10 @@ const pianoActiveIndices = computed(() =>
 </script>
 
 <template>
-  <!-- EP-1320 mode: mini pad grid + press labels -->
-  <template v-if="displayMode === 'ep1320'">
+  <!-- Pad mode: mini pad grid + press labels -->
+  <template v-if="displayMode === 'pad'">
     <div class="mini-grid">
-      <div class="mini-row" v-for="(row, ri) in rows" :key="ri">
+      <div class="mini-row" v-for="(row, ri) in rows" :key="ri" :style="{ gridTemplateColumns: `repeat(${row.length}, 1fr)` }">
         <div
           v-for="pad in row"
           :key="pad.label"
@@ -76,7 +76,7 @@ const pianoActiveIndices = computed(() =>
 <style scoped>
 /* Mini grid */
 .mini-grid { display: flex; flex-direction: column; gap: 3px; margin: 0.25rem 0; }
-.mini-row  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+.mini-row  { display: grid; gap: 3px; }
 
 .mini-pad {
   width: 36px;

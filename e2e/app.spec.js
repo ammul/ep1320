@@ -137,7 +137,7 @@ test.describe('Display mode switching', () => {
 
   test('clicking gear icon opens Settings page', async ({ page }) => {
     await page.locator('.icon-btn[aria-label="Settings"]').click()
-    await expect(page.getByText('EP-1320').first()).toBeVisible()
+    await expect(page.getByText('Pad').first()).toBeVisible()
     await expect(page.getByText('Notes').first()).toBeVisible()
     await expect(page.getByText('Guitar').first()).toBeVisible()
   })

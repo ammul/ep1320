@@ -1,4 +1,4 @@
-# Tonarium — Roadmap
+# Tonarium - Roadmap
 
 ## Monetization strategy
 Ko-fi donation button on the free web app (hosted on GitHub Pages). No backend, no paywall.
@@ -6,7 +6,7 @@ Target audience: synth nerds, beatmakers, teachers, and people who love music bu
 
 ---
 
-## Phase 1 — Public readiness
+## Phase 1 - Public readiness
 
 Get the app in shape before sharing it publicly and adding the Ko-fi link.
 
@@ -20,21 +20,21 @@ Get the app in shape before sharing it publicly and adding the Ko-fi link.
 
 ---
 
-## Phase 2 — Growth & polish
+## Phase 2 - Growth & polish
 
 Nice-to-haves once the app is public.
 
-- [ ] Convert to PWA (installable, offline) — add `vite-plugin-pwa`, manifest, service worker
-- [ ] MIDI status indicator in header (small dot when connected) — currently only visible in Settings
+- [ ] Convert to PWA (installable, offline) - add `vite-plugin-pwa`, manifest, service worker
+- [ ] MIDI status indicator in header (small dot when connected) - currently only visible in Settings
 - [ ] `<meta>` tags for social sharing (og:title, og:description, og:image)
 - [ ] Favicon / app icon that isn't the Vite default
 
 ---
 
-## Phase 3 — Paid features (future)
+## Phase 3 - Paid features (future)
 
 Only worth building once there's an audience. All client-side, no backend.
 
-- [ ] MIDI file export — record a progression or jam session and export as `.mid`
-- [ ] Additional sound packs — more drum kits and instrument timbres bundled as assets
-- [ ] Custom sample upload — File API + IndexedDB, files stay local (no server needed)
+- [ ] MIDI file export - record a progression or jam session and export as `.mid`
+- [ ] Additional sound packs - more drum kits and instrument timbres bundled as assets
+- [ ] Custom sample upload - File API + IndexedDB, files stay local (no server needed)

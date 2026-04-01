@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { displayMode } from '../displayMode.js'
 import { NOTES, LABELS, CHORD_TYPES, CHORD_SUFFIX } from '../musicConstants.js'
 import { buildRows } from '../musicUtils.js'
+import { padSize } from '../padSize.js'
 import ChordCardBody from './ChordCardBody.vue'
 import RootNotePicker from './RootNotePicker.vue'
 import { midiStatus, midiChannel, chordOn, chordOff } from '../midiManager.js'
@@ -328,13 +329,13 @@ const ALL_PROGRESSIONS = [
 ]
 
 const SOLO_ADVICE = {
-  maj:  { scale: 'Major pentatonic', why: 'Open and resolved — all 5 notes sound great over a major chord.' },
-  min:  { scale: 'Minor pentatonic', why: 'Dark and expressive — every note fits naturally over a minor chord.' },
+  maj:  { scale: 'Major pentatonic', why: 'Open and resolved - all 5 notes sound great over a major chord.' },
+  min:  { scale: 'Minor pentatonic', why: 'Dark and expressive - every note fits naturally over a minor chord.' },
   dom7: { scale: 'Minor pentatonic', why: 'The bluesy feel of the minor pentatonic adds perfect tension over a dominant 7th.' },
-  maj7: { scale: 'Major pentatonic', why: 'Smooth and bright — the major pentatonic floats beautifully over a maj7 chord.' },
-  min7: { scale: 'Minor pentatonic', why: 'The minor pentatonic is built for minor 7ths — soulful and natural.' },
-  dim:  { scale: 'Minor pentatonic', why: 'Stick to root and 5th — pentatonic avoids the worst clashes over a diminished chord.' },
-  aug:  { scale: 'Major pentatonic', why: 'Keep to the bright notes — avoid the 5th, which clashes with the augmented chord.' },
+  maj7: { scale: 'Major pentatonic', why: 'Smooth and bright - the major pentatonic floats beautifully over a maj7 chord.' },
+  min7: { scale: 'Minor pentatonic', why: 'The minor pentatonic is built for minor 7ths - soulful and natural.' },
+  dim:  { scale: 'Minor pentatonic', why: 'Stick to root and 5th - pentatonic avoids the worst clashes over a diminished chord.' },
+  aug:  { scale: 'Major pentatonic', why: 'Keep to the bright notes - avoid the 5th, which clashes with the augmented chord.' },
   sus4: { scale: 'Major pentatonic', why: 'The open sound of pentatonic matches the unresolved feel of a sus4 chord.' },
 }
 
@@ -380,7 +381,7 @@ const chordCards = computed(() =>
       name:         NOTES[chordRootIdx] + CHORD_SUFFIX[chord.type],
       type:         chord.type,
       chordRootIdx,
-      rows:         buildRows(padIndices, chordRootIdx),
+      rows:         buildRows(padIndices, chordRootIdx, padSize.value === '4x4' ? 4 : 3),
       pressLabels:  sorted.map(i => LABELS[i]),
       noteNames:    sorted.map(i => NOTES[i]),
     }
@@ -440,7 +441,7 @@ watch([selectedId, selectedRoot], stopLoop)
   <div class="chord-prog">
     <div class="chord-prog-header">
       <h2>Chord Progressions</h2>
-      <p class="subtitle">explore chord sequences by genre — transposed to any key</p>
+      <p class="subtitle">explore chord sequences by genre - transposed to any key</p>
     </div>
 
     <div class="controls">
@@ -544,7 +545,7 @@ watch([selectedId, selectedRoot], stopLoop)
         >i</button>
         <div v-if="showInfoIdx === card.idx" class="solo-info">
           <span class="solo-scale">{{ SOLO_ADVICE[card.type].scale }}</span>
-          — {{ SOLO_ADVICE[card.type].why }}
+          - {{ SOLO_ADVICE[card.type].why }}
         </div>
       </div>
     </div>

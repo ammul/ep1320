@@ -2,7 +2,7 @@
   <div class="legend">
     <span class="legend-item root">root</span>
     <span class="legend-sep">·</span>
-    <span class="legend-item anchor">anchor — land here</span>
+    <span class="legend-item anchor">anchor - land here</span>
     <span class="legend-sep">·</span>
     <span class="legend-item safe">safe</span>
   </div>

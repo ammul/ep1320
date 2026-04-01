@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { displayMode } from '../displayMode.js'
-import { NOTES, LABELS, SHARPS, NOTE_TO_SEMI, FRET_COUNT } from '../musicConstants.js'
+import { padSize } from '../padSize.js'
+import { NOTES, SHARPS, NOTE_TO_SEMI, FRET_COUNT } from '../musicConstants.js'
 import { playNote } from '../audioEngine.js'
 import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
 import { detectChord } from '../chordDetect.js'
@@ -26,18 +27,23 @@ function clearAll() {
   selected.value = new Set()
 }
 
-// EP-1320 pad grid
+const cols = computed(() => padSize.value === '4x4' ? 4 : 3)
+
 const pads = computed(() =>
-  NOTES.map((note, i) => ({
-    index: i,
-    label: LABELS[i],
-    note,
-    isSharp: SHARPS.has(note),
-    isSelected: selected.value.has(i),
-  }))
+  Array.from({ length: 4 * cols.value }, (_, i) => {
+    const noteIndex = i % 12
+    return {
+      padIdx:    i,
+      noteIndex,
+      label:     String(i + 1),
+      note:      NOTES[noteIndex],
+      isSharp:   SHARPS.has(NOTES[noteIndex]),
+      isSelected: selected.value.has(noteIndex),
+    }
+  })
 )
 
-const rows = computed(() => sliceRows(pads.value))
+const rows = computed(() => sliceRows(pads.value, cols.value))
 
 // Notes mode: 12 chromatic note buttons
 const noteButtons = computed(() =>
@@ -69,24 +75,24 @@ const chord = computed(() => detectChord([...selected.value]))
 
     <div class="header">
       <h2>Chord Detector</h2>
-      <p class="subtitle" v-if="displayMode === 'ep1320'">Tap the notes you're playing — the chord is identified instantly</p>
-      <p class="subtitle" v-else-if="displayMode === 'notes'">Click note names to select — chord identified instantly</p>
-      <p class="subtitle" v-else-if="displayMode === 'guitar'">Click frets on the neck — chord identified instantly</p>
-      <p class="subtitle" v-else>Click piano keys to select — chord identified instantly</p>
+      <p class="subtitle" v-if="displayMode === 'pad'">Tap the notes you're playing - the chord is identified instantly</p>
+      <p class="subtitle" v-else-if="displayMode === 'notes'">Click note names to select - chord identified instantly</p>
+      <p class="subtitle" v-else-if="displayMode === 'guitar'">Click frets on the neck - chord identified instantly</p>
+      <p class="subtitle" v-else>Click piano keys to select - chord identified instantly</p>
     </div>
 
     <div class="detector-body">
       <div class="input-col">
         <ModeLayout>
-          <template #ep1320>
+          <template #pad>
             <div class="grid">
-              <div class="row" v-for="(row, ri) in rows" :key="ri">
+              <div class="row" v-for="(row, ri) in rows" :key="ri" :style="{ gridTemplateColumns: `repeat(${row.length}, 1fr)` }">
                 <button
                   v-for="pad in row"
-                  :key="pad.index"
+                  :key="pad.padIdx"
                   class="pad"
                   :class="{ sharp: pad.isSharp, selected: pad.isSelected }"
-                  @pointerdown.prevent="toggleNote(pad.index)"
+                  @pointerdown.prevent="toggleNote(pad.noteIndex)"
                 >
                   <span class="pad-label">{{ pad.label }}</span>
                   <span class="pad-note">{{ pad.note }}</span>
@@ -206,9 +212,9 @@ const chord = computed(() => detectChord([...selected.value]))
 }
 .subtitle { margin-top: 0.3rem; font-size: 0.85rem; color: var(--text3); }
 
-/* EP-1320 pad grid */
-.grid { display: flex; flex-direction: column; gap: 0.6rem; max-width: 360px; margin: 0 auto; }
-.row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+/* Pad grid */
+.grid { display: flex; flex-direction: column; gap: 0.6rem; max-width: 420px; margin: 0 auto; }
+.row { display: grid; gap: 0.6rem; }
 
 .pad {
   display: flex;

@@ -24,8 +24,8 @@ const INTERVALS = [
 const SCALES = [
   { name: 'Major',         steps: [0,2,4,5,7,9,11], feel: 'Bright and resolved' },
   { name: 'Natural Minor', steps: [0,2,3,5,7,8,10], feel: 'Dark and emotional' },
-  { name: 'Minor Pent.',   steps: [0,3,5,7,10],      feel: '5 notes — easy to improvise over' },
-  { name: 'Major Pent.',   steps: [0,2,4,7,9],       feel: '5 notes — always sounds positive' },
+  { name: 'Minor Pent.',   steps: [0,3,5,7,10],      feel: '5 notes - easy to improvise over' },
+  { name: 'Major Pent.',   steps: [0,2,4,7,9],       feel: '5 notes - always sounds positive' },
   { name: 'Dorian',        steps: [0,2,3,5,7,9,10],  feel: 'Soulful, funky minor' },
   { name: 'Mixolydian',    steps: [0,2,4,5,7,9,10],  feel: 'Bluesy, rock feel' },
 ]
@@ -198,7 +198,7 @@ const activeDegrees = computed(() =>
 
     <!-- ── Step 1: Intervals ─────────────────────────────────────────────── -->
     <div v-if="step === 0" class="step-content">
-      <p class="step-intro">Tap any two notes — hear the sound and see the <strong>interval</strong> between them.</p>
+      <p class="step-intro">Tap any two notes - hear the sound and see the <strong>interval</strong> between them.</p>
 
       <div class="note-strip">
         <button
@@ -246,7 +246,7 @@ const activeDegrees = computed(() =>
 
     <!-- ── Step 2: Scales ────────────────────────────────────────────────── -->
     <div v-if="step === 1" class="step-content">
-      <p class="step-intro">A <strong>scale</strong> is a set of notes that all sound good together. Pick a root, choose a scale — hear which notes light up.</p>
+      <p class="step-intro">A <strong>scale</strong> is a set of notes that all sound good together. Pick a root, choose a scale - hear which notes light up.</p>
 
       <div class="picker-row">
         <span class="picker-label">Root</span>
@@ -380,11 +380,11 @@ const activeDegrees = computed(() =>
       <div class="tips">
         <div class="tip">
           <span class="tip-num">1</span>
-          <span>Start with <strong>minor pentatonic</strong> — 5 notes, no clashes, works over almost anything minor.</span>
+          <span>Start with <strong>minor pentatonic</strong> - 5 notes, no clashes, works over almost anything minor.</span>
         </div>
         <div class="tip">
           <span class="tip-num">2</span>
-          <span>Land on <strong>chord tones</strong> (root, 3rd, 5th) — they resolve. Other notes work best as passing notes.</span>
+          <span>Land on <strong>chord tones</strong> (root, 3rd, 5th) - they resolve. Other notes work best as passing notes.</span>
         </div>
         <div class="tip">
           <span class="tip-num">3</span>
@@ -393,7 +393,7 @@ const activeDegrees = computed(() =>
       </div>
 
       <div class="improv-cta">
-        Try it in <strong>Jam Mode</strong> — pick a key and scale to see safe pads highlighted.
+        Try it in <strong>Jam Mode</strong> - pick a key and scale to see safe pads highlighted.
       </div>
     </div>
 
@@ -566,7 +566,7 @@ const activeDegrees = computed(() =>
   user-select: none;
   touch-action: none;
   transition: background 0.1s, border-color 0.1s, transform 0.07s;
-  -webkit-tap-highlight-color: transparent;
+  - webkit-tap-highlight-color: transparent;
 }
 
 .note-pill:hover { background: var(--border); }
@@ -831,7 +831,7 @@ const activeDegrees = computed(() =>
   user-select: none;
   touch-action: none;
   transition: background 0.12s, border-color 0.12s, transform 0.08s;
-  -webkit-tap-highlight-color: transparent;
+  - webkit-tap-highlight-color: transparent;
 }
 
 .diatonic-chord:hover { background: var(--border); }
@@ -882,7 +882,7 @@ const activeDegrees = computed(() =>
   cursor: pointer;
   font-family: inherit;
   transition: border-color 0.12s, background 0.12s;
-  -webkit-tap-highlight-color: transparent;
+  - webkit-tap-highlight-color: transparent;
 }
 
 .prog-item:hover { background: var(--border); }
@@ -1117,7 +1117,7 @@ const activeDegrees = computed(() =>
   flex-direction: column;
   gap: 0.25rem;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  - webkit-overflow-scrolling: touch;
 }
 
 .bp-beat-nums,

@@ -28,11 +28,11 @@ const previousTab  = ref('home')
 const menuOpen     = ref(false)
 
 const tabs = computed(() =>
-  allTabs.filter(t => !t.ep1320Only || displayMode.value === 'ep1320')
+  allTabs.filter(t => !t.padOnly || displayMode.value === 'pad')
 )
 
 watch(displayMode, (mode) => {
-  if (mode !== 'ep1320' && activeTab.value === 'claves') {
+  if (mode !== 'pad' && activeTab.value === 'claves') {
     activeTab.value = 'home'
   }
 })

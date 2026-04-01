@@ -3,6 +3,7 @@ import { computed } from 'vue'
 
 const emit = defineEmits(['close'])
 import { displayMode } from '../displayMode.js'
+import { padSize } from '../padSize.js'
 import { colorMode } from '../colorMode.js'
 import { soundEnabled } from '../soundEnabled.js'
 import { soundStyle } from '../soundStyle.js'
@@ -10,10 +11,10 @@ import { midiStatus, midiOutputs, selectedOutputId, initMidi, disconnectMidi } f
 import { octave } from '../octave.js'
 
 const DISPLAY_OPTIONS = [
-  { value: 'ep1320', label: 'EP-1320', desc: '4×3 pad grid matching the EP-1320 layout — pad numbers and note names visible.' },
-  { value: 'notes',  label: 'Notes',   desc: 'Chromatic strip of the 12 note names — clean and instrument-agnostic.' },
-  { value: 'guitar', label: 'Guitar',  desc: 'Guitar neck or chord diagrams in standard tuning (E A D G B e).' },
-  { value: 'piano',  label: 'Piano',   desc: 'Piano keyboard across one octave.' },
+  { value: 'pad',    label: 'Pad',    desc: 'Chromatic pad grid - pad numbers and note names visible. Layout (4x3 or 4x4) is configurable below.' },
+  { value: 'notes',  label: 'Notes',  desc: 'Chromatic strip of the 12 note names - clean and instrument-agnostic.' },
+  { value: 'guitar', label: 'Guitar', desc: 'Guitar neck or chord diagrams in standard tuning (E A D G B e).' },
+  { value: 'piano',  label: 'Piano',  desc: 'Piano keyboard across one octave.' },
 ]
 
 const selectedDesc = computed(() => DISPLAY_OPTIONS.find(o => o.value === displayMode.value)?.desc ?? '')
@@ -50,6 +51,15 @@ const selectedDevice = computed({
       <p class="option-desc">{{ selectedDesc }}</p>
     </section>
 
+    <section class="settings-section" v-if="displayMode === 'pad'">
+      <h3>Pad Layout</h3>
+      <p class="section-desc">Number of columns in the pad grid.</p>
+      <div class="option-group">
+        <button class="option-btn" :class="{ active: padSize === '4x3' }" @click="padSize = '4x3'">4x3 (12 pads)</button>
+        <button class="option-btn" :class="{ active: padSize === '4x4' }" @click="padSize = '4x4'">4x4 (16 pads)</button>
+      </div>
+    </section>
+
     <section class="settings-section">
       <h3>Audio</h3>
       <p class="section-desc">Play sound when tapping notes, chords, and pads.</p>
@@ -80,7 +90,7 @@ const selectedDevice = computed({
 
     <section class="settings-section" v-if="midiStatus !== 'unsupported'">
       <h3>MIDI</h3>
-      <p class="section-desc">Connect to send chords and notes directly to your EP-1320 or any MIDI device.</p>
+      <p class="section-desc">Connect to send chords and notes directly to any MIDI device.</p>
 
       <div class="midi-panel">
         <template v-if="midiStatus === 'idle'">
