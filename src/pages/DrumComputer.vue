@@ -1,13 +1,11 @@
 <script setup>
-import { pattern, bpm, isPlaying, currentStep, play, pause, clearPattern, toggleCell, INSTRUMENTS } from '../drumEngine.js'
+import { pattern, bpm, isPlaying, currentStep, play, pause, clearPattern, toggleCell, INSTRUMENTS } from '../audio/drumEngine.js'
+import PageHeader from '../components/PageHeader.vue'
 </script>
 
 <template>
   <div class="drum-computer">
-    <div class="drum-header">
-      <h2>Drum Computer</h2>
-      <p class="subtitle">loop continues while switching tabs</p>
-    </div>
+    <PageHeader title="Drum Computer" subtitle="loop continues while switching tabs" />
 
     <div class="transport">
       <button
@@ -60,19 +58,6 @@ import { pattern, bpm, isPlaying, currentStep, play, pause, clearPattern, toggle
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 2rem;
-}
-
-.drum-header h2 {
-  font-size: 1.4rem;
-  color: var(--accent);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.subtitle {
-  margin-top: 0.3rem;
-  font-size: 0.85rem;
-  color: var(--text3);
 }
 
 .transport {
@@ -215,8 +200,6 @@ import { pattern, bpm, isPlaying, currentStep, play, pause, clearPattern, toggle
 
 @media (orientation: landscape) and (max-height: 500px) {
   .drum-computer { padding: 0.75rem 1rem; }
-  .drum-header h2 { font-size: 1.1rem; }
-  .subtitle { display: none; }
   .transport { margin: 0.5rem 0; }
   .step-btn { height: 1.6rem; }
 }

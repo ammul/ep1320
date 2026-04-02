@@ -2,15 +2,15 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
-vi.mock('../audioEngine.js', () => ({
+vi.mock('../audio/audioEngine.js', () => ({
   startNote: vi.fn(),
   stopNote: vi.fn(),
   playNote: vi.fn(),
 }))
 
 import ScaleVisualizer from './ScaleVisualizer.vue'
-import { displayMode } from '../displayMode.js'
-import { NOTES } from '../musicConstants.js'
+import { displayMode } from '../state/displayMode.js'
+import { NOTES } from '../constants/musicConstants.js'
 
 beforeEach(() => {
   displayMode.value = 'pad'

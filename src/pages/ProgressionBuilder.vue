@@ -1,11 +1,12 @@
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
-import { displayMode } from '../displayMode.js'
-import { NOTES, LABELS, SHARPS, CHORD_TYPES, CHORD_SUFFIX, FLAT_MAP, NOTE_TO_SEMI } from '../musicConstants.js'
-import { buildRows } from '../musicUtils.js'
-import { padSize } from '../padSize.js'
-import { startNote, stopNote } from '../audioEngine.js'
-import ChordCardBody from './ChordCardBody.vue'
+import { displayMode } from '../state/displayMode.js'
+import { NOTES, LABELS, SHARPS, CHORD_TYPES, CHORD_SUFFIX, FLAT_MAP, NOTE_TO_SEMI } from '../constants/musicConstants.js'
+import { buildRows } from '../utils/musicUtils.js'
+import { padSize } from '../state/padSize.js'
+import { startNote, stopNote } from '../audio/audioEngine.js'
+import ChordCardBody from '../components/ChordCardBody.vue'
+import PageHeader from '../components/PageHeader.vue'
 
 const input = ref('D f#m E D')
 
@@ -89,10 +90,7 @@ const chordCards = computed(() =>
 
 <template>
   <div class="prog-builder">
-    <div class="prog-builder-header">
-      <h2>Progression Builder</h2>
-      <p class="subtitle">type chords separated by spaces</p>
-    </div>
+    <PageHeader title="Progression Builder" subtitle="type chords separated by spaces" />
 
     <div class="input-row">
       <input
@@ -152,19 +150,6 @@ const chordCards = computed(() =>
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 2rem;
-}
-
-.prog-builder-header h2 {
-  font-size: 1.4rem;
-  color: var(--accent);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.subtitle {
-  margin-top: 0.3rem;
-  font-size: 0.85rem;
-  color: var(--text3);
 }
 
 .input-row { margin: 1.5rem 0 0.6rem; }
@@ -283,7 +268,6 @@ const chordCards = computed(() =>
 
 @media (orientation: landscape) and (max-height: 500px) {
   .prog-builder { padding: 0.75rem 1rem; }
-  .subtitle { display: none; }
   .chord-row { margin-top: 0.5rem; }
 }
 </style>

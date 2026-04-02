@@ -2,13 +2,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
-vi.mock('../audioEngine.js', () => ({
+vi.mock('../audio/audioEngine.js', () => ({
   playNote: vi.fn(),
   playChord: vi.fn(),
   stopAllNotes: vi.fn(),
 }))
 
-vi.mock('../drumEngine.js', async () => {
+vi.mock('../audio/drumEngine.js', async () => {
   const { ref } = await import('vue')
   return {
     isPlaying:   ref(false),
@@ -20,8 +20,8 @@ vi.mock('../drumEngine.js', async () => {
 })
 
 import LearnMode from './LearnMode.vue'
-import { playNote, playChord } from '../audioEngine.js'
-import { isPlaying as drumIsPlaying, pattern as drumPattern, play as drumPlay, pause as drumPause } from '../drumEngine.js'
+import { playNote, playChord } from '../audio/audioEngine.js'
+import { isPlaying as drumIsPlaying, pattern as drumPattern, play as drumPlay, pause as drumPause } from '../audio/drumEngine.js'
 
 beforeEach(async () => {
   vi.clearAllMocks()

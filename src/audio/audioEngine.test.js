@@ -66,8 +66,8 @@ const MockAudioContext = vi.fn(function () {
 vi.stubGlobal('AudioContext', MockAudioContext)
 
 import { startNote, stopNote, stopAllNotes, playNote } from './audioEngine.js'
-import { soundEnabled } from './soundEnabled.js'
-import { soundStyle } from './soundStyle.js'
+import { soundEnabled } from '../state/soundEnabled.js'
+import { soundStyle } from '../state/soundStyle.js'
 import { midiStatus } from './midiManager.js'
 
 beforeEach(() => {

@@ -1,13 +1,14 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { displayMode } from '../displayMode.js'
-import { NOTES, LABELS, CHORD_TYPES, CHORD_SUFFIX } from '../musicConstants.js'
-import { buildRows } from '../musicUtils.js'
-import { padSize } from '../padSize.js'
-import ChordCardBody from './ChordCardBody.vue'
-import RootNotePicker from './RootNotePicker.vue'
-import { midiStatus, midiChannel, chordOn, chordOff } from '../midiManager.js'
-import { startNote, stopNote, stopAllNotes, playNote } from '../audioEngine.js'
+import { displayMode } from '../state/displayMode.js'
+import { NOTES, LABELS, CHORD_TYPES, CHORD_SUFFIX } from '../constants/musicConstants.js'
+import { buildRows } from '../utils/musicUtils.js'
+import { padSize } from '../state/padSize.js'
+import ChordCardBody from '../components/ChordCardBody.vue'
+import RootNotePicker from '../components/RootNotePicker.vue'
+import PageHeader from '../components/PageHeader.vue'
+import { midiStatus, midiChannel, chordOn, chordOff } from '../audio/midiManager.js'
+import { startNote, stopNote, stopAllNotes, playNote } from '../audio/audioEngine.js'
 
 const GENRES = [
   { id: 'all',       label: 'All' },
@@ -439,10 +440,7 @@ watch([selectedId, selectedRoot], stopLoop)
 
 <template>
   <div class="chord-prog">
-    <div class="chord-prog-header">
-      <h2>Chord Progressions</h2>
-      <p class="subtitle">explore chord sequences by genre - transposed to any key</p>
-    </div>
+    <PageHeader title="Chord Progressions" subtitle="explore chord sequences by genre - transposed to any key" />
 
     <div class="controls">
       <div class="control-group">
@@ -558,19 +556,6 @@ watch([selectedId, selectedRoot], stopLoop)
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 2rem;
-}
-
-.chord-prog-header h2 {
-  font-size: 1.4rem;
-  color: var(--accent);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.subtitle {
-  margin-top: 0.3rem;
-  font-size: 0.85rem;
-  color: var(--text3);
 }
 
 .controls {
@@ -911,7 +896,6 @@ watch([selectedId, selectedRoot], stopLoop)
 
 @media (orientation: landscape) and (max-height: 500px) {
   .chord-prog { padding: 0.75rem 1rem; }
-  .subtitle   { display: none; }
   .controls   { margin: 0.5rem 0; }
   .control-group {
     flex-direction: row;

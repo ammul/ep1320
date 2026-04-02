@@ -1,13 +1,14 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { displayMode } from '../displayMode.js'
-import { padSize } from '../padSize.js'
-import { NOTES, SHARPS, NOTE_TO_SEMI, FRET_COUNT } from '../musicConstants.js'
-import { playNote } from '../audioEngine.js'
-import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
-import { detectChord } from '../chordDetect.js'
-import PianoOctave from './PianoOctave.vue'
-import ModeLayout from './ModeLayout.vue'
+import { displayMode } from '../state/displayMode.js'
+import { padSize } from '../state/padSize.js'
+import { NOTES, SHARPS, NOTE_TO_SEMI, FRET_COUNT } from '../constants/musicConstants.js'
+import { playNote } from '../audio/audioEngine.js'
+import { buildGuitarNeck, sliceRows } from '../utils/musicUtils.js'
+import { detectChord } from '../utils/chordDetect.js'
+import PianoOctave from '../components/PianoOctave.vue'
+import ModeLayout from '../components/ModeLayout.vue'
+import PageHeader from '../components/PageHeader.vue'
 
 const selected = ref(new Set())
 const pianoOctave = ref(4)
@@ -68,18 +69,20 @@ const selectedNames = computed(() =>
 )
 
 const chord = computed(() => detectChord([...selected.value]))
+
+const SUBTITLES = {
+  pad:    "Tap the notes you're playing - the chord is identified instantly",
+  notes:  'Click note names to select - chord identified instantly',
+  guitar: 'Click frets on the neck - chord identified instantly',
+  piano:  'Click piano keys to select - chord identified instantly',
+}
+const subtitle = computed(() => SUBTITLES[displayMode.value] ?? SUBTITLES.piano)
 </script>
 
 <template>
   <div class="chord-detector">
 
-    <div class="header">
-      <h2>Chord Detector</h2>
-      <p class="subtitle" v-if="displayMode === 'pad'">Tap the notes you're playing - the chord is identified instantly</p>
-      <p class="subtitle" v-else-if="displayMode === 'notes'">Click note names to select - chord identified instantly</p>
-      <p class="subtitle" v-else-if="displayMode === 'guitar'">Click frets on the neck - chord identified instantly</p>
-      <p class="subtitle" v-else>Click piano keys to select - chord identified instantly</p>
-    </div>
+    <PageHeader title="Chord Detector" :subtitle="subtitle" />
 
     <div class="detector-body">
       <div class="input-col">
@@ -203,14 +206,6 @@ const chord = computed(() => detectChord([...selected.value]))
   gap: 1rem;
   align-items: flex-start;
 }
-
-.header h2 {
-  font-size: 1.4rem;
-  color: var(--accent);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-.subtitle { margin-top: 0.3rem; font-size: 0.85rem; color: var(--text3); }
 
 /* Pad grid */
 .grid { display: flex; flex-direction: column; gap: 0.6rem; max-width: 420px; margin: 0 auto; }
@@ -443,14 +438,6 @@ const chord = computed(() => detectChord([...selected.value]))
   .chord-detector {
     padding: 0.75rem 1rem;
     gap: 0.75rem;
-  }
-
-  .header h2 {
-    font-size: 1.1rem;
-  }
-
-  .subtitle {
-    display: none;
   }
 
   .result {

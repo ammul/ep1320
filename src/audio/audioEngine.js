@@ -1,6 +1,6 @@
 import { midiStatus } from './midiManager.js'
-import { soundEnabled } from './soundEnabled.js'
-import { soundStyle } from './soundStyle.js'
+import { soundEnabled } from '../state/soundEnabled.js'
+import { soundStyle } from '../state/soundStyle.js'
 
 let _ctx = null
 let _compressor = null

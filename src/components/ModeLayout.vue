@@ -1,5 +1,5 @@
 <script setup>
-import { displayMode } from '../displayMode.js'
+import { displayMode } from '../state/displayMode.js'
 </script>
 
 <template>
