@@ -172,8 +172,8 @@ describe('STRING_NAMES', () => {
 })
 
 describe('FRET_COUNT', () => {
-  it('is 12', () => {
-    expect(FRET_COUNT).toBe(12)
+  it('is 7', () => {
+    expect(FRET_COUNT).toBe(7)
   })
 })
 

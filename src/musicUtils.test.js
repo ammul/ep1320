@@ -106,7 +106,7 @@ describe('buildGuitarNeck', () => {
     expect(neck).toHaveLength(6)
   })
 
-  it('each string has FRET_COUNT + 1 cells (open + 12 frets)', () => {
+  it('each string has FRET_COUNT + 1 cells (open + 7 frets)', () => {
     for (const string of neck) {
       expect(string.cells).toHaveLength(FRET_COUNT + 1)
     }

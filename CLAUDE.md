@@ -25,7 +25,7 @@ Vue 3 Composition API (`<script setup>`). No Vuex/Pinia - shared state via expor
 Every tab adapts to three modes. Components import `displayMode` directly from `src/displayMode.js`.
 - **Pad**: 4×3 or 4×4 chromatic pad grid (size set by `padSize` ref; rows top→bottom = high→low pitch)
 - **Notes**: chromatic note name buttons/tiles
-- **Guitar**: 12-fret neck or chord diagram (standard tuning)
+- **Guitar**: 7-fret neck or chord diagram (standard tuning)
 
 Claves Mode (deleted) was `padOnly: true` - this pattern still exists in App.vue for future use.
 
