@@ -48,9 +48,9 @@ describe('desktop tab bar', () => {
     expect(wrapper.find('.desktop-tabs').exists()).toBe(true)
   })
 
-  it('renders 8 tabs (all except Settings)', () => {
+  it('renders 9 tabs (all except Settings)', () => {
     const wrapper = shallowMount(App)
-    expect(wrapper.findAll('.dt-tab')).toHaveLength(8)
+    expect(wrapper.findAll('.dt-tab')).toHaveLength(9)
   })
 
   it('uses shortLabels on desktop tab buttons', () => {
