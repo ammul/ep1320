@@ -152,7 +152,9 @@ function selectSoundStyle(style) {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 2rem;
-  max-width: 480px;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
 }
 
 .settings-header {
