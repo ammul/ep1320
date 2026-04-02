@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { displayMode } from './displayMode.js'
+import { colorScheme as _colorScheme } from './colorScheme.js'
 import { isPlaying as drumIsPlaying, play as drumPlay, pause as drumPause } from './drumEngine.js'
 import StartPage from './components/StartPage.vue'
 import ScaleVisualizer from './components/ScaleVisualizer.vue'

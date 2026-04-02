@@ -6,6 +6,7 @@ import { displayMode } from '../displayMode.js'
 import { playNote } from '../audioEngine.js'
 import { padSize } from '../padSize.js'
 import { colorMode } from '../colorMode.js'
+import { colorScheme } from '../colorScheme.js'
 import { soundEnabled } from '../soundEnabled.js'
 import { soundStyle } from '../soundStyle.js'
 import { midiStatus, midiOutputs, selectedOutputId, initMidi, disconnectMidi } from '../midiManager.js'
@@ -89,8 +90,18 @@ function selectSoundStyle(style) {
     <section class="settings-section">
       <h3>Theme</h3>
       <div class="option-group">
-        <button class="option-btn" :class="{ active: colorMode === 'dark' }" @click="colorMode = 'dark'">Dark</button>
+        <button class="option-btn" :class="{ active: colorMode === 'dark' }"  @click="colorMode = 'dark'">Dark</button>
         <button class="option-btn" :class="{ active: colorMode === 'light' }" @click="colorMode = 'light'">Light</button>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h3>Color Scheme</h3>
+      <div class="option-group">
+        <button class="option-btn" :class="{ active: colorScheme === 'none' }"     @click="colorScheme = 'none'">Neutral</button>
+        <button class="option-btn scheme-btn medieval" :class="{ active: colorScheme === 'medieval' }" @click="colorScheme = 'medieval'">Medieval</button>
+        <button class="option-btn scheme-btn ko2"      :class="{ active: colorScheme === 'ko2' }"      @click="colorScheme = 'ko2'">K.O. II</button>
+        <button class="option-btn scheme-btn riddim"   :class="{ active: colorScheme === 'riddim' }"   @click="colorScheme = 'riddim'">Riddim</button>
       </div>
     </section>
 
@@ -218,6 +229,26 @@ function selectSoundStyle(style) {
 
 .option-btn:hover  { border-color: var(--accent); color: var(--text); }
 .option-btn.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+.scheme-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.scheme-btn::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.scheme-btn.medieval::before { background: #d4b84c; }
+.scheme-btn.ko2::before      { background: #e05c20; }
+.scheme-btn.riddim::before   { background: #28be70; }
+
+.scheme-btn.active::before { opacity: 0.7; }
 
 .option-desc {
   margin-top: 0.65rem;
