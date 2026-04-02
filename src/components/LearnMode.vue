@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { playNote, playChord, stopAllNotes } from '../audioEngine.js'
-import { pattern as drumPattern, play as drumPlay, pause as drumPause, isPlaying as drumIsPlaying } from '../drumEngine.js'
+import { pattern as drumPattern, play as drumPlay, pause as drumPause, isPlaying as drumIsPlaying, currentStep as drumCurrentStep } from '../drumEngine.js'
 
 const emit = defineEmits(['navigate'])
 
@@ -44,17 +44,17 @@ const PROGS = [
 ]
 
 const IMPROV = [
-  { chord:'Major chord',   color:'#c8a96e', scales:[
+  { chord:'Major chord',   def:'Bright, resolved sound. Root + major 3rd (4 semitones) + 5th.', color:'#c8a96e', scales:[
     { name:'Major pentatonic', desc:'always safe' },
     { name:'Major scale',      desc:'full palette' },
     { name:'Mixolydian',       desc:'bluesy edge' },
   ]},
-  { chord:'Minor chord',   color:'#8a7a9e', scales:[
+  { chord:'Minor chord',   def:'Dark, emotional. Like major but with a minor 3rd (3 semitones) instead.', color:'#8a7a9e', scales:[
     { name:'Minor pentatonic', desc:'easy, no clashes' },
     { name:'Natural minor',    desc:'dark and expressive' },
     { name:'Dorian',           desc:'soulful minor' },
   ]},
-  { chord:'Dominant 7th',  color:'#9e7a5a', scales:[
+  { chord:'Dominant 7th',  def:'Tense, bluesy. A major chord with a flattened 7th added — wants to resolve.', color:'#9e7a5a', scales:[
     { name:'Mixolydian',       desc:'natural match' },
     { name:'Blues scale',      desc:'gritty tension' },
   ]},
@@ -121,8 +121,16 @@ function pickNote(i) {
 const selectedRefSemi = ref(null)
 
 function pickRefInterval(semi) {
-  selectedRefSemi.value = selectedRefSemi.value === semi ? null : semi
-  if (selectedRefSemi.value !== null) playChord([60, 60 + semi])
+  if (selectedRefSemi.value === semi) {
+    selectedRefSemi.value = null
+    fromIdx.value = null
+    toIdx.value = null
+  } else {
+    selectedRefSemi.value = semi
+    fromIdx.value = 0
+    toIdx.value = semi
+    playChord([60, 60 + semi])
+  }
 }
 
 const intervalInfo = computed(() => {
@@ -137,8 +145,9 @@ const intervalInfo = computed(() => {
 })
 
 // ── Step 2: Scales ───────────────────────────────────────────────────────────
-const scaleRoot = ref(0)
-const scaleIdx  = ref(0)
+const scaleRoot        = ref(0)
+const scaleIdx         = ref(0)
+const scalePlayingNote = ref(null)
 
 const scaleNotes = computed(() =>
   SCALES[scaleIdx.value].steps.map(s => (scaleRoot.value + s) % 12)
@@ -154,23 +163,35 @@ function pickScaleRoot(i) {
   _scaleTimers.forEach(clearTimeout)
   _scaleTimers = []
   stopAllNotes()
+  scalePlayingNote.value = null
   scaleRoot.value = i
-  playNote(60 + i)
 }
 
 function playScale() {
   _scaleTimers.forEach(clearTimeout)
   _scaleTimers = []
+  scalePlayingNote.value = null
   const { steps } = SCALES[scaleIdx.value]
-  steps.forEach((s, i) =>
-    _scaleTimers.push(setTimeout(() => playNote(60 + scaleRoot.value + s, 0.5), i * 280))
-  )
-  _scaleTimers.push(setTimeout(() => playNote(72 + scaleRoot.value, 0.8), steps.length * 280))
+  steps.forEach((s, i) => {
+    const noteIdx = (scaleRoot.value + s) % 12
+    _scaleTimers.push(setTimeout(() => {
+      scalePlayingNote.value = noteIdx
+      playNote(60 + scaleRoot.value + s, 0.5)
+    }, i * 280))
+  })
+  _scaleTimers.push(setTimeout(() => {
+    scalePlayingNote.value = scaleRoot.value
+    playNote(72 + scaleRoot.value, 0.8)
+  }, steps.length * 280))
+  _scaleTimers.push(setTimeout(() => {
+    scalePlayingNote.value = null
+  }, (steps.length + 1) * 280))
 }
 
 // ── Step 3: Progressions ─────────────────────────────────────────────────────
-const progRoot   = ref(0)
-const activeProg = ref(null)
+const progRoot          = ref(0)
+const activeProg        = ref(null)
+const progActiveChordIdx = ref(null)
 let   _progTimers = []
 
 function chordLabel(rootC, di) {
@@ -191,22 +212,44 @@ function tapDiatonic(di) {
 function tapProg(pi) {
   _progTimers.forEach(clearTimeout)
   _progTimers = []
+  progActiveChordIdx.value = null
   activeProg.value = activeProg.value === pi ? null : pi
   if (activeProg.value === null) return
   PROGS[pi].degIdx.forEach((deg, i) => {
     _progTimers.push(
-      setTimeout(() => playChord(chordMidis(progRoot.value, deg), 0.9), i * 900)
+      setTimeout(() => {
+        progActiveChordIdx.value = i
+        playChord(chordMidis(progRoot.value, deg), 0.9)
+      }, i * 900)
     )
   })
+  _progTimers.push(
+    setTimeout(() => { progActiveChordIdx.value = null }, PROGS[pi].degIdx.length * 900)
+  )
 }
 
 const activeDegrees = computed(() =>
   activeProg.value === null ? new Set() : new Set(PROGS[activeProg.value].degIdx)
 )
 
+const progActiveDeg = computed(() =>
+  activeProg.value !== null && progActiveChordIdx.value !== null
+    ? PROGS[activeProg.value].degIdx[progActiveChordIdx.value]
+    : null
+)
+
 // ── Step 5: Beats ────────────────────────────────────────────────────────────
 const loadedPattern = ref(null)
 const BEAT_INST_MAP = { 'Kick': 0, 'Snare': 1, 'Hi-Hat': 2 }
+
+function buildDrumPattern(pi) {
+  const newPattern = Array.from({ length: 8 }, () => new Array(16).fill(false))
+  for (const row of BEAT_PATTERNS[pi].rows) {
+    const instIdx = BEAT_INST_MAP[row.name]
+    if (instIdx !== undefined) newPattern[instIdx] = row.steps.map(s => s === 1)
+  }
+  return newPattern
+}
 
 function loadBeat(pi) {
   if (drumIsPlaying.value) drumPause()
@@ -214,14 +257,16 @@ function loadBeat(pi) {
     loadedPattern.value = null
     return
   }
-  const newPattern = Array.from({ length: 8 }, () => new Array(16).fill(false))
-  for (const row of BEAT_PATTERNS[pi].rows) {
-    const instIdx = BEAT_INST_MAP[row.name]
-    if (instIdx !== undefined) newPattern[instIdx] = row.steps.map(s => s === 1)
-  }
-  drumPattern.value = newPattern
+  drumPattern.value = buildDrumPattern(pi)
   loadedPattern.value = pi
   drumPlay()
+}
+
+function editBeat(pi) {
+  if (drumIsPlaying.value) drumPause()
+  drumPattern.value = buildDrumPattern(pi)
+  loadedPattern.value = pi
+  emit('navigate', 'drums')
 }
 
 watch(step, (newStep, oldStep) => {
@@ -333,15 +378,21 @@ onUnmounted(() => {
         </div>
       </div>
 
+      <div class="scale-display-legend">
+        <span class="sdl-item sdl-root">Root</span>
+        <span class="sdl-item sdl-scale">Scale</span>
+      </div>
+
       <div class="scale-display">
         <div
           v-for="(note, i) in CHROMATIC"
           :key="i"
           class="scale-tile"
           :class="{
-            active: scaleNotes.includes(i),
-            root:   i === scaleRoot,
-            sharp:  IS_SHARP.has(i),
+            active:   scaleNotes.includes(i),
+            root:     i === scaleRoot,
+            sharp:    IS_SHARP.has(i),
+            playing:  scalePlayingNote === i,
           }"
           @pointerdown.prevent="playNote(60 + i)"
         >{{ note }}</div>
@@ -371,6 +422,8 @@ onUnmounted(() => {
         </div>
       </div>
 
+      <div class="section-label">Chords in key</div>
+
       <div class="diatonic-row">
         <button
           v-for="(roman, di) in ROMAN"
@@ -381,6 +434,7 @@ onUnmounted(() => {
             min:       DIA_TYPES[di] === 'min',
             dim:       DIA_TYPES[di] === 'dim',
             highlight: activeDegrees.has(di),
+            playing:   progActiveDeg === di,
           }"
           @pointerdown.prevent="tapDiatonic(di)"
         >
@@ -388,6 +442,8 @@ onUnmounted(() => {
           <span class="dc-name">{{ chordLabel(progRoot, di) }}</span>
         </button>
       </div>
+
+      <div class="section-label">Common progressions</div>
 
       <div class="prog-list">
         <button
@@ -404,10 +460,10 @@ onUnmounted(() => {
           <div v-if="activeProg === pi" class="prog-bottom">
             <div class="prog-chords">
               <span
-                v-for="deg in prog.degIdx"
-                :key="deg"
+                v-for="(deg, ci) in prog.degIdx"
+                :key="ci"
                 class="prog-chord-pill"
-                :class="DIA_TYPES[deg]"
+                :class="[DIA_TYPES[deg], { playing: progActiveChordIdx === ci }]"
               >{{ chordLabel(progRoot, deg) }}</span>
             </div>
             <div class="prog-songs">{{ prog.songs }}</div>
@@ -428,6 +484,7 @@ onUnmounted(() => {
           :style="{ '--card-color': card.color }"
         >
           <div class="ic-chord">{{ card.chord }}</div>
+          <div class="ic-def">{{ card.def }}</div>
           <div class="ic-scales">
             <div v-for="sc in card.scales" :key="sc.name" class="ic-scale">
               <span class="ic-name">{{ sc.name }}</span>
@@ -461,16 +518,37 @@ onUnmounted(() => {
     <div v-if="step === 4" class="step-content">
       <p class="step-intro">A good beat is built from three layers: <strong>kick</strong>, <strong>snare</strong>, and <strong>hi-hat</strong>. Each has a job. Together they create rhythm that makes people move.</p>
 
+      <div class="beat-recipe">
+        <div class="beat-recipe-title">The simplest beat that works</div>
+        <div class="beat-recipe-steps">
+          <div class="br-step">
+            <span class="br-num">1</span>
+            <div><strong>Snare on beats 2 and 4.</strong> This is the backbeat — the most important rule in drumming. Get this right first, everything else is decoration.</div>
+          </div>
+          <div class="br-step">
+            <span class="br-num">2</span>
+            <div><strong>Kick on beat 1.</strong> Add beat 3 for a rock feel, or only beat 1 for something more sparse. Experiment from there.</div>
+          </div>
+          <div class="br-step">
+            <span class="br-num">3</span>
+            <div><strong>Hi-hat on every 8th note</strong> (every other step) for a steady groove. Move to every step for urgency, or just the offbeats for a bouncy feel.</div>
+          </div>
+        </div>
+      </div>
+
       <div class="beat-patterns">
         <div v-for="(pattern, pi) in BEAT_PATTERNS" :key="pattern.name" class="beat-pattern">
           <div class="bp-header">
             <div class="bp-header-top">
               <span class="bp-name">{{ pattern.name }}</span>
-              <button
-                class="bp-play-btn"
-                :class="{ active: loadedPattern === pi && drumIsPlaying }"
-                @click="loadBeat(pi)"
-              >{{ loadedPattern === pi && drumIsPlaying ? 'Stop' : 'Play' }}</button>
+              <div class="bp-btn-group">
+                <button
+                  class="bp-play-btn"
+                  :class="{ active: loadedPattern === pi && drumIsPlaying }"
+                  @click="loadBeat(pi)"
+                >{{ loadedPattern === pi && drumIsPlaying ? 'Stop' : 'Play' }}</button>
+                <button class="bp-edit-btn" @click="editBeat(pi)">Edit &rarr;</button>
+              </div>
             </div>
             <span class="bp-desc">{{ pattern.desc }}</span>
           </div>
@@ -486,8 +564,9 @@ onUnmounted(() => {
                 :key="si"
                 class="bp-cell"
                 :class="{
-                  on:         on === 1,
-                  'beat-1':   si % 4 === 0,
+                  on:      on === 1,
+                  'beat-1': si % 4 === 0,
+                  current: drumIsPlaying && loadedPattern === pi && si === drumCurrentStep,
                 }"
               ></div>
             </div>
@@ -525,7 +604,7 @@ onUnmounted(() => {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 /* ── Step navigation ──────────────────────────────────────────────────────── */
@@ -596,7 +675,7 @@ onUnmounted(() => {
 .step-content {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.35rem;
 }
 
 .step-intro {
@@ -865,6 +944,48 @@ onUnmounted(() => {
 .scale-tile.active.sharp { color: var(--text3); }
 .scale-tile.root.sharp { color: var(--accent); font-size: 0.82rem; }
 
+.scale-tile.playing {
+  border-color: var(--accent);
+  background: var(--selected);
+  color: var(--accent-hi);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.scale-display-legend {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.sdl-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  color: var(--text4);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sdl-item::before {
+  content: '';
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.sdl-root::before {
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+}
+
+.sdl-scale::before {
+  background: var(--raised);
+  border: 1px solid var(--border2);
+}
+
 .scale-meta {
   display: flex;
   align-items: center;
@@ -905,6 +1026,16 @@ onUnmounted(() => {
   border-color: var(--accent);
 }
 
+/* ── Section labels ───────────────────────────────────────────────────────── */
+.section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text4);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: -0.25rem;
+}
+
 /* ── Diatonic row ─────────────────────────────────────────────────────────── */
 .diatonic-row {
   display: flex;
@@ -937,6 +1068,12 @@ onUnmounted(() => {
   background: var(--selected);
   border-color: var(--accent);
   box-shadow: 0 0 6px var(--accent-glow);
+}
+
+.diatonic-chord.playing {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
 }
 
 .diatonic-chord.min { border-color: var(--border); }
@@ -1033,6 +1170,13 @@ onUnmounted(() => {
 .prog-chord-pill.min { color: var(--accent-lo); }
 .prog-chord-pill.dim { color: var(--text3); }
 
+.prog-chord-pill.playing {
+  background: var(--selected);
+  border-color: var(--accent);
+  color: var(--accent-hi);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
 .prog-songs {
   font-size: 0.76rem;
   color: var(--text4);
@@ -1054,12 +1198,19 @@ onUnmounted(() => {
 }
 
 .ic-chord {
-  padding: 0.55rem 0.7rem;
+  padding: 0.55rem 0.7rem 0.3rem;
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--card-color);
-  border-bottom: 1px solid var(--border);
   letter-spacing: 0.03em;
+}
+
+.ic-def {
+  padding: 0 0.7rem 0.5rem;
+  font-size: 0.7rem;
+  color: var(--text4);
+  line-height: 1.45;
+  border-bottom: 1px solid var(--border);
 }
 
 .ic-scales {
@@ -1172,6 +1323,58 @@ onUnmounted(() => {
   letter-spacing: 0.05em;
 }
 
+/* ── Beat recipe ──────────────────────────────────────────────────────────── */
+.beat-recipe {
+  background: var(--raised);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.beat-recipe-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.beat-recipe-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.br-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.84rem;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.br-step strong { color: var(--accent); font-weight: 600; }
+
+.br-num {
+  flex-shrink: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-mid);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1rem;
+}
+
 /* ── Beats ────────────────────────────────────────────────────────────────── */
 .beat-patterns {
   display: flex;
@@ -1202,7 +1405,14 @@ onUnmounted(() => {
   gap: 0.75rem;
 }
 
-.bp-play-btn {
+.bp-btn-group {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.bp-play-btn,
+.bp-edit-btn {
   padding: 0.3rem 0.8rem;
   border-radius: 5px;
   border: 1px solid var(--accent-mid);
@@ -1212,11 +1422,11 @@ onUnmounted(() => {
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  flex-shrink: 0;
   transition: background 0.15s, border-color 0.15s;
 }
 
-.bp-play-btn:hover {
+.bp-play-btn:hover,
+.bp-edit-btn:hover {
   background: var(--accent-bg);
   border-color: var(--accent);
 }
@@ -1225,6 +1435,15 @@ onUnmounted(() => {
   background: var(--accent-bg);
   border-color: var(--accent);
   color: var(--accent-hi);
+}
+
+.bp-edit-btn {
+  color: var(--text3);
+  border-color: var(--border2);
+}
+
+.bp-edit-btn:hover {
+  color: var(--accent);
 }
 
 .bp-name {
@@ -1246,6 +1465,7 @@ onUnmounted(() => {
   gap: 0.25rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.5rem;
 }
 
 .bp-beat-nums,
@@ -1295,6 +1515,16 @@ onUnmounted(() => {
 .bp-cell.on.beat-1 {
   border-left-color: var(--accent);
   background: var(--accent-bg);
+}
+
+.bp-cell.current {
+  border-color: var(--accent);
+  background: var(--border2);
+}
+
+.bp-cell.on.current {
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .beat-tips {
