@@ -21,7 +21,7 @@ const pianoActiveIndices = computed(() =>
 <template>
   <!-- Pad mode: mini pad grid + press labels -->
   <template v-if="displayMode === 'pad'">
-    <div class="flex-col gap-05 my-1" style="margin: 0.25rem 0">
+    <div class="mini-grid flex-col gap-05 my-1" style="margin: 0.25rem 0">
       <div class="mini-row" v-for="(row, ri) in rows" :key="ri" :style="{ display: 'grid', gap: '3px', gridTemplateColumns: `repeat(${row.length}, 1fr)` }">
         <div
           v-for="pad in row"
@@ -38,19 +38,20 @@ const pianoActiveIndices = computed(() =>
         </div>
       </div>
     </div>
-    <div class="flex items-center gap-05 flex-wrap justify-center">
+    <div class="press-labels flex items-center gap-05 flex-wrap justify-center">
       <span class="text-tiny text-dim" style="margin-right: 2px">press</span>
-      <span v-for="lbl in pressLabels" :key="lbl" class="chip p-1 text-tiny text-bold text-accent" style="padding: 1px 5px">{{ lbl }}</span>
+      <span v-for="lbl in pressLabels" :key="lbl" class="press-badge chip p-1 text-tiny text-bold text-accent" style="padding: 1px 5px">{{ lbl }}</span>
     </div>
   </template>
 
   <!-- Notes mode: note name badges -->
   <template v-else-if="displayMode === 'notes'">
-    <div class="flex-wrap gap-1 justify-center my-1" style="margin: 0.25rem 0">
+    <div class="note-badges flex-wrap gap-1 justify-center my-1" style="margin: 0.25rem 0">
       <span
         v-for="n in noteNames"
         :key="n"
-        class="chip text-small text-bold text-accent"
+        class="note-badge chip text-small text-bold text-accent"
+        :class="{ root: n === NOTES[chordRootIdx] }"
         :style="n === NOTES[chordRootIdx] ? { background: 'var(--rust-bg)', borderColor: 'var(--rust)', color: 'var(--rust-hi)' } : {}"
       >{{ n }}</span>
     </div>

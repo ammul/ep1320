@@ -377,7 +377,8 @@ onUnmounted(() => {
       <button
         v-for="(s, i) in STEPS"
         :key="s.id"
-        class="flex items-center gap-2 p-2"
+        class="step-btn flex items-center gap-2 p-2"
+        :class="{ active: step === s.id, done: i < stepIndex }"
         :style="{
           opacity: step === s.id ? 1 : 0.4,
           border: step === s.id ? '1px solid var(--accent)' : '1px solid transparent',
@@ -391,7 +392,7 @@ onUnmounted(() => {
           color: i < stepIndex ? 'white' : (step === s.id ? 'var(--bg)' : 'var(--accent)'),
           borderColor: i < stepIndex ? 'var(--good)' : 'var(--accent-mid)'
         }">{{ i + 1 }}</span>
-        <span class="text-tiny text-bold text-uppercase letter-spacing-wide hidden-mobile" style="display: var(--display-mobile-none)">{{ s.label }}</span>
+        <span class="step-label text-tiny text-bold text-uppercase letter-spacing-wide hidden-mobile" style="display: var(--display-mobile-none)">{{ s.label }}</span>
       </button>
     </div>
 
@@ -407,13 +408,13 @@ onUnmounted(() => {
       <div class="card flex items-center justify-between min-h-6" style="min-height: 6rem">
         <template v-if="rootNoteIdx !== null">
           <div class="flex-col">
-            <p class="m-0 text-accent text-bold" style="font-size: 1.5rem">{{ CHROMATIC[rootNoteIdx] }}</p>
+            <p class="rr-name m-0 text-accent text-bold" style="font-size: 1.5rem">{{ CHROMATIC[rootNoteIdx] }}</p>
             <p class="m-0 text-muted text-tiny text-uppercase letter-spacing-wide">your root note</p>
           </div>
-          <button class="btn primary text-tiny text-bold letter-spacing-wide" @click="playRootOctave">Hear it one octave up</button>
+          <button class="rr-octave-btn btn primary text-tiny text-bold letter-spacing-wide" @click="playRootOctave">Hear it one octave up</button>
         </template>
         <template v-else>
-          <div class="text-muted text-bold">Tap any note to set your root</div>
+          <div class="rr-hint text-muted text-bold">Tap any note to set your root</div>
         </template>
       </div>
 
@@ -437,32 +438,32 @@ onUnmounted(() => {
     <div v-if="step === 'intervals'" class="flex-col gap-6">
       <p class="text-muted" style="line-height: 1.6">Tap any two notes - hear the sound and see the <strong>interval</strong> between them.</p>
 
-      <NoteStrip :from="fromIdx" :to="toIdx" @pick="pickNote" />
+      <NoteStrip class="note-strip" :from="fromIdx" :to="toIdx" @pick="pickNote" />
 
       <div class="card flex items-center justify-between min-h-7" style="min-height: 7rem">
         <template v-if="intervalInfo">
           <div class="flex-col">
-            <p class="m-0 text-accent text-bold" style="font-size: 1.5rem">{{ intervalInfo.name }}</p>
+            <p class="iv-name m-0 text-accent text-bold" style="font-size: 1.5rem">{{ intervalInfo.name }}</p>
             <p class="m-0 text-muted text-tiny text-uppercase letter-spacing-wide">{{ intervalInfo.semi }} semitone{{ intervalInfo.semi !== 1 ? 's' : '' }}</p>
             <p class="m-0 text-small" style="margin-top: 0.2rem">{{ intervalInfo.feel }}</p>
           </div>
-          <div v-if="fromIdx !== null && toIdx !== null" class="text-tiny text-dim text-bold letter-spacing-wide text-uppercase">
+          <div v-if="fromIdx !== null && toIdx !== null" class="iv-path text-tiny text-dim text-bold letter-spacing-wide text-uppercase">
             {{ CHROMATIC[fromIdx] }} → {{ CHROMATIC[toIdx] }}
           </div>
         </template>
         <template v-else-if="fromIdx !== null">
-          <div class="text-muted text-bold">Now pick a second note</div>
+          <div class="iv-hint text-muted text-bold">Now pick a second note</div>
         </template>
         <template v-else>
-          <div class="text-muted text-bold">Pick a starting note</div>
+          <div class="iv-hint text-muted text-bold">Pick a starting note</div>
         </template>
       </div>
 
       <div class="flex-col gap-2">
         <p class="text-dim text-tiny text-bold text-uppercase letter-spacing-wide m-0">All intervals from root — tap to hear</p>
         <div class="flex-wrap gap-1">
-          <button v-for="iv in INTERVALS" :key="iv.semi" class="btn text-tiny flex items-center gap-2"
-            :class="{ primary: intervalInfo && intervalInfo.semi === iv.semi }"
+          <button v-for="iv in INTERVALS" :key="iv.semi" class="ref-item btn text-tiny flex items-center gap-2"
+            :class="{ highlight: intervalInfo && intervalInfo.semi === iv.semi, primary: intervalInfo && intervalInfo.semi === iv.semi }"
             style="padding: 0.25rem 0.5rem"
             @click="pickRefInterval(iv.semi)">
             <span class="text-bold" style="min-width: 0.8rem">{{ iv.semi }}</span>
@@ -489,7 +490,7 @@ onUnmounted(() => {
           <button
             v-for="(sc, si) in SCALES"
             :key="si"
-            class="btn text-small"
+            class="scale-tab btn text-small"
             :class="{ primary: scaleIdx === si }"
             @click="scaleIdx = si"
           >{{ sc.name }}</button>
@@ -511,7 +512,7 @@ onUnmounted(() => {
         <div
           v-for="(note, i) in CHROMATIC"
           :key="i"
-          class="tile"
+          class="scale-tile tile"
           :class="{
             active:   scaleNotes.includes(i),
             root:     i === scaleRoot,
@@ -712,18 +713,18 @@ onUnmounted(() => {
       </div>
 
       <div class="list">
-        <div v-for="(pattern, pi) in BEAT_PATTERNS" :key="pattern.name" class="card flex-col gap-3">
+        <div v-for="(pattern, pi) in BEAT_PATTERNS" :key="pattern.name" class="beat-pattern card flex-col gap-3">
           <div class="flex-col gap-2">
             <div class="flex items-center justify-between gap-4">
               <span class="text-accent text-bold">{{ pattern.name }}</span>
               <div class="flex gap-2">
                 <button
-                  class="btn text-tiny text-bold"
+                  class="bp-play-btn btn text-tiny text-bold"
                   :class="{ primary: loadedPattern === pi && drumIsPlaying }"
                   style="padding: 0.25rem 0.6rem"
                   @click="loadBeat(pi)"
                 >{{ loadedPattern === pi && drumIsPlaying ? 'Stop' : 'Play' }}</button>
-                <button class="btn text-tiny" style="padding: 0.25rem 0.6rem" @click="editBeat(pi)">Edit &rarr;</button>
+                <button class="bp-edit-btn btn text-tiny" style="padding: 0.25rem 0.6rem" @click="editBeat(pi)">Edit &rarr;</button>
               </div>
             </div>
             <p class="text-muted text-tiny m-0" style="line-height: 1.45">{{ pattern.desc }}</p>
@@ -766,9 +767,9 @@ onUnmounted(() => {
 
     <!-- Step footer -->
     <div class="step-footer">
-      <button class="btn" @click="step = STEPS[stepIndex - 1].id" :disabled="stepIndex === 0">← Back</button>
-      <span class="text-tiny text-dim text-bold letter-spacing-wide">{{ stepIndex + 1 }} / {{ STEPS.length }}</span>
-      <button class="btn" @click="step = STEPS[stepIndex + 1].id" :disabled="stepIndex === STEPS.length - 1">Next →</button>
+      <button class="nav-btn btn" @click="step = STEPS[stepIndex - 1].id" :disabled="stepIndex === 0">← Back</button>
+      <span class="step-counter text-tiny text-dim text-bold letter-spacing-wide">{{ stepIndex + 1 }} / {{ STEPS.length }}</span>
+      <button class="nav-btn btn" @click="step = STEPS[stepIndex + 1].id" :disabled="stepIndex === STEPS.length - 1">Next →</button>
     </div>
 
   </div>

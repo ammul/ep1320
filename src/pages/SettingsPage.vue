@@ -44,13 +44,14 @@ function selectSoundStyle(style) {
     </PageHeader>
 
     <section class="settings-section">
-      <p class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">Display</p>
-      <p class="text-muted text-small mb-3">Controls how chords and scales are shown across all tools.</p>
+      <h3 class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">
+Display</h3>
+      <p class="text-muted text-small mb-3">Controls how chords and scales are shown across all tools</p>
       <div class="flex-wrap gap-2">
         <button
           v-for="opt in DISPLAY_OPTIONS"
           :key="opt.value"
-          class="btn text-small"
+          class="option-btn btn text-small"
           :class="{ active: displayMode === opt.value }"
           @click="displayMode = opt.value"
         >{{ opt.label }}</button>
@@ -59,8 +60,9 @@ function selectSoundStyle(style) {
     </section>
 
     <section class="settings-section" v-if="displayMode === 'pad'">
-      <p class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">Pad Layout</p>
-      <p class="text-muted text-small mb-3">Number of columns in the pad grid.</p>
+      <h3 class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">
+Pad Layout</h3>
+      <p class="text-muted text-small mb-3">Number of columns in the pad grid</p>
       <div class="flex-wrap gap-2">
         <button class="btn text-small" :class="{ active: padSize === '4x3' }" @click="padSize = '4x3'">4x3 (12 pads)</button>
         <button class="btn text-small" :class="{ active: padSize === '4x4' }" @click="padSize = '4x4'">4x4 (16 pads)</button>
@@ -68,24 +70,27 @@ function selectSoundStyle(style) {
     </section>
 
     <section class="settings-section">
-      <p class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">Audio</p>
-      <p class="text-muted text-small mb-3">Play sound when tapping notes, chords, and pads.</p>
+      <h3 class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">
+Audio</h3>
+      <p class="text-muted text-small mb-3">Play sound when tapping notes, chords, and pads</p>
       <div class="flex-wrap gap-2">
-        <button class="btn text-small" :class="{ active: soundEnabled }" @click="soundEnabled = true">On</button>
-        <button class="btn text-small" :class="{ active: !soundEnabled }" @click="soundEnabled = false">Off</button>
+        <button class="option-btn btn text-small" :class="{ active: soundEnabled }" @click="soundEnabled = true">On</button>
+        <button class="option-btn btn text-small" :class="{ active: !soundEnabled }" @click="soundEnabled = false">Off</button>
       </div>
     </section>
 
     <section class="settings-section" v-if="soundEnabled">
-      <p class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">Button Sound Style</p>
-      <p class="text-muted text-small mb-3">Timbre used when tapping pads, keys, and tiles.</p>
+      <h3 class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">
+Button Sound Style</h3>
+      <p class="text-muted text-small mb-3">Timbre used when tapping pads, keys, and tiles</p>
       <div class="flex-wrap gap-2">
         <button class="btn text-small" v-for="s in ['synth', 'piano', 'bell', 'pluck']" :key="s" :class="{ active: soundStyle === s }" @click="selectSoundStyle(s)">{{ s.charAt(0).toUpperCase() + s.slice(1) }}</button>
       </div>
     </section>
 
     <section class="settings-section">
-      <p class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">Theme</p>
+      <h3 class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">
+Theme</h3>
       <div class="flex-wrap gap-2">
         <button class="btn text-small" :class="{ active: colorMode === 'dark' }"  @click="colorMode = 'dark'">Dark</button>
         <button class="btn text-small" :class="{ active: colorMode === 'light' }" @click="colorMode = 'light'">Light</button>
@@ -93,7 +98,8 @@ function selectSoundStyle(style) {
     </section>
 
     <section class="settings-section">
-      <p class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">Color Scheme</p>
+      <h3 class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">
+Color Scheme</h3>
       <div class="flex-wrap gap-2">
         <button class="btn text-small" :class="{ active: colorScheme === 'none' }" @click="colorScheme = 'none'">Neutral</button>
         <button v-for="s in ['medieval', 'ko2', 'riddim']" :key="s" class="btn text-small flex items-center gap-2" :class="[s, { active: colorScheme === s }]" @click="colorScheme = s">
@@ -104,8 +110,9 @@ function selectSoundStyle(style) {
     </section>
 
     <section class="settings-section" v-if="midiStatus !== 'unsupported'">
-      <p class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">MIDI</p>
-      <p class="text-muted text-small mb-3">Connect to send chords and notes directly to any MIDI device.</p>
+      <h3 class="text-accent text-bold text-tiny text-uppercase letter-spacing-wide mb-1">
+MIDI</h3>
+      <p class="text-muted text-small mb-3">Connect to send chords and notes directly to any MIDI device</p>
 
       <div class="mt-1">
         <template v-if="midiStatus === 'idle'">
@@ -123,11 +130,11 @@ function selectSoundStyle(style) {
             </div>
             <button class="btn text-tiny text-bold" @click="disconnectMidi">Disconnect</button>
           </div>
-          <div class="flex items-center gap-3 mt-4">
+          <div class="octave-row flex items-center gap-3 mt-4">
             <span class="text-tiny text-bold text-dim text-uppercase letter-spacing-wide" style="min-width: 4rem">Octave</span>
-            <button class="btn p-0 flex items-center justify-center" style="width: 1.8rem; height: 1.8rem" @click="octave = Math.max(0, octave - 1)">−</button>
+            <button class="octave-btn btn p-0 flex items-center justify-center" style="width: 1.8rem; height: 1.8rem" @click="octave = Math.max(0, octave - 1)">−</button>
             <span class="text-bold" style="min-width: 1.2rem; text-align: center">{{ octave }}</span>
-            <button class="btn p-0 flex items-center justify-center" style="width: 1.8rem; height: 1.8rem" @click="octave = Math.min(9, octave + 1)">+</button>
+            <button class="octave-btn btn p-0 flex items-center justify-center" style="width: 1.8rem; height: 1.8rem" @click="octave = Math.min(9, octave + 1)">+</button>
           </div>
         </template>
 
