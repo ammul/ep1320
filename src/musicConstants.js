@@ -47,7 +47,7 @@ export const FLAT_MAP = { Ab: 'G#', Bb: 'A#', Cb: 'B', Db: 'C#', Eb: 'D#', Fb: '
 // Guitar standard tuning: open string note indices (E2, A2, D3, G3, B3, E4)
 export const OPEN_STRINGS = [7, 0, 5, 10, 2, 7]
 export const STRING_NAMES = ['E', 'A', 'D', 'G', 'B', 'e']
-export const FRET_COUNT = 12
+export const FRET_COUNT = 7
 
 // Semitone conversion: A-based index (0-11) <-> C-based semitone (0-11)
 export const NOTE_TO_SEMI = [9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8]

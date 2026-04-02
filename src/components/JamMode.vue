@@ -481,6 +481,7 @@ select:focus { border-color: var(--accent); }
 /* Guitar neck */
 .guitar-neck-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin-bottom: 0.5rem;
 }
 
@@ -488,7 +489,7 @@ select:focus { border-color: var(--accent); }
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-width: 600px;
+  min-width: 380px;
 }
 
 .neck-row {
@@ -516,7 +517,7 @@ select:focus { border-color: var(--accent); }
   border-right: 1px solid var(--border3);
   position: relative;
   user-select: none;
-  touch-action: none;
+  touch-action: pan-x;
   cursor: pointer;
 }
 

@@ -47,6 +47,11 @@
   --error-text: #be6452;
   --error-text2: #9e5444;
 
+  --good: #5aaa50;
+  --good-dim: #3d7838;
+  --bad: #bb6060;
+  --bad-dim: #884444;
+
   --midi-ok: #5cb85c;
   --midi-err: #d9534f;
 
@@ -111,6 +116,11 @@ html.light {
   --rust-hi: #993010;
   --rust-bg: #f0e4de;
   --rust-glow: rgba(187, 68, 32, 0.2);
+
+  --good: #2a7a22;
+  --good-dim: #1e5818;
+  --bad: #943030;
+  --bad-dim: #6c2020;
 
   --error-bg: #faeae4;
   --error-bd: #d09080;
@@ -179,6 +189,11 @@ html.medieval:not(.light) {
   --rust-bg: #2e1a10;
   --rust-glow: rgba(200, 90, 40, 0.3);
 
+  --good: #5aaa50;
+  --good-dim: #3d7838;
+  --bad: #bb6060;
+  --bad-dim: #884444;
+
   --error-bg: #2e1c14;
   --error-bd: #6a3820;
   --error-text: #c07050;
@@ -243,6 +258,11 @@ html.light.medieval {
   --rust-hi: #8c3412;
   --rust-bg: #f5e8e0;
   --rust-glow: rgba(184, 72, 24, 0.2);
+
+  --good: #2a7a22;
+  --good-dim: #1e5818;
+  --bad: #943030;
+  --bad-dim: #6c2020;
 
   --error-bg: #f8eae4;
   --error-bd: #d09080;

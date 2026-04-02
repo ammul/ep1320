@@ -1724,8 +1724,8 @@ onUnmounted(() => {
   padding-bottom: 0.25rem;
 }
 
-.ie-col-label.good { color: #7aad6e; }
-.ie-col-label.bad  { color: #c07070; }
+.ie-col-label.good { color: var(--good); }
+.ie-col-label.bad  { color: var(--bad); }
 
 .ie-note-btn {
   display: flex;
@@ -1744,11 +1744,11 @@ onUnmounted(() => {
 
 .ie-note-btn:hover { background: var(--surface); }
 
-.ie-note-btn.good { border-left: 3px solid #4e8a44; }
-.ie-note-btn.bad  { border-left: 3px solid #8a4444; }
+.ie-note-btn.good { border-left: 3px solid var(--good-dim); }
+.ie-note-btn.bad  { border-left: 3px solid var(--bad-dim); }
 
-.ie-note-btn.good:hover { border-color: #7aad6e; border-left-color: #7aad6e; }
-.ie-note-btn.bad:hover  { border-color: #c07070; border-left-color: #c07070; }
+.ie-note-btn.good:hover { border-color: var(--good); border-left-color: var(--good); }
+.ie-note-btn.bad:hover  { border-color: var(--bad);  border-left-color: var(--bad); }
 
 .ie-note-name {
   font-size: 0.9rem;
