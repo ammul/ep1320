@@ -111,11 +111,11 @@ describe('Step 1: Root Notes', () => {
   it('sharp notes have the sharp class', () => {
     const wrapper = mount(LearnMode)
     const pills = wrapper.findAll('.note-pill')
-    // IS_SHARP = {1,3,6,8,10}: C#, D#, F#, G#, A#
-    expect(pills[1].classes()).toContain('sharp')  // C#
-    expect(pills[3].classes()).toContain('sharp')  // D#
-    expect(pills[0].classes()).not.toContain('sharp') // C
-    expect(pills[2].classes()).not.toContain('sharp') // D
+    // NOTES is A-based: A=0, A#=1, B=2, C=3, C#=4, D=5, D#=6, E=7, F=8, F#=9, G=10, G#=11
+    expect(pills[1].classes()).toContain('sharp')  // A#
+    expect(pills[4].classes()).toContain('sharp')  // C#
+    expect(pills[0].classes()).not.toContain('sharp') // A
+    expect(pills[2].classes()).not.toContain('sharp') // B
   })
 
   it('shows the octave button after picking a note', async () => {

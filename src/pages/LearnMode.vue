@@ -2,6 +2,7 @@
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { playNote, playChord, stopAllNotes } from '@/audio/audioEngine.js'
 import { pattern as drumPattern, play as drumPlay, pause as drumPause, isPlaying as drumIsPlaying, currentStep as drumCurrentStep } from '@/audio/drumEngine.js'
+import NoteStripPicker from '@/components/ui/NoteStripPicker.vue'
 
 const emit = defineEmits(['navigate'])
 
@@ -386,15 +387,10 @@ onUnmounted(() => {
       <p class="step-intro">Every piece of music orbits a home note — the <strong>root</strong>. When a melody lands on it, it sounds resolved. When it moves away, it creates tension. Everything else — scales, chords, keys — is named and measured relative to this anchor.</p>
 
       <div class="root-note-picker">
-        <div class="note-strip">
-          <button
-            v-for="(note, i) in CHROMATIC"
-            :key="i"
-            class="note-pill"
-            :class="{ sharp: IS_SHARP.has(i), from: rootNoteIdx === i }"
-            @pointerdown.prevent="pickRootNote(i)"
-          >{{ note }}</button>
-        </div>
+        <NoteStripPicker
+          :from-index="rootNoteIdx"
+          @note-down="pickRootNote"
+        />
       </div>
 
       <div class="root-result">
@@ -432,19 +428,11 @@ onUnmounted(() => {
     <div v-if="step === 1" class="step-content">
       <p class="step-intro">Tap any two notes - hear the sound and see the <strong>interval</strong> between them.</p>
 
-      <div class="note-strip">
-        <button
-          v-for="(note, i) in CHROMATIC"
-          :key="i"
-          class="note-pill"
-          :class="{
-            sharp:  IS_SHARP.has(i),
-            from:   fromIdx === i,
-            to:     toIdx === i,
-          }"
-          @pointerdown.prevent="pickNote(i)"
-        >{{ note }}</button>
-      </div>
+      <NoteStripPicker
+        :from-index="fromIdx"
+        :to-index="toIdx"
+        @note-down="pickNote"
+      />
 
       <div class="interval-result">
         <template v-if="intervalInfo">
@@ -487,15 +475,11 @@ onUnmounted(() => {
 
       <div class="picker-row">
         <span class="picker-label">Root</span>
-        <div class="note-strip small">
-          <button
-            v-for="(note, i) in CHROMATIC"
-            :key="i"
-            class="note-pill"
-            :class="{ sharp: IS_SHARP.has(i), from: scaleRoot === i }"
-            @pointerdown.prevent="pickScaleRoot(i)"
-          >{{ note }}</button>
-        </div>
+        <NoteStripPicker
+          small
+          :from-index="scaleRoot"
+          @note-down="pickScaleRoot"
+        />
       </div>
 
       <div class="picker-row">
@@ -544,15 +528,11 @@ onUnmounted(() => {
 
       <div class="picker-row">
         <span class="picker-label">Key</span>
-        <div class="note-strip small">
-          <button
-            v-for="(note, i) in CHROMATIC"
-            :key="i"
-            class="note-pill"
-            :class="{ sharp: IS_SHARP.has(i), from: progRoot === i }"
-            @pointerdown.prevent="pickProgRoot(i)"
-          >{{ note }}</button>
-        </div>
+        <NoteStripPicker
+          small
+          :from-index="progRoot"
+          @note-down="pickProgRoot"
+        />
       </div>
 
       <div class="section-label">Chords in key</div>
@@ -611,15 +591,11 @@ onUnmounted(() => {
 
       <div class="picker-row">
         <span class="picker-label">Root</span>
-        <div class="note-strip small">
-          <button
-            v-for="(note, i) in CHROMATIC"
-            :key="i"
-            class="note-pill"
-            :class="{ sharp: IS_SHARP.has(i), from: chordsRoot === i }"
-            @pointerdown.prevent="chordsRoot = i"
-          >{{ note }}</button>
-        </div>
+        <NoteStripPicker
+          small
+          :from-index="chordsRoot"
+          @note-down="chordsRoot = $event"
+        />
       </div>
 
       <div class="chord-type-list">
@@ -901,49 +877,6 @@ onUnmounted(() => {
 .step-intro strong {
   color: var(--accent);
   font-weight: 600;
-}
-
-/* ── Note strip ───────────────────────────────────────────────────────────── */
-.note-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.note-pill {
-  padding: 0.45rem 0.55rem;
-  min-width: 2.4rem;
-  border-radius: 6px;
-  border: 1px solid var(--border2);
-  background: var(--raised);
-  color: var(--accent);
-  font-size: 0.88rem;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  text-align: center;
-  user-select: none;
-  touch-action: none;
-  transition: background 0.1s, border-color 0.1s, transform 0.07s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.note-pill:hover { background: var(--border); }
-.note-pill:active { transform: scale(0.93); }
-.note-pill.sharp { background: var(--input); color: var(--accent-lo); font-size: 0.8rem; }
-.note-pill.sharp:hover { background: var(--border3); }
-
-.note-pill.from {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--bg);
-}
-
-.note-pill.to {
-  background: var(--selected);
-  border-color: var(--accent);
-  color: var(--accent-hi);
-  box-shadow: 0 0 6px var(--accent-glow);
 }
 
 /* ── Root Notes ───────────────────────────────────────────────────────────── */

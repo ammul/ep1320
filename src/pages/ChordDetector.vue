@@ -9,6 +9,7 @@ import { detectChord } from '@/utils/chordDetect.js'
 import PianoOctave from '@/components/PianoOctave.vue'
 import ModeLayout from '@/components/ModeLayout.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
+import NoteStripPicker from '@/components/ui/NoteStripPicker.vue'
 
 const selected = ref(new Set())
 const pianoOctave = ref(4)
@@ -45,16 +46,6 @@ const pads = computed(() =>
 )
 
 const rows = computed(() => sliceRows(pads.value, cols.value))
-
-// Notes mode: 12 chromatic note buttons
-const noteButtons = computed(() =>
-  NOTES.map((note, i) => ({
-    index: i,
-    note,
-    isSharp: SHARPS.has(note),
-    isSelected: selected.value.has(i),
-  }))
-)
 
 // Guitar mode: fretboard (high e at top)
 const guitarNeck = computed(() =>
@@ -104,17 +95,10 @@ const subtitle = computed(() => {
           </template>
 
           <template #notes>
-            <div class="note-strip">
-              <button
-                v-for="btn in noteButtons"
-                :key="btn.index"
-                class="note-btn"
-                :class="{ sharp: btn.isSharp, selected: btn.isSelected }"
-                @pointerdown.prevent="toggleNote(btn.index)"
-              >
-                {{ btn.note }}
-              </button>
-            </div>
+            <NoteStripPicker
+              :highlight-set="selected"
+              @note-down="toggleNote"
+            />
           </template>
 
           <template #piano>
@@ -240,38 +224,6 @@ const subtitle = computed(() => {
 .pad-note { font-size: 1.4rem; font-weight: 700; color: var(--accent); line-height: 1; }
 .pad.sharp .pad-note { color: var(--accent-lo); }
 .pad.selected .pad-note { color: var(--accent-hi); }
-
-/* Notes mode strip */
-.note-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.note-btn {
-  padding: 0.55rem 0.8rem;
-  border-radius: 6px;
-  border: 1px solid var(--border2);
-  background: var(--raised);
-  color: var(--accent);
-  font-size: 1rem;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  min-width: 3rem;
-  text-align: center;
-  user-select: none;
-  touch-action: none;
-  transition: background 0.1s, border-color 0.1s, transform 0.08s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.note-btn:hover { background: var(--border); }
-.note-btn:active { transform: scale(0.95); }
-.note-btn.sharp { background: var(--input); border-color: var(--border); color: var(--accent-lo); font-size: 0.9rem; }
-.note-btn.sharp:hover { background: var(--border3); }
-.note-btn.selected { background: var(--selected); border-color: var(--accent); color: var(--accent-hi); box-shadow: 0 0 6px var(--accent-glow); }
-.note-btn.selected.sharp { background: var(--sharp-sel); }
 
 /* Guitar neck */
 .guitar-neck-wrap {
