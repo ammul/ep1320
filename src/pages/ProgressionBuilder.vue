@@ -1,11 +1,11 @@
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
-import { displayMode } from '../displayMode.js'
-import { NOTES, LABELS, SHARPS, CHORD_TYPES, CHORD_SUFFIX, FLAT_MAP, NOTE_TO_SEMI } from '../musicConstants.js'
-import { buildRows } from '../musicUtils.js'
-import { padSize } from '../padSize.js'
-import { startNote, stopNote } from '../audioEngine.js'
-import ChordCardBody from './ChordCardBody.vue'
+import { displayMode } from '@/state/displayMode.js'
+import { NOTES, LABELS, SHARPS, CHORD_TYPES, CHORD_SUFFIX, FLAT_MAP, NOTE_TO_SEMI } from '@/constants/musicConstants.js'
+import { buildRows } from '@/utils/musicUtils.js'
+import { padSize } from '@/state/padSize.js'
+import { startNote, stopNote } from '@/audio/audioEngine.js'
+import ChordCardBody from '@/components/ChordCardBody.vue'
 
 const input = ref('D f#m E D')
 

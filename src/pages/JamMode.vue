@@ -1,16 +1,16 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { displayMode } from '../displayMode.js'
-import { padSize } from '../padSize.js'
-import { NOTES, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
-import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
-import { activeInputNotes, midiStatus } from '../midiManager.js'
-import { octave } from '../octave.js'
-import { useNotePlayback } from '../composables/useNotePlayback.js'
-import PianoOctave from './PianoOctave.vue'
-import ScaleLegend from './ScaleLegend.vue'
-import RootNotePicker from './RootNotePicker.vue'
-import ModeLayout from './ModeLayout.vue'
+import { displayMode } from '@/state/displayMode.js'
+import { padSize } from '@/state/padSize.js'
+import { NOTES, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '@/constants/musicConstants.js'
+import { buildGuitarNeck, sliceRows } from '@/utils/musicUtils.js'
+import { activeInputNotes, midiStatus } from '@/audio/midiManager.js'
+import { octave } from '@/state/octave.js'
+import { useNotePlayback } from '@/composables/useNotePlayback.js'
+import PianoOctave from '@/components/PianoOctave.vue'
+import ScaleLegend from '@/components/ScaleLegend.vue'
+import RootNotePicker from '@/components/RootNotePicker.vue'
+import ModeLayout from '@/components/ModeLayout.vue'
 
 const SCALES = [
   {

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
-vi.mock('../midiManager.js', async () => {
+vi.mock('@/audio/midiManager.js', async () => {
   const { ref } = await import('vue')
   return {
     midiStatus: ref('unavailable'),
@@ -14,10 +14,10 @@ vi.mock('../midiManager.js', async () => {
 })
 
 import SettingsPage from './SettingsPage.vue'
-import { displayMode } from '../displayMode.js'
-import { soundEnabled } from '../soundEnabled.js'
-import { soundStyle } from '../soundStyle.js'
-import { octave } from '../octave.js'
+import { displayMode } from '@/state/displayMode.js'
+import { soundEnabled } from '@/state/soundEnabled.js'
+import { soundStyle } from '@/state/soundStyle.js'
+import { octave } from '@/state/octave.js'
 
 beforeEach(() => {
   displayMode.value = 'pad'
@@ -107,7 +107,7 @@ describe('SettingsPage', () => {
     })
 
     it('is visible when MIDI is connected', async () => {
-      const { midiStatus } = await import('../midiManager.js')
+      const { midiStatus } = await import('@/audio/midiManager.js')
       midiStatus.value = 'connected'
       const wrapper = mount(SettingsPage)
       await nextTick()
@@ -116,7 +116,7 @@ describe('SettingsPage', () => {
     })
 
     it('increments octave when + is clicked', async () => {
-      const { midiStatus } = await import('../midiManager.js')
+      const { midiStatus } = await import('@/audio/midiManager.js')
       midiStatus.value = 'connected'
       octave.value = 4
       const wrapper = mount(SettingsPage)
@@ -128,7 +128,7 @@ describe('SettingsPage', () => {
     })
 
     it('decrements octave when − is clicked', async () => {
-      const { midiStatus } = await import('../midiManager.js')
+      const { midiStatus } = await import('@/audio/midiManager.js')
       midiStatus.value = 'connected'
       octave.value = 4
       const wrapper = mount(SettingsPage)
@@ -140,7 +140,7 @@ describe('SettingsPage', () => {
     })
 
     it('does not go below 0', async () => {
-      const { midiStatus } = await import('../midiManager.js')
+      const { midiStatus } = await import('@/audio/midiManager.js')
       midiStatus.value = 'connected'
       octave.value = 0
       const wrapper = mount(SettingsPage)
@@ -152,7 +152,7 @@ describe('SettingsPage', () => {
     })
 
     it('does not go above 9', async () => {
-      const { midiStatus } = await import('../midiManager.js')
+      const { midiStatus } = await import('@/audio/midiManager.js')
       midiStatus.value = 'connected'
       octave.value = 9
       const wrapper = mount(SettingsPage)

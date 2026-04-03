@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { PIANO_WHITE, PIANO_BLACK, NOTES } from '../musicConstants.js'
+import { PIANO_WHITE, PIANO_BLACK, NOTES } from '@/constants/musicConstants.js'
 
 const props = defineProps({
   activeIndices:      { type: Object,  default: () => new Set() }, // Set of A-based indices

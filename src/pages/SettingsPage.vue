@@ -2,15 +2,15 @@
 import { computed } from 'vue'
 
 const emit = defineEmits(['close'])
-import { displayMode } from '../displayMode.js'
-import { playNote } from '../audioEngine.js'
-import { padSize } from '../padSize.js'
-import { colorMode } from '../colorMode.js'
-import { colorScheme } from '../colorScheme.js'
-import { soundEnabled } from '../soundEnabled.js'
-import { soundStyle } from '../soundStyle.js'
-import { midiStatus, midiOutputs, selectedOutputId, initMidi, disconnectMidi } from '../midiManager.js'
-import { octave } from '../octave.js'
+import { displayMode } from '@/state/displayMode.js'
+import { playNote } from '@/audio/audioEngine.js'
+import { padSize } from '@/state/padSize.js'
+import { colorMode } from '@/state/colorMode.js'
+import { colorScheme } from '@/state/colorScheme.js'
+import { soundEnabled } from '@/state/soundEnabled.js'
+import { soundStyle } from '@/state/soundStyle.js'
+import { midiStatus, midiOutputs, selectedOutputId, initMidi, disconnectMidi } from '@/audio/midiManager.js'
+import { octave } from '@/state/octave.js'
 
 const DISPLAY_OPTIONS = [
   { value: 'pad',    label: 'Pad',    desc: 'Chromatic pad grid - pad numbers and note names visible. Layout (4x3 or 4x4) is configurable below.' },

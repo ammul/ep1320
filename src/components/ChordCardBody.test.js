@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import ChordCardBody from './ChordCardBody.vue'
-import { displayMode } from '../displayMode.js'
-import { buildRows } from '../musicUtils.js'
+import { displayMode } from '@/state/displayMode.js'
+import { buildRows } from '@/utils/musicUtils.js'
 
 const baseProps = {
   rows: buildRows(new Set([3, 7, 10]), 3), // C major: C E G, root=C

@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { midiStatus, midiOutputs, selectedOutputId, initMidi, disconnectMidi } from '../midiManager.js'
+import { midiStatus, midiOutputs, selectedOutputId, initMidi, disconnectMidi } from '@/audio/midiManager.js'
 
 function truncate(name, max = 20) {
   return name.length > max ? name.slice(0, max - 1) + '…' : name

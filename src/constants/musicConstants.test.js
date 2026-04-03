@@ -4,7 +4,7 @@ import {
   FLAT_MAP, OPEN_STRINGS, STRING_NAMES, FRET_COUNT,
   NOTE_TO_SEMI, SEMI_TO_NAME, CHORD_DETECT_TYPES,
   PIANO_WHITE, PIANO_BLACK,
-} from './musicConstants.js'
+} from '@/constants/musicConstants.js'
 
 describe('NOTES', () => {
   it('has exactly 12 entries', () => {

@@ -1,13 +1,13 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { displayMode } from '../displayMode.js'
-import { padSize } from '../padSize.js'
-import { NOTES, SHARPS, NOTE_TO_SEMI, FRET_COUNT } from '../musicConstants.js'
-import { playNote } from '../audioEngine.js'
-import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
-import { detectChord } from '../chordDetect.js'
-import PianoOctave from './PianoOctave.vue'
-import ModeLayout from './ModeLayout.vue'
+import { displayMode } from '@/state/displayMode.js'
+import { padSize } from '@/state/padSize.js'
+import { NOTES, SHARPS, NOTE_TO_SEMI, FRET_COUNT } from '@/constants/musicConstants.js'
+import { playNote } from '@/audio/audioEngine.js'
+import { buildGuitarNeck, sliceRows } from '@/utils/musicUtils.js'
+import { detectChord } from '@/utils/chordDetect.js'
+import PianoOctave from '@/components/PianoOctave.vue'
+import ModeLayout from '@/components/ModeLayout.vue'
 
 const selected = ref(new Set())
 const pianoOctave = ref(4)

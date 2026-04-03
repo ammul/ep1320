@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, onUnmounted } from 'vue'
-import { playNote, playChord, stopAllNotes } from '../audioEngine.js'
-import { pattern as drumPattern, play as drumPlay, pause as drumPause, isPlaying as drumIsPlaying, currentStep as drumCurrentStep } from '../drumEngine.js'
+import { playNote, playChord, stopAllNotes } from '@/audio/audioEngine.js'
+import { pattern as drumPattern, play as drumPlay, pause as drumPause, isPlaying as drumIsPlaying, currentStep as drumCurrentStep } from '@/audio/drumEngine.js'
 
 const emit = defineEmits(['navigate'])
 

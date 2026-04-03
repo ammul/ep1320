@@ -28,7 +28,7 @@ vi.stubGlobal('AudioContext', vi.fn(() => ({
 })))
 
 import DrumComputer from './DrumComputer.vue'
-import { pattern, bpm, isPlaying, toggleCell, INSTRUMENTS } from '../drumEngine.js'
+import { pattern, bpm, isPlaying, toggleCell, INSTRUMENTS } from '@/audio/drumEngine.js'
 
 beforeEach(() => {
   // Reset state

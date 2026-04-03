@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import {
   midiStatus, midiOutputs, selectedOutputId, midiChannel, activeInputNotes,
   initMidi, disconnectMidi, noteOn, noteOff, chordOn, chordOff,
-} from './midiManager.js'
+} from '@/audio/midiManager.js'
 
 function makeMockAccess(outputs = [], inputs = []) {
   return {

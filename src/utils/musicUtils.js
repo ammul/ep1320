@@ -1,4 +1,4 @@
-import { NOTES, LABELS, SHARPS, OPEN_STRINGS, STRING_NAMES, FRET_COUNT } from './musicConstants.js'
+import { NOTES, LABELS, SHARPS, OPEN_STRINGS, STRING_NAMES, FRET_COUNT } from '@/constants/musicConstants.js'
 
 // Build a 4xN pad grid from a set of active note indices.
 // cols=3 gives 4x3 (12 pads), cols=4 gives 4x4 (16 pads).

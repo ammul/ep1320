@@ -1,13 +1,13 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { displayMode } from '../displayMode.js'
-import { NOTES, LABELS, CHORD_TYPES, CHORD_SUFFIX } from '../musicConstants.js'
-import { buildRows } from '../musicUtils.js'
-import { padSize } from '../padSize.js'
-import ChordCardBody from './ChordCardBody.vue'
-import RootNotePicker from './RootNotePicker.vue'
-import { midiStatus, midiChannel, chordOn, chordOff } from '../midiManager.js'
-import { startNote, stopNote, stopAllNotes, playNote } from '../audioEngine.js'
+import { displayMode } from '@/state/displayMode.js'
+import { NOTES, LABELS, CHORD_TYPES, CHORD_SUFFIX } from '@/constants/musicConstants.js'
+import { buildRows } from '@/utils/musicUtils.js'
+import { padSize } from '@/state/padSize.js'
+import ChordCardBody from '@/components/ChordCardBody.vue'
+import RootNotePicker from '@/components/RootNotePicker.vue'
+import { midiStatus, midiChannel, chordOn, chordOff } from '@/audio/midiManager.js'
+import { startNote, stopNote, stopAllNotes, playNote } from '@/audio/audioEngine.js'
 
 const GENRES = [
   { id: 'all',       label: 'All' },

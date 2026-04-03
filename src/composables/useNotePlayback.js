@@ -1,5 +1,5 @@
 import { ref, onUnmounted } from 'vue'
-import { startNote, stopNote } from '../audioEngine.js'
+import { startNote, stopNote } from '@/audio/audioEngine.js'
 
 export function useNotePlayback() {
   const pressedMidi = ref(new Map())

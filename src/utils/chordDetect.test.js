@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { detectChord } from './chordDetect.js'
-import { NOTES, NOTE_TO_SEMI } from './musicConstants.js'
+import { detectChord } from '@/utils/chordDetect.js'
+import { NOTES, NOTE_TO_SEMI } from '@/constants/musicConstants.js'
 
 // Helper: given note names, return A-based indices
 function noteIndices(...names) {

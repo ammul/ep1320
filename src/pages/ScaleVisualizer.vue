@@ -1,13 +1,13 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { displayMode } from '../displayMode.js'
-import { padSize } from '../padSize.js'
-import { NOTES, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '../musicConstants.js'
-import { buildGuitarNeck, sliceRows } from '../musicUtils.js'
-import { useNotePlayback } from '../composables/useNotePlayback.js'
-import PianoOctave from './PianoOctave.vue'
-import RootNotePicker from './RootNotePicker.vue'
-import ModeLayout from './ModeLayout.vue'
+import { displayMode } from '@/state/displayMode.js'
+import { padSize } from '@/state/padSize.js'
+import { NOTES, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '@/constants/musicConstants.js'
+import { buildGuitarNeck, sliceRows } from '@/utils/musicUtils.js'
+import { useNotePlayback } from '@/composables/useNotePlayback.js'
+import PianoOctave from '@/components/PianoOctave.vue'
+import RootNotePicker from '@/components/RootNotePicker.vue'
+import ModeLayout from '@/components/ModeLayout.vue'
 
 const SCALES = [
   { id: '12t',  label: '12T - Chromatic',         intervals: [0,1,2,3,4,5,6,7,8,9,10,11], description: 'All 12 semitones. No inherent tonality - every key plays, nothing is highlighted. Useful for atonal passages or when you want full chromatic access.' },

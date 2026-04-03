@@ -1,5 +1,5 @@
 <script setup>
-import { NOTES, SHARPS } from '../musicConstants.js'
+import { NOTES, SHARPS } from '@/constants/musicConstants.js'
 
 defineProps({ modelValue: String })
 defineEmits(['update:modelValue'])

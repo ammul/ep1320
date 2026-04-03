@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { OPEN_STRINGS } from '../musicConstants.js'
+import { OPEN_STRINGS } from '@/constants/musicConstants.js'
 
 // Chord shapes: fret offsets from root position on root string, -1 = muted
 // rootString: which string (0=low E … 5=high e) carries the root note

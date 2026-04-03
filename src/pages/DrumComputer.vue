@@ -1,5 +1,5 @@
 <script setup>
-import { pattern, bpm, isPlaying, currentStep, play, pause, clearPattern, toggleCell, INSTRUMENTS } from '../drumEngine.js'
+import { pattern, bpm, isPlaying, currentStep, play, pause, clearPattern, toggleCell, INSTRUMENTS } from '@/audio/drumEngine.js'
 </script>
 
 <template>
