@@ -3,6 +3,7 @@ import { ref, computed, watch, onUnmounted } from 'vue'
 import { playNote, playChord, stopAllNotes } from '@/audio/audioEngine.js'
 import { pattern as drumPattern, play as drumPlay, pause as drumPause, isPlaying as drumIsPlaying, currentStep as drumCurrentStep } from '@/audio/drumEngine.js'
 import NoteStripPicker from '@/components/ui/NoteStripPicker.vue'
+import { NOTE_TO_SEMI } from '@/constants/musicConstants.js'
 
 const emit = defineEmits(['navigate'])
 
@@ -121,13 +122,13 @@ const rootNoteIdx = ref(null)
 
 function pickRootNote(i) {
   rootNoteIdx.value = i
-  playNote(60 + i)
+  playNote(60 + NOTE_TO_SEMI[i])
 }
 
 function playRootOctave() {
   if (rootNoteIdx.value === null) return
-  playNote(60 + rootNoteIdx.value)
-  setTimeout(() => playNote(72 + rootNoteIdx.value, 0.8), 550)
+  playNote(60 + NOTE_TO_SEMI[rootNoteIdx.value])
+  setTimeout(() => playNote(72 + NOTE_TO_SEMI[rootNoteIdx.value], 0.8), 550)
 }
 
 // ── Step 2: Intervals ────────────────────────────────────────────────────────
@@ -137,14 +138,14 @@ const toIdx   = ref(null)
 function pickNote(i) {
   if (fromIdx.value === null) {
     fromIdx.value = i
-    playNote(60 + i)
+    playNote(60 + NOTE_TO_SEMI[i])
   } else if (toIdx.value === null && i !== fromIdx.value) {
     toIdx.value = i
-    playChord([60 + fromIdx.value, 60 + i])
+    playChord([60 + NOTE_TO_SEMI[fromIdx.value], 60 + NOTE_TO_SEMI[i]])
   } else {
     fromIdx.value = i
     toIdx.value   = null
-    playNote(60 + i)
+    playNote(60 + NOTE_TO_SEMI[i])
   }
 }
 

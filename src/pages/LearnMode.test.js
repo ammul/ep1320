@@ -97,8 +97,8 @@ describe('Step 1: Root Notes', () => {
 
   it('calls playNote with the correct MIDI note', async () => {
     const wrapper = mount(LearnMode)
-    await wrapper.findAll('.note-pill')[2].trigger('pointerdown') // D (index 2)
-    expect(playNote).toHaveBeenCalledWith(62) // 60 + 2
+    await wrapper.findAll('.note-pill')[2].trigger('pointerdown') // B (index 2, A-based)
+    expect(playNote).toHaveBeenCalledWith(71) // 60 + NOTE_TO_SEMI[2] = 60 + 11
   })
 
   it('selected note gets the from class', async () => {
