@@ -1287,6 +1287,15 @@ src/components/learn/LearnStepNav.test.js
 43. ✅ Finalize `LearnMode.vue` as 64-line orchestrator (was 2,077 lines)
 44. ✅ **TEST:** `npm test` — 268 tests pass
 
+### ✅ Phase 8 DONE — Constants Extraction (268 tests pass)
+45. ✅ Create `src/constants/scales.js` — JAM_SCALES, VISUALIZER_SCALES, LEARN_SCALES
+46. ✅ Create `src/constants/intervals.js` — INTERVALS
+47. ✅ Create `src/constants/progressions.js` — ALL_PROGRESSIONS, GENRES, LEARN_PROGS
+48. ✅ Create `src/constants/chordTypes.js` — CHORD_TYPES, IMPROV_CHORD_TYPES, IMPROV_EXAMPLES
+49. ✅ Create `src/constants/beatPatterns.js` — BEAT_PATTERNS, BEAT_TIPS
+50. ✅ Update 9 components to import from constants/ instead of inline arrays
+51. ✅ **TEST:** `npm test` — 268 tests pass
+
 ---
 
 ## Metrics
