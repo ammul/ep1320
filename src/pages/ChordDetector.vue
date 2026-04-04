@@ -6,8 +6,8 @@ import { NOTES, SHARPS, NOTE_TO_SEMI, FRET_COUNT } from '@/constants/musicConsta
 import { playNote } from '@/audio/audioEngine.js'
 import { buildGuitarNeck, sliceRows } from '@/utils/musicUtils.js'
 import { detectChord } from '@/utils/chordDetect.js'
-import PianoOctave from '@/components/PianoOctave.vue'
-import ModeLayout from '@/components/ModeLayout.vue'
+import PianoOctave from '@/components/music/PianoOctave.vue'
+import ModeLayout from '@/components/layout/ModeLayout.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import NoteStripPicker from '@/components/ui/NoteStripPicker.vue'
 

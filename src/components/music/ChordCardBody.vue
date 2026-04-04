@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 import { displayMode } from '@/state/displayMode.js'
 import { NOTES } from '@/constants/musicConstants.js'
-import GuitarChordDiagram from '@/components/GuitarChordDiagram.vue'
-import PianoOctave from '@/components/PianoOctave.vue'
+import GuitarChordDiagram from '@/components/music/GuitarChordDiagram.vue'
+import PianoOctave from '@/components/music/PianoOctave.vue'
 
 const props = defineProps({
   rows:         { type: Array,  required: true },

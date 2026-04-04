@@ -5,7 +5,7 @@ import { NOTES, LABELS, SHARPS, CHORD_TYPES, CHORD_SUFFIX, FLAT_MAP, NOTE_TO_SEM
 import { buildRows } from '@/utils/musicUtils.js'
 import { padSize } from '@/state/padSize.js'
 import { startNote, stopNote } from '@/audio/audioEngine.js'
-import ChordCardBody from '@/components/ChordCardBody.vue'
+import ChordCardBody from '@/components/music/ChordCardBody.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 
 const input = ref('D f#m E D')
