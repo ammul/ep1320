@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { displayMode } from '@/state/displayMode.js'
-import { NOTES, LABELS, CHORD_TYPES, CHORD_SUFFIX } from '@/constants/musicConstants.js'
+import { NOTES, CHORD_TYPES, CHORD_SUFFIX } from '@/constants/musicConstants.js'
 import { buildRows } from '@/utils/musicUtils.js'
 import { padSize } from '@/state/padSize.js'
 import ChordCardBody from '@/components/music/ChordCardBody.vue'
@@ -10,6 +10,8 @@ import { midiStatus, midiChannel, chordOn, chordOff } from '@/audio/midiManager.
 import { startNote, stopNote, stopAllNotes, playNote } from '@/audio/audioEngine.js'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { GENRES, ALL_PROGRESSIONS } from '@/constants/progressions.js'
+import GenreTabs from '@/components/progressions/GenreTabs.vue'
+import ProgressionSection from '@/components/progressions/ProgressionSection.vue'
 
 const SOLO_ADVICE = {
   maj:  { scale: 'Major pentatonic', why: 'Open and resolved - all 5 notes sound great over a major chord.' },
@@ -24,7 +26,7 @@ const SOLO_ADVICE = {
 
 const selectedRoot   = ref('A')
 const selectedGenre  = ref('all')
-const selectedId     = ref('pop-1')
+const expandedId     = ref('pop-1')
 const showInfoIdx    = ref(null)
 
 const chordOctave   = ref(4)
@@ -32,6 +34,7 @@ const bpm           = ref(80)
 const beatsPerChord = ref(4)
 const loopActiveIdx = ref(null)
 const loopPlaying   = ref(false)
+const loopProgressionId = ref(null)
 let _loopTimer      = null
 let _currentMidis   = []
 
@@ -41,13 +44,21 @@ const filteredProgressions = computed(() =>
     : ALL_PROGRESSIONS.filter(p => p.genre === selectedGenre.value)
 )
 
+const majorProgressions = computed(() =>
+  filteredProgressions.value.filter(p => p.key === 'major')
+)
+
+const minorProgressions = computed(() =>
+  filteredProgressions.value.filter(p => p.key === 'minor')
+)
+
 const selectedProgression = computed(() =>
-  ALL_PROGRESSIONS.find(p => p.id === selectedId.value) ?? ALL_PROGRESSIONS[0]
+  ALL_PROGRESSIONS.find(p => p.id === expandedId.value) ?? ALL_PROGRESSIONS[0]
 )
 
 watch(selectedGenre, () => {
-  const still = filteredProgressions.value.find(p => p.id === selectedId.value)
-  if (!still) selectedId.value = filteredProgressions.value[0]?.id ?? ALL_PROGRESSIONS[0].id
+  const still = filteredProgressions.value.find(p => p.id === expandedId.value)
+  if (!still) expandedId.value = filteredProgressions.value[0]?.id ?? ALL_PROGRESSIONS[0].id
   stopLoop()
 })
 
@@ -65,7 +76,7 @@ const chordCards = computed(() =>
       type:         chord.type,
       chordRootIdx,
       rows:         buildRows(padIndices, chordRootIdx, padSize.value === '4x4' ? 4 : 3),
-      pressLabels:  sorted.map(i => LABELS[i]),
+      pressLabels:  sorted.map(i => NOTES[i]),
       noteNames:    sorted.map(i => NOTES[i]),
     }
   })
@@ -89,18 +100,27 @@ function stopPreview(card) {
   cardMidis(card).forEach(m => stopNote(m))
 }
 
-function playLoop() {
-  if (_loopTimer) { stopLoop(); return }
+function playLoop(progressionId) {
+  if (_loopTimer) { stopLoop(); if (loopProgressionId.value === progressionId) return }
+  loopProgressionId.value = progressionId
+  const progression = ALL_PROGRESSIONS.find(p => p.id === progressionId) ?? selectedProgression.value
+  const cards = progression.chords.map((chord, idx) => {
+    const chordRootIdx = (rootIndex.value + chord.degree) % 12
+    return { idx, chordRootIdx, type: chord.type }
+  })
   let idx = 0
   const advance = () => {
     chordOff(_currentMidis)
     _currentMidis.forEach(m => stopNote(m))
     loopActiveIdx.value = idx
-    _currentMidis = cardMidis(chordCards.value[idx])
+    _currentMidis = CHORD_TYPES[cards[idx].type].map(i => {
+      const aMidi = 12 * (chordOctave.value + 1) + 9
+      return aMidi + cards[idx].chordRootIdx + i
+    })
     chordOn(_currentMidis)
     const beatSec = Math.max(0.1, (60 / bpm.value) * beatsPerChord.value - 0.05)
     _currentMidis.forEach(m => playNote(m, beatSec))
-    idx = (idx + 1) % chordCards.value.length
+    idx = (idx + 1) % cards.length
   }
   advance()
   const ms = (60000 / bpm.value) * beatsPerChord.value
@@ -111,13 +131,19 @@ function stopLoop() {
   clearInterval(_loopTimer)
   _loopTimer = null
   loopPlaying.value = false
+  loopProgressionId.value = null
   chordOff(_currentMidis)
   stopAllNotes()
   _currentMidis = []
   loopActiveIdx.value = null
 }
 
-watch([selectedId, selectedRoot], stopLoop)
+function handleToggleExpand(id) {
+  expandedId.value = expandedId.value === id ? null : id
+  showInfoIdx.value = null
+}
+
+watch([expandedId, selectedRoot], stopLoop)
 </script>
 
 <template>
@@ -131,104 +157,108 @@ watch([selectedId, selectedRoot], stopLoop)
       </div>
     </div>
 
-    <!-- Genre filter -->
-    <div class="genre-filter">
-      <button
-        v-for="g in GENRES"
-        :key="g.id"
-        class="genre-btn"
-        :class="{ active: selectedGenre === g.id }"
-        @click="selectedGenre = g.id"
-      >{{ g.label }}</button>
-    </div>
+    <GenreTabs v-model="selectedGenre" :genres="GENRES" />
 
-    <!-- Progression list -->
-    <div class="prog-list">
-      <button
-        v-for="p in filteredProgressions"
-        :key="p.id"
-        class="prog-item"
-        :class="{ active: selectedId === p.id }"
-        @click="selectedId = p.id; showInfoIdx = null"
-      >
-        <span class="prog-label">{{ p.label }}</span>
-        <span class="prog-key-badge" :class="p.key">{{ p.key }}</span>
-        <span class="prog-numeral">{{ p.numeral }}</span>
-      </button>
-    </div>
+    <ProgressionSection
+      title="Major Key Progressions"
+      :progressions="majorProgressions"
+      :rootNote="selectedRoot"
+      :expandedId="expandedId"
+      :playingId="loopProgressionId"
+      @toggle-expand="handleToggleExpand"
+      @play="playLoop"
+      @stop="stopLoop"
+      @loop-start="playLoop"
+      @loop-stop="stopLoop"
+    />
 
-    <!-- Description of selected -->
-    <p class="prog-examples">{{ selectedProgression.examples }}</p>
+    <ProgressionSection
+      title="Minor Key Progressions"
+      :progressions="minorProgressions"
+      :rootNote="selectedRoot"
+      :expandedId="expandedId"
+      :playingId="loopProgressionId"
+      @toggle-expand="handleToggleExpand"
+      @play="playLoop"
+      @stop="stopLoop"
+      @loop-start="playLoop"
+      @loop-stop="stopLoop"
+    />
 
-    <!-- MIDI toolbar -->
-    <div v-if="midiStatus === 'connected'" class="midi-toolbar">
-      <button class="play-btn" :class="{ playing: loopPlaying }" @click="playLoop">
-        {{ loopPlaying ? 'Stop' : 'Play' }}
-      </button>
-      <span class="midi-divider"></span>
-      <span class="midi-lbl">Oct</span>
-      <button class="mini-btn" @click="chordOctave = Math.max(2, chordOctave - 1)">−</button>
-      <span class="midi-val">{{ chordOctave }}</span>
-      <button class="mini-btn" @click="chordOctave = Math.min(6, chordOctave + 1)">+</button>
-      <span class="midi-divider"></span>
-      <input type="number" v-model.number="bpm" min="40" max="200" class="bpm-input" />
-      <span class="midi-lbl">BPM</span>
-      <span class="midi-divider"></span>
-      <button
-        v-for="b in [1, 2, 4, 8]"
-        :key="b"
-        class="mini-btn"
-        :class="{ active: beatsPerChord === b }"
-        @click="beatsPerChord = b"
-      >{{ b }}</button>
-      <span class="midi-divider"></span>
-      <span class="midi-lbl">Lane</span>
-      <button
-        v-for="(lane, i) in ['A','B','C','D']"
-        :key="lane"
-        class="mini-btn"
-        :class="{ active: midiChannel === i }"
-        @click="midiChannel = i"
-      >{{ lane }}</button>
-    </div>
+    <!-- Chord cards for selected progression -->
+    <template v-if="expandedId">
+      <p class="prog-examples">{{ selectedProgression.examples }}</p>
 
-    <!-- Chord cards -->
-    <div class="chord-row" :class="{ 'piano-mode': displayMode === 'piano' }">
-      <div
-        v-for="card in chordCards"
-        :key="card.idx"
-        class="chord-card"
-        :class="{ 'piano-mode': displayMode === 'piano', active: loopActiveIdx === card.idx }"
-        @pointerdown.prevent="previewChord(card)"
-        @pointerup="stopPreview(card)"
-        @pointerleave="stopPreview(card)"
-        @pointercancel="stopPreview(card)"
-      >
-        <div class="chord-info">
-          <div class="chord-numeral">{{ card.numeral }}</div>
-          <div class="chord-name">{{ card.name }}</div>
-        </div>
-        <div class="chord-body-wrap">
-          <ChordCardBody
-            :rows="card.rows"
-            :pressLabels="card.pressLabels"
-            :noteNames="card.noteNames"
-            :chordRootIdx="card.chordRootIdx"
-            :chordType="card.type"
-          />
-        </div>
+      <!-- MIDI toolbar -->
+      <div v-if="midiStatus === 'connected'" class="midi-toolbar">
+        <button class="play-btn" :class="{ playing: loopPlaying }" @click="loopPlaying ? stopLoop() : playLoop(expandedId)">
+          {{ loopPlaying ? 'Stop' : 'Play' }}
+        </button>
+        <span class="midi-divider"></span>
+        <span class="midi-lbl">Oct</span>
+        <button class="mini-btn" @click="chordOctave = Math.max(2, chordOctave - 1)">−</button>
+        <span class="midi-val">{{ chordOctave }}</span>
+        <button class="mini-btn" @click="chordOctave = Math.min(6, chordOctave + 1)">+</button>
+        <span class="midi-divider"></span>
+        <input type="number" v-model.number="bpm" min="40" max="200" class="bpm-input" />
+        <span class="midi-lbl">BPM</span>
+        <span class="midi-divider"></span>
         <button
-          class="info-btn card-info-btn"
-          :class="{ active: showInfoIdx === card.idx }"
-          @click.stop="showInfoIdx = showInfoIdx === card.idx ? null : card.idx"
-          aria-label="Solo tip"
-        >i</button>
-        <div v-if="showInfoIdx === card.idx" class="solo-info">
-          <span class="solo-scale">{{ SOLO_ADVICE[card.type].scale }}</span>
-          - {{ SOLO_ADVICE[card.type].why }}
+          v-for="b in [1, 2, 4, 8]"
+          :key="b"
+          class="mini-btn"
+          :class="{ active: beatsPerChord === b }"
+          @click="beatsPerChord = b"
+        >{{ b }}</button>
+        <span class="midi-divider"></span>
+        <span class="midi-lbl">Lane</span>
+        <button
+          v-for="(lane, i) in ['A','B','C','D']"
+          :key="lane"
+          class="mini-btn"
+          :class="{ active: midiChannel === i }"
+          @click="midiChannel = i"
+        >{{ lane }}</button>
+      </div>
+
+      <!-- Chord cards -->
+      <div class="chord-row" :class="{ 'piano-mode': displayMode === 'piano' }">
+        <div
+          v-for="card in chordCards"
+          :key="card.idx"
+          class="chord-card"
+          :class="{ 'piano-mode': displayMode === 'piano', active: loopActiveIdx === card.idx }"
+          @pointerdown.prevent="previewChord(card)"
+          @pointerup="stopPreview(card)"
+          @pointerleave="stopPreview(card)"
+          @pointercancel="stopPreview(card)"
+        >
+          <div class="chord-info">
+            <div class="chord-numeral">{{ card.numeral }}</div>
+            <div class="chord-name">{{ card.name }}</div>
+          </div>
+          <div class="chord-body-wrap">
+            <ChordCardBody
+              :rows="card.rows"
+              :pressLabels="card.pressLabels"
+              :noteNames="card.noteNames"
+              :chordRootIdx="card.chordRootIdx"
+              :chordType="card.type"
+            />
+          </div>
+          <button
+            class="info-btn card-info-btn"
+            :class="{ active: showInfoIdx === card.idx }"
+            @click.stop="showInfoIdx = showInfoIdx === card.idx ? null : card.idx"
+            aria-label="Solo tip"
+          >i</button>
+          <div v-if="showInfoIdx === card.idx" class="solo-info">
+            <span class="solo-scale">{{ SOLO_ADVICE[card.type].scale }}</span>
+            - {{ SOLO_ADVICE[card.type].why }}
+          </div>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -262,95 +292,6 @@ watch([selectedId, selectedRoot], stopLoop)
   font-size: 0.8rem;
   min-width: 5rem;
 }
-
-/* Genre filter */
-.genre-filter {
-  display: flex;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.75rem;
-}
-
-.genre-btn {
-  padding: 0.28rem 0.75rem;
-  border-radius: 5px;
-  border: 1px solid var(--border2);
-  background: var(--input);
-  color: var(--text3);
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-}
-
-.genre-btn:hover  { border-color: var(--accent); color: var(--text); }
-.genre-btn.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-
-/* Progression list */
-.prog-list {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  max-height: 280px;
-  overflow-y: auto;
-  margin-bottom: 0.6rem;
-}
-
-.prog-item {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.55rem 0.85rem;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border3);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.1s;
-  color: inherit;
-}
-
-.prog-item:last-child { border-bottom: none; }
-.prog-item:hover      { background: var(--hover); }
-.prog-item.active     { background: var(--selected); }
-
-.prog-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.prog-item.active .prog-label { color: var(--accent); }
-
-.prog-key-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 0.1rem 0.4rem;
-  border-radius: 3px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.prog-key-badge.major { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent-dim); border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); }
-.prog-key-badge.minor { background: color-mix(in srgb, var(--rust) 14%, transparent); color: var(--rust); border: 1px solid color-mix(in srgb, var(--rust) 25%, transparent); }
-
-.prog-numeral {
-  font-size: 0.78rem;
-  color: var(--text3);
-  white-space: nowrap;
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
-}
-
-.prog-item.active .prog-numeral { color: var(--text2); }
 
 /* Description */
 .prog-examples {
@@ -568,8 +509,6 @@ watch([selectedId, selectedRoot], stopLoop)
 
   .control-group label { min-width: unset; }
 
-  .prog-numeral { display: none; }
-
   .chord-card {
     flex: 1 1 calc(50% - 0.375rem);
     max-width: calc(50% - 0.375rem);
@@ -586,6 +525,5 @@ watch([selectedId, selectedRoot], stopLoop)
     flex-wrap: nowrap;
   }
   .control-group label { min-width: unset; white-space: nowrap; }
-  .prog-list { max-height: 160px; }
 }
 </style>
