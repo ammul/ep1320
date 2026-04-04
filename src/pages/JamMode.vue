@@ -12,15 +12,18 @@ import ScaleLegend from '@/components/music/ScaleLegend.vue'
 import RootNotePicker from '@/components/music/RootNotePicker.vue'
 import ModeLayout from '@/components/layout/ModeLayout.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
+import PickerRow from '@/components/ui/PickerRow.vue'
+import ScaleSelector from '@/components/jam/ScaleSelector.vue'
+import OctaveControl from '@/components/jam/OctaveControl.vue'
 import { JAM_SCALES as SCALES } from '@/constants/scales.js'
 
 // Semitone offsets from root considered "anchor" notes (root, minor 3rd, major 3rd, 5th)
 const ANCHOR_OFFSETS = new Set([0, 3, 4, 7])
 
-const selectedRoot   = ref('A')
+const selectedRoot    = ref('A')
 const selectedScaleId = ref('mi.p')
-const showInfo       = ref(false)
-const pianoOctave    = ref(4)
+const showInfo        = ref(false)
+const pianoOctave     = ref(4)
 
 const SUBTITLE = { pad: 'lit pads', notes: 'highlighted notes', guitar: 'highlighted frets', piano: 'highlighted keys' }
 const subtitle = computed(() => `pick a key and scale - ${SUBTITLE[displayMode.value] ?? 'highlighted items'} are safe to play`)
@@ -104,8 +107,8 @@ const scaleNotes = computed(() =>
 const STRING_BASE_MIDI = [40, 45, 50, 55, 59, 64]
 const { pressDown, pressUp, pressToggle } = useNotePlayback()
 
-function padMidi(noteIndex, octave) {
-  return 12 * (octave + 1) + NOTE_TO_SEMI[noteIndex]
+function padMidi(noteIndex, oct) {
+  return 12 * (oct + 1) + NOTE_TO_SEMI[noteIndex]
 }
 
 function onPadDown(noteIndex, octaveOffset = 0) { pressDown(12 * (octave.value + 1 + octaveOffset) + NOTE_TO_SEMI[noteIndex]) }
@@ -122,21 +125,21 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx, pianoOctave.value
     <PageHeader title="Jam Mode" :subtitle="subtitle" />
 
     <div class="controls">
-      <div class="control-group">
-        <label>Key</label>
+      <PickerRow label="Key">
         <RootNotePicker v-model="selectedRoot" />
-      </div>
+      </PickerRow>
 
-      <div class="control-group">
-        <label>Scale</label>
-        <div class="scale-select-row">
-          <select v-model="selectedScaleId" @change="showInfo = false">
-            <option v-for="s in SCALES" :key="s.id" :value="s.id">{{ s.label }}</option>
-          </select>
-          <button class="info-btn" :class="{ active: showInfo }" @click="showInfo = !showInfo" aria-label="Scale info">i</button>
-        </div>
-        <p v-if="showInfo" class="scale-info">{{ selectedScale.description }}</p>
-      </div>
+      <PickerRow label="Scale">
+        <ScaleSelector
+          v-model="selectedScaleId"
+          :scales="SCALES"
+          v-model:showInfo="showInfo"
+        />
+      </PickerRow>
+
+      <PickerRow label="Octave">
+        <OctaveControl v-model="pianoOctave" :min="1" :max="7" />
+      </PickerRow>
     </div>
 
     <ModeLayout>
@@ -195,6 +198,7 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx, pianoOctave.value
           :activeIndices="activeIndices"
           :rootIndex="rootIndex"
           v-model:octave="pianoOctave"
+          :showOctaveSelector="false"
           :dimInactive="true"
           :clickable="true"
           @toggle="onPianoToggle"
@@ -266,76 +270,6 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx, pianoOctave.value
   gap: 1.2rem;
   margin: 1.5rem 0;
 }
-
-.control-group {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.control-group label {
-  font-weight: 600;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.8rem;
-  min-width: 5rem;
-}
-
-
-.scale-select-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.info-btn {
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 50%;
-  border: 1px solid var(--border2);
-  background: var(--input);
-  color: var(--text3);
-  font-size: 0.8rem;
-  font-style: italic;
-  font-weight: 700;
-  cursor: pointer;
-  line-height: 1;
-  flex-shrink: 0;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-}
-
-.info-btn:hover  { border-color: var(--accent); color: var(--text); }
-.info-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
-
-.scale-info {
-  margin-top: 0.6rem;
-  padding: 0.65rem 0.85rem;
-  background: var(--input);
-  border: 1px solid var(--border2);
-  border-left: 3px solid var(--accent);
-  border-radius: 6px;
-  font-size: 0.82rem;
-  color: var(--text2);
-  line-height: 1.55;
-  width: 100%;
-}
-
-select {
-  background: var(--input);
-  border: 1px solid var(--border2);
-  border-radius: 6px;
-  color: var(--text);
-  padding: 0.4rem 0.8rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  outline: none;
-  max-width: 100%;
-}
-
-select:focus { border-color: var(--accent); }
 
 /* Pad grid */
 .grid {
@@ -501,7 +435,6 @@ select:focus { border-color: var(--accent); }
   text-align: center;
 }
 
-
 /* Scale notes strip */
 .scale-notes {
   display: flex;
@@ -546,16 +479,6 @@ select:focus { border-color: var(--accent); }
     padding: 1.25rem 1rem;
   }
 
-  .control-group {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .control-group label {
-    min-width: unset;
-  }
-
   .pad-note {
     font-size: 1.2rem;
   }
@@ -569,18 +492,6 @@ select:focus { border-color: var(--accent); }
   .controls {
     margin: 0.5rem 0;
     gap: 0.5rem;
-  }
-
-  .control-group {
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: nowrap;
-  }
-
-  .control-group label {
-    min-width: unset;
-    white-space: nowrap;
   }
 
   .scale-notes {
