@@ -1262,13 +1262,13 @@ src/components/learn/LearnStepNav.test.js
 24. ✅ Fix A-based MIDI calculation in LearnMode (NOTE_TO_SEMI)
 25. ✅ **TEST:** `npm test` — 231 tests pass
 
-### Week 4: More UI Components
-21. Create `NoteStripPicker.vue` + test
-22. Refactor LearnMode + ChordDetector to use NoteStripPicker
-23. Update LearnMode.test.js if needed
-24. Create `Card.vue` + test
-25. Reorganize `src/components/` into `music/`, `layout/` subdirs
-26. **TEST:** `npm test` — all tests pass
+### ✅ Phase 5 DONE — Card + PickerRow + Component Reorganization (239 tests pass)
+26. ✅ Create `Card.vue` + `Card.test.js` (6 new tests)
+27. ✅ Create `PickerRow.vue` + `PickerRow.test.js` (2 new tests)
+28. ✅ Move PianoOctave, GuitarChordDiagram, RootNotePicker, ScaleLegend, ChordCardBody, MidiControl → `src/components/music/`
+29. ✅ Move ModeLayout → `src/components/layout/`
+30. ✅ Update all imports to new subdirectory paths
+31. ✅ **TEST:** `npm test` — 239 tests pass
 
 ### Week 5: LearnMode Decomposition
 27. Create `src/components/learn/` directory
