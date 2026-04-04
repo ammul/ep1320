@@ -1,0 +1,416 @@
+<script setup>
+import { ref, computed } from 'vue'
+import { displayMode } from '@/state/displayMode.js'
+import { padCols as cols } from '@/state/padSize.js'
+import { NOTES, SHARPS, NOTE_TO_SEMI } from '@/constants/musicConstants.js'
+import { buildGuitarNeck, sliceRows } from '@/utils/musicUtils.js'
+import { useNotePlayback } from '@/composables/useNotePlayback.js'
+import PianoOctave from '@/components/music/PianoOctave.vue'
+import RootNotePicker from '@/components/music/RootNotePicker.vue'
+import ModeLayout from '@/components/layout/ModeLayout.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import GuitarNeck from '@/components/music/GuitarNeck.vue'
+import { VISUALIZER_SCALES as SCALES } from '@/constants/scales.js'
+
+const selectedRoot = ref('A')
+const selectedScaleId = ref('maj')
+const showInfo = ref(false)
+const pianoOctave = ref(4)
+
+const selectedScale = computed(() => SCALES.find(s => s.id === selectedScaleId.value))
+const rootIndex = computed(() => NOTES.indexOf(selectedRoot.value))
+
+const activeIndices = computed(() => {
+  const root = rootIndex.value
+  return new Set(selectedScale.value.intervals.map(i => (root + i) % 12))
+})
+
+const degreeMap = computed(() => {
+  const root = rootIndex.value
+  const map = {}
+  selectedScale.value.intervals.forEach((interval, i) => {
+    map[(root + interval) % 12] = i + 1
+  })
+  return map
+})
+
+const pads = computed(() =>
+  Array.from({ length: 4 * cols.value }, (_, i) => {
+    const noteIndex = i % 12
+    return {
+      number:      i + 1,
+      label:       String(i + 1),
+      note:        NOTES[noteIndex],
+      noteIndex,
+      octaveOffset: Math.floor(i / 12),
+      isSharp:     SHARPS.has(NOTES[noteIndex]),
+      isActive:    activeIndices.value.has(noteIndex),
+      isRoot:      noteIndex === rootIndex.value,
+      degree:      degreeMap.value[noteIndex] ?? null,
+    }
+  })
+)
+
+const rows = computed(() => sliceRows(pads.value, cols.value))
+
+// Notes mode: all 12 chromatic notes as tiles
+const chromaTiles = computed(() =>
+  NOTES.map((note, i) => ({
+    note,
+    isSharp: SHARPS.has(note),
+    isActive: activeIndices.value.has(i),
+    isRoot: i === rootIndex.value,
+    degree: degreeMap.value[i] ?? null,
+  }))
+)
+
+// Guitar neck: 6 strings displayed high→low (e, B, G, D, A, E)
+const guitarNeck = computed(() =>
+  buildGuitarNeck(noteIdx => ({
+    isActive: activeIndices.value.has(noteIdx),
+    isRoot:   noteIdx === rootIndex.value,
+  }))
+)
+
+const STRING_BASE_MIDI = [40, 45, 50, 55, 59, 64]
+const { pressDown, pressUp, pressToggle } = useNotePlayback()
+
+function onPadDown(noteIndex, octaveOffset = 0) { pressDown(12 * (5 + octaveOffset) + NOTE_TO_SEMI[noteIndex]) }
+function onPadUp(noteIndex, octaveOffset = 0)   { pressUp(12 * (5 + octaveOffset) + NOTE_TO_SEMI[noteIndex]) }
+
+function onCellDown(stringIdx, fret) { pressDown(STRING_BASE_MIDI[stringIdx] + fret) }
+function onCellUp(stringIdx, fret)   { pressUp(STRING_BASE_MIDI[stringIdx] + fret) }
+
+function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx)) }
+
+const subtitle = computed(() => {
+  if (displayMode.value === 'pad') return 'see which pads are active for any scale'
+  if (displayMode.value === 'notes') return 'chromatic note strip - scale notes highlighted'
+  if (displayMode.value === 'guitar') return 'guitar neck (standard tuning) - scale positions highlighted'
+  return 'piano keyboard - scale notes highlighted'
+})
+</script>
+
+<template>
+  <div class="scale-viz">
+    <PageHeader title="Scale Visualizer" :subtitle="subtitle" />
+
+    <div class="controls">
+      <div class="control-group">
+        <label>Root note</label>
+        <RootNotePicker v-model="selectedRoot" />
+      </div>
+
+      <div class="control-group">
+        <label>Scale</label>
+        <div class="scale-select-row">
+          <select v-model="selectedScaleId" @change="showInfo = false">
+            <option v-for="s in SCALES" :key="s.id" :value="s.id">{{ s.label }}</option>
+          </select>
+          <button class="info-btn" :class="{ active: showInfo }" @click="showInfo = !showInfo" aria-label="Scale info">i</button>
+        </div>
+        <p v-if="showInfo" class="scale-info">{{ selectedScale.description }}</p>
+      </div>
+    </div>
+
+    <ModeLayout>
+      <template #pad>
+        <div class="grid">
+          <div class="row" v-for="(row, ri) in rows" :key="ri" :style="{ gridTemplateColumns: `repeat(${row.length}, 1fr)` }">
+            <div
+              v-for="pad in row"
+              :key="pad.number"
+              class="pad"
+              :class="{
+                active: pad.isActive,
+                root: pad.isRoot,
+                sharp: pad.isSharp,
+                inactive: !pad.isActive,
+              }"
+              @pointerdown.prevent="onPadDown(pad.noteIndex, pad.octaveOffset)"
+              @pointerup="onPadUp(pad.noteIndex, pad.octaveOffset)"
+              @pointerleave="onPadUp(pad.noteIndex, pad.octaveOffset)"
+              @pointercancel="onPadUp(pad.noteIndex, pad.octaveOffset)"
+            >
+              <span class="pad-label">{{ pad.label }}</span>
+              <span class="pad-note">{{ pad.note }}</span>
+              <span class="pad-degree" v-if="pad.isActive">{{ pad.isRoot ? '①' : pad.degree }}</span>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <template #notes>
+        <div class="chroma-strip">
+          <div
+            v-for="(tile, ti) in chromaTiles"
+            :key="tile.note"
+            class="chroma-tile"
+            :class="{
+              active: tile.isActive,
+              root: tile.isRoot,
+              sharp: tile.isSharp,
+              inactive: !tile.isActive,
+            }"
+            @pointerdown.prevent="onPadDown(ti)"
+            @pointerup="onPadUp(ti)"
+            @pointerleave="onPadUp(ti)"
+            @pointercancel="onPadUp(ti)"
+          >
+            <span class="tile-note">{{ tile.note }}</span>
+            <span class="tile-degree" v-if="tile.isActive">{{ tile.isRoot ? '①' : tile.degree }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #piano>
+        <PianoOctave
+          :activeIndices="activeIndices"
+          :rootIndex="rootIndex"
+          v-model:octave="pianoOctave"
+          :dimInactive="true"
+          :clickable="true"
+          @toggle="onPianoToggle"
+        />
+      </template>
+
+      <template #guitar>
+        <GuitarNeck
+          :strings="guitarNeck"
+          :cell-class="cell => ({ active: cell.isActive, root: cell.isRoot })"
+          @cell-down="onCellDown"
+          @cell-up="onCellUp"
+        >
+          <template #cell="{ cell }">
+            <span v-if="cell.isActive" class="neck-dot" :class="{ root: cell.isRoot }"></span>
+          </template>
+        </GuitarNeck>
+      </template>
+    </ModeLayout>
+
+  </div>
+</template>
+
+<style scoped>
+.scale-viz {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin: 1.5rem 0;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.control-group label {
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+  min-width: 5rem;
+}
+
+
+.scale-select-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.info-btn {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--input);
+  color: var(--text3);
+  font-size: 0.8rem;
+  font-style: italic;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.info-btn:hover  { border-color: var(--accent); color: var(--text); }
+.info-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+
+.scale-info {
+  margin-top: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--input);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  color: var(--text2);
+  line-height: 1.55;
+  width: 100%;
+}
+
+select {
+  background: var(--input);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+  max-width: 100%;
+}
+
+select:focus { border-color: var(--accent); }
+
+/* Pad grid */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.row {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  aspect-ratio: 1;
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+  touch-action: none;
+  cursor: pointer;
+}
+
+.pad.inactive { background: var(--bg); opacity: 0.35; }
+.pad.active   { background: var(--raised); border-color: var(--accent-mid); }
+.pad.root     { background: var(--rust-bg); border-color: var(--rust); }
+
+.pad-label  { font-size: 0.7rem; color: var(--text4); font-weight: 600; letter-spacing: 0.1em; }
+.pad-note   { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+
+.pad.inactive .pad-note { color: var(--text5); }
+.pad.active .pad-note   { color: var(--accent); }
+.pad.root .pad-note     { color: var(--rust-hi); }
+
+.pad-degree           { font-size: 0.72rem; color: var(--accent-dim); }
+.pad.root .pad-degree { color: var(--rust); }
+
+/* Notes mode chromatic strip */
+.chroma-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.chroma-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+  touch-action: none;
+  cursor: pointer;
+}
+
+.chroma-tile.inactive { background: transparent; border-color: transparent; opacity: 0.4; }
+.chroma-tile.active   { background: var(--raised); border-color: var(--accent-mid); }
+.chroma-tile.root     { background: var(--rust-bg); border-color: var(--rust); }
+
+.tile-note { font-size: 1.1rem; font-weight: 700; line-height: 1; }
+.chroma-tile.inactive .tile-note { color: var(--text5); }
+.chroma-tile.active .tile-note   { color: var(--accent); }
+.chroma-tile.root .tile-note     { color: var(--rust-hi); }
+
+.tile-degree           { font-size: 0.65rem; color: var(--accent-dim); }
+.chroma-tile.root .tile-degree { color: var(--rust); }
+
+/* Guitar neck dots (page-specific) */
+.neck-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--dot-scale);
+  display: block;
+}
+
+.neck-dot.root {
+  background: var(--dot-root);
+  box-shadow: 0 0 5px var(--rust-glow);
+}
+
+@media (max-width: 600px) {
+  .scale-viz {
+    padding: 1.25rem 1rem;
+  }
+
+  .control-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .control-group label {
+    min-width: unset;
+  }
+
+  .pad-note {
+    font-size: 1.2rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .scale-viz {
+    padding: 0.75rem 1rem;
+  }
+
+  .controls {
+    margin: 0.5rem 0;
+    gap: 0.5rem;
+  }
+
+  .control-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+  }
+
+  .control-group label {
+    min-width: unset;
+    white-space: nowrap;
+  }
+
+}
+</style>

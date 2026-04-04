@@ -22,7 +22,7 @@ vi.stubGlobal('AudioContext', vi.fn(() => ({
   sampleRate: 44100,
 })))
 
-vi.mock('./midiManager.js', async () => {
+vi.mock('@/audio/midiManager.js', async () => {
   const { ref } = await import('vue')
   return {
     midiStatus: ref('unavailable'),
@@ -34,7 +34,7 @@ vi.mock('./midiManager.js', async () => {
 })
 
 import App from './App.vue'
-import { isPlaying as drumIsPlaying } from './drumEngine.js'
+import { isPlaying as drumIsPlaying } from '@/audio/drumEngine.js'
 
 beforeEach(() => {
   drumIsPlaying.value = false

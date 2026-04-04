@@ -1,0 +1,16 @@
+.picker-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.picker-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text3);
+  min-width: 3rem;
+}
+
+.picker-control {
+  flex: 1;
+}
