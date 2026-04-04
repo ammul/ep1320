@@ -1,10 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import { playNote } from '@/audio/audioEngine.js'
-import { NOTE_TO_SEMI } from '@/constants/musicConstants.js'
+import { NOTE_TO_SEMI, SEMI_TO_NAME as CHROMATIC } from '@/constants/musicConstants.js'
 import NoteStripPicker from '@/components/ui/NoteStripPicker.vue'
-
-const CHROMATIC = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
 
 const rootNoteIdx = ref(null)
 

@@ -1,14 +1,15 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { displayMode } from '@/state/displayMode.js'
-import { padSize } from '@/state/padSize.js'
-import { NOTES, SHARPS, NOTE_TO_SEMI, FRET_COUNT } from '@/constants/musicConstants.js'
+import { padCols as cols } from '@/state/padSize.js'
+import { NOTES, SHARPS, NOTE_TO_SEMI } from '@/constants/musicConstants.js'
 import { playNote } from '@/audio/audioEngine.js'
 import { buildGuitarNeck, sliceRows } from '@/utils/musicUtils.js'
 import { detectChord } from '@/utils/chordDetect.js'
 import PianoOctave from '@/components/music/PianoOctave.vue'
 import ModeLayout from '@/components/layout/ModeLayout.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
+import GuitarNeck from '@/components/music/GuitarNeck.vue'
 import NoteStripPicker from '@/components/ui/NoteStripPicker.vue'
 
 const selected = ref(new Set())
@@ -28,8 +29,6 @@ function toggleNote(noteIndex) {
 function clearAll() {
   selected.value = new Set()
 }
-
-const cols = computed(() => padSize.value === '4x4' ? 4 : 3)
 
 const pads = computed(() =>
   Array.from({ length: 4 * cols.value }, (_, i) => {
@@ -111,33 +110,16 @@ const subtitle = computed(() => {
           </template>
 
           <template #guitar>
-            <div class="guitar-neck-wrap">
-              <div class="guitar-neck">
-                <div v-for="(string, si) in guitarNeck" :key="si" class="neck-row">
-                  <div class="string-name">{{ string.name }}</div>
-                  <button
-                    v-for="cell in string.cells"
-                    :key="cell.fret"
-                    class="neck-cell"
-                    :class="{
-                      selected: cell.isSelected,
-                      sharp: cell.isSharp,
-                      open: cell.isOpen,
-                    }"
-                    @pointerdown.prevent="toggleNote(cell.noteIdx)"
-                  >
-                    <span v-if="cell.isSelected" class="neck-dot"></span>
-                    <span v-else class="neck-note">{{ cell.note }}</span>
-                  </button>
-                </div>
-                <div class="fret-numbers">
-                  <div class="string-name-spacer"></div>
-                  <div v-for="f in FRET_COUNT + 1" :key="f" class="fret-num">
-                    {{ f - 1 === 0 ? '' : f - 1 }}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <GuitarNeck
+              :strings="guitarNeck"
+              :cell-class="cell => ({ selected: cell.isSelected, sharp: cell.isSharp })"
+              @cell-down="(si, fret, noteIdx) => toggleNote(noteIdx)"
+            >
+              <template #cell="{ cell }">
+                <span v-if="cell.isSelected" class="neck-dot"></span>
+                <span v-else class="neck-note">{{ cell.note }}</span>
+              </template>
+            </GuitarNeck>
           </template>
         </ModeLayout>
 
@@ -225,61 +207,24 @@ const subtitle = computed(() => {
 .pad.sharp .pad-note { color: var(--accent-lo); }
 .pad.selected .pad-note { color: var(--accent-hi); }
 
-/* Guitar neck */
-.guitar-neck-wrap {
-  overflow-x: auto;
-}
-
-.guitar-neck {
-  display: flex;
-  flex-direction: column;
-  min-width: 600px;
-}
-
-.neck-row {
-  display: flex;
-  align-items: stretch;
-  border-bottom: 1px solid var(--border3);
-}
-
-.string-name {
-  width: 1.8rem;
-  font-size: 0.7rem;
-  color: var(--text4);
-  font-weight: 600;
-  text-align: right;
-  padding-right: 0.5rem;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.neck-cell {
-  flex: 1;
+/* Guitar neck overrides and page-specific states */
+:deep(.guitar-neck) { min-width: 600px; }
+:deep(.neck-row) { align-items: stretch; }
+:deep(.string-name) { display: flex; align-items: center; justify-content: flex-end; }
+:deep(.neck-cell) {
   height: 2.4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-right: 1px solid var(--border3);
-  border: none;
   background: var(--input);
-  cursor: pointer;
-  user-select: none;
   touch-action: none;
-  position: relative;
   transition: background 0.1s;
-  border-right: 1px solid var(--border3);
   -webkit-tap-highlight-color: transparent;
 }
-
-.neck-cell:hover { background: var(--border3); }
-.neck-cell.sharp { background: var(--sharp); }
-.neck-cell.sharp:hover { background: var(--border3); }
-.neck-cell.open { border-right: 3px solid var(--border2); background: var(--surface); }
-.neck-cell.open:hover { background: var(--raised); }
-.neck-cell.selected { background: var(--selected); }
-.neck-cell.selected.sharp { background: var(--sharp-sel); }
+:deep(.neck-cell:hover) { background: var(--border3); }
+:deep(.neck-cell.sharp) { background: var(--sharp); }
+:deep(.neck-cell.sharp:hover) { background: var(--border3); }
+:deep(.neck-cell.open) { background: var(--surface); }
+:deep(.neck-cell.open:hover) { background: var(--raised); }
+:deep(.neck-cell.selected) { background: var(--selected); }
+:deep(.neck-cell.selected.sharp) { background: var(--sharp-sel); }
 
 .neck-dot {
   width: 14px;
@@ -297,22 +242,7 @@ const subtitle = computed(() => {
   pointer-events: none;
 }
 
-.neck-cell.open .neck-note { color: var(--text5); }
-
-.fret-numbers {
-  display: flex;
-  align-items: center;
-  margin-top: 0.25rem;
-}
-
-.string-name-spacer { width: 1.8rem; flex-shrink: 0; }
-
-.fret-num {
-  flex: 1;
-  font-size: 0.6rem;
-  color: var(--text5);
-  text-align: center;
-}
+:deep(.neck-cell.open) .neck-note { color: var(--text5); }
 
 /* Clear button */
 .clear-btn {

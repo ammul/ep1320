@@ -3,7 +3,7 @@ import { ref, computed, onUnmounted } from 'vue'
 import { displayMode } from '@/state/displayMode.js'
 import { NOTES, LABELS, SHARPS, CHORD_TYPES, CHORD_SUFFIX, FLAT_MAP, NOTE_TO_SEMI } from '@/constants/musicConstants.js'
 import { buildRows } from '@/utils/musicUtils.js'
-import { padSize } from '@/state/padSize.js'
+import { padCols } from '@/state/padSize.js'
 import { startNote, stopNote } from '@/audio/audioEngine.js'
 import ChordCardBody from '@/components/music/ChordCardBody.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
@@ -79,7 +79,7 @@ const chordCards = computed(() =>
         name:         note + CHORD_SUFFIX[type],
         type,
         chordRootIdx: noteIndex,
-        rows:         buildRows(activeSet, noteIndex, padSize.value === '4x4' ? 4 : 3),
+        rows:         buildRows(activeSet, noteIndex, padCols.value),
         pressLabels:  sorted.map(i => LABELS[i]),
         noteNames:    sorted.map(i => NOTES[i]),
       }

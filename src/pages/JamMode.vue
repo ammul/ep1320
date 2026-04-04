@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { displayMode } from '@/state/displayMode.js'
-import { padSize } from '@/state/padSize.js'
-import { NOTES, SHARPS, FRET_COUNT, NOTE_TO_SEMI } from '@/constants/musicConstants.js'
+import { padCols as cols } from '@/state/padSize.js'
+import { NOTES, SHARPS, NOTE_TO_SEMI } from '@/constants/musicConstants.js'
 import { buildGuitarNeck, sliceRows } from '@/utils/musicUtils.js'
 import { activeInputNotes, midiStatus } from '@/audio/midiManager.js'
 import { octave } from '@/state/octave.js'
@@ -15,6 +15,7 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import PickerRow from '@/components/ui/PickerRow.vue'
 import ScaleSelector from '@/components/jam/ScaleSelector.vue'
 import OctaveControl from '@/components/jam/OctaveControl.vue'
+import GuitarNeck from '@/components/music/GuitarNeck.vue'
 import { JAM_SCALES as SCALES } from '@/constants/scales.js'
 
 // Semitone offsets from root considered "anchor" notes (root, minor 3rd, major 3rd, 5th)
@@ -44,8 +45,6 @@ const anchorIndices = computed(() => {
       .map(i => (root + i) % 12)
   )
 })
-
-const cols = computed(() => padSize.value === '4x4' ? 4 : 3)
 
 const pads = computed(() =>
   Array.from({ length: 4 * cols.value }, (_, i) => {
@@ -206,39 +205,20 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx, pianoOctave.value
       </template>
 
       <template #guitar>
-        <div class="guitar-neck-wrap">
-          <div class="guitar-neck">
-            <div v-for="(string, si) in guitarNeck" :key="si" class="neck-row">
-              <div class="string-name">{{ string.name }}</div>
-              <div
-                v-for="cell in string.cells"
-                :key="cell.fret"
-                class="neck-cell"
-                :class="{
-                  active: cell.isActive,
-                  root:   cell.isRoot,
-                  open:   cell.isOpen,
-                }"
-                @pointerdown.prevent="onCellDown(string.stringIdx, cell.fret)"
-                @pointerup="onCellUp(string.stringIdx, cell.fret)"
-                @pointerleave="onCellUp(string.stringIdx, cell.fret)"
-                @pointercancel="onCellUp(string.stringIdx, cell.fret)"
-              >
-                <span
-                  v-if="cell.isActive"
-                  class="neck-dot"
-                  :class="{ root: cell.isRoot, anchor: cell.isAnchor && !cell.isRoot }"
-                ></span>
-              </div>
-            </div>
-            <div class="fret-numbers">
-              <div class="string-name-spacer"></div>
-              <div v-for="f in FRET_COUNT + 1" :key="f" class="fret-num">
-                {{ f - 1 === 0 ? '' : f - 1 }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <GuitarNeck
+          :strings="guitarNeck"
+          :cell-class="cell => ({ active: cell.isActive, root: cell.isRoot })"
+          @cell-down="onCellDown"
+          @cell-up="onCellUp"
+        >
+          <template #cell="{ cell }">
+            <span
+              v-if="cell.isActive"
+              class="neck-dot"
+              :class="{ root: cell.isRoot, anchor: cell.isAnchor && !cell.isRoot }"
+            ></span>
+          </template>
+        </GuitarNeck>
       </template>
     </ModeLayout>
 
@@ -353,53 +333,7 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx, pianoOctave.value
 .chroma-tile.root     .tile-note { color: var(--rust-hi); }
 .chroma-tile.pressed  .tile-note { color: var(--accent); }
 
-/* Guitar neck */
-.guitar-neck-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin-bottom: 0.5rem;
-}
-
-.guitar-neck {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-width: 380px;
-}
-
-.neck-row {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--border3);
-}
-
-.string-name {
-  width: 1.8rem;
-  font-size: 0.7rem;
-  color: var(--text4);
-  font-weight: 600;
-  text-align: right;
-  padding-right: 0.5rem;
-  flex-shrink: 0;
-}
-
-.neck-cell {
-  flex: 1;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-right: 1px solid var(--border3);
-  position: relative;
-  user-select: none;
-  touch-action: pan-x;
-  cursor: pointer;
-}
-
-.neck-cell.open {
-  border-right: 3px solid var(--border2);
-}
-
+/* Guitar neck dots (page-specific) */
 .neck-dot {
   width: 14px;
   height: 14px;
@@ -415,24 +349,6 @@ function onPianoToggle(noteIdx) { pressToggle(padMidi(noteIdx, pianoOctave.value
 .neck-dot.root {
   background: var(--dot-root);
   box-shadow: 0 0 4px var(--rust-glow);
-}
-
-.fret-numbers {
-  display: flex;
-  align-items: center;
-  margin-top: 0.3rem;
-}
-
-.string-name-spacer {
-  width: 1.8rem;
-  flex-shrink: 0;
-}
-
-.fret-num {
-  flex: 1;
-  font-size: 0.6rem;
-  color: var(--text5);
-  text-align: center;
 }
 
 /* Scale notes strip */

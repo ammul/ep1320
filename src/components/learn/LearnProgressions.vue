@@ -3,12 +3,11 @@ import { ref, computed } from 'vue'
 import { playChord, stopAllNotes } from '@/audio/audioEngine.js'
 import NoteStripPicker from '@/components/ui/NoteStripPicker.vue'
 import { LEARN_PROGS as PROGS } from '@/constants/progressions.js'
+import { SEMI_TO_NAME as CHROMATIC, CHORD_TYPES } from '@/constants/musicConstants.js'
 
-const CHROMATIC  = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
 const MAJOR_SCALE = [0,2,4,5,7,9,11]
 const DIA_TYPES   = ['maj','min','min','maj','maj','min','dim']
 const ROMAN       = ['I','ii','iii','IV','V','vi','vii°']
-const CHORD_ITVS  = { maj:[0,4,7], min:[0,3,7], dim:[0,3,6] }
 
 const progRoot           = ref(0)
 const activeProg         = ref(null)
@@ -32,7 +31,7 @@ function chordLabel(rootC, di) {
 
 function chordMidis(rootC, di) {
   const semi = (rootC + MAJOR_SCALE[di]) % 12
-  return CHORD_ITVS[DIA_TYPES[di]].map(i => 60 + semi + i)
+  return CHORD_TYPES[DIA_TYPES[di]].map(i => 60 + semi + i)
 }
 
 function tapDiatonic(di) {

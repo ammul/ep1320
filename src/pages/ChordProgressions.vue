@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { displayMode } from '@/state/displayMode.js'
 import { NOTES, CHORD_TYPES, CHORD_SUFFIX } from '@/constants/musicConstants.js'
 import { buildRows } from '@/utils/musicUtils.js'
-import { padSize } from '@/state/padSize.js'
+import { padCols } from '@/state/padSize.js'
 import ChordCardBody from '@/components/music/ChordCardBody.vue'
 import RootNotePicker from '@/components/music/RootNotePicker.vue'
 import { midiStatus, midiChannel, chordOn, chordOff } from '@/audio/midiManager.js'
@@ -75,7 +75,7 @@ const chordCards = computed(() =>
       name:         NOTES[chordRootIdx] + CHORD_SUFFIX[chord.type],
       type:         chord.type,
       chordRootIdx,
-      rows:         buildRows(padIndices, chordRootIdx, padSize.value === '4x4' ? 4 : 3),
+      rows:         buildRows(padIndices, chordRootIdx, padCols.value),
       pressLabels:  sorted.map(i => NOTES[i]),
       noteNames:    sorted.map(i => NOTES[i]),
     }

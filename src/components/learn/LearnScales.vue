@@ -3,8 +3,7 @@ import { ref, computed } from 'vue'
 import { playNote, stopAllNotes } from '@/audio/audioEngine.js'
 import NoteStripPicker from '@/components/ui/NoteStripPicker.vue'
 import { LEARN_SCALES as SCALES } from '@/constants/scales.js'
-
-const CHROMATIC = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+import { SEMI_TO_NAME as CHROMATIC } from '@/constants/musicConstants.js'
 const IS_SHARP  = new Set([1,3,6,8,10])
 
 const scaleRoot        = ref(0)

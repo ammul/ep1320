@@ -7,9 +7,9 @@
 ## Table of Contents
 1. [CSS Architecture](#1-css-architecture)
 2. [Component API Contracts](#2-component-api-contracts)
-3. [Phased PR Strategy](#3-phased-pr-strategy)
-4. [ChordProgressions Extraction](#4-chordprogressions-extraction)
-5. [JamMode Extraction](#5-jammode-extraction)
+3. [Directory Map](#3-directory-map)
+4. [State Modules](#4-state-modules)
+5. [Quick Reference](#5-quick-reference)
 
 ---
 
@@ -607,266 +607,184 @@ defineProps({
 
 ---
 
-## 3. Phased PR Strategy
+### 2.5 GuitarNeck
 
-### PR Naming Convention
-```
-refactor/<phase>-<description>
-```
+**File:** `src/components/music/GuitarNeck.vue`
 
-### PR 1: Style System Foundation
-**Branch:** `refactor/01-style-system`
-**Files:**
-- Create `src/styles/` directory structure
-- Create `base/tokens.css`, `base/reset.css`
-- Create `components/buttons.css`
-- Update `main.js` to import `styles/index.css`
-- Keep `style.css` temporarily (colors only)
-
-**Tests:** No changes (220 pass)
-**Risk:** Low
-
----
-
-### PR 2: Directory Restructure
-**Branch:** `refactor/02-directory-structure`
-**Files:**
-- Add `@/` alias to vite.config.js, vitest.config.js
-- Create `src/pages/`, move 10 page components
-- Create `src/audio/`, move 3 files + 2 tests
-- Create `src/state/`, move 7 files
-- Create `src/utils/`, move 2 files + 2 tests
-- Create `src/constants/`, move 1 file + 1 test
-- Update ALL imports to use `@/` alias
-
-**Tests:** Path updates only (220 pass)
-**Risk:** Medium (many file moves, but mechanical)
-
----
-
-### PR 3: PageHeader Component
-**Branch:** `refactor/03-page-header`
-**Files:**
-- Create `src/components/ui/PageHeader.vue`
-- Create `src/components/ui/PageHeader.test.js`
-- Create `src/styles/components/page-header.css`
-- Update 8 pages to use PageHeader
-- Remove header CSS from each page
-
-**Tests:** Update selectors in page tests (220 pass)
-**Risk:** Low
-
----
-
-### PR 4: NoteStripPicker Component
-**Branch:** `refactor/04-note-strip-picker`
-**Files:**
-- Create `src/components/ui/NoteStripPicker.vue`
-- Create `src/components/ui/NoteStripPicker.test.js`
-- Create `src/styles/components/pills.css`
-- Update LearnMode.vue (4 instances)
-- Update ChordDetector.vue (1 instance)
-
-**Tests:** May need selector updates (220 pass)
-**Risk:** Medium (LearnMode is complex)
-
----
-
-### PR 5: Card + PickerRow Components
-**Branch:** `refactor/05-card-picker-row`
-**Files:**
-- Create `src/components/ui/Card.vue` + test
-- Create `src/components/ui/PickerRow.vue` + test
-- Create `src/styles/components/cards.css`
-- Create `src/styles/layouts/picker-row.css`
-- Reorganize `src/components/` into subdirs (music/, layout/)
-
-**Tests:** 220+ pass
-**Risk:** Low
-
----
-
-### PR 6: LearnMode Step 1-3 Extraction
-**Branch:** `refactor/06-learn-steps-1-3`
-**Files:**
-- Create `src/components/learn/LearnStepNav.vue` + test
-- Create `src/components/learn/LearnRootNotes.vue` + test
-- Create `src/components/learn/LearnIntervals.vue` + test
-- Create `src/components/learn/LearnScales.vue` + test
-- Update LearnMode.vue to use new components
-- Split LearnMode.test.js
-
-**Tests:** ~235 pass (new tests added)
-**Risk:** High (most complex refactor)
-
----
-
-### PR 7: LearnMode Step 4-7 Extraction
-**Branch:** `refactor/07-learn-steps-4-7`
-**Files:**
-- Create LearnProgressions, LearnChords, LearnImprovising, LearnBeats
-- Create LearnStepFooter.vue
-- Finalize LearnMode.vue as orchestration-only
-- Complete test migration
-
-**Tests:** ~260 pass
-**Risk:** High
-
----
-
-### PR 8: Constants Extraction
-**Branch:** `refactor/08-constants`
-**Files:**
-- Create `src/constants/scales.js` (JAM_SCALES, VISUALIZER_SCALES, LEARN_SCALES)
-- Create `src/constants/intervals.js`
-- Create `src/constants/progressions.js`
-- Update imports in affected components
-
-**Tests:** 260 pass
-**Risk:** Low
-
----
-
-### PR 9: ChordProgressions Cleanup (Optional)
-**Branch:** `refactor/09-chord-progressions`
-**See Section 4 below**
-
----
-
-### PR 10: JamMode Cleanup (Optional)
-**Branch:** `refactor/10-jam-mode`
-**See Section 5 below**
-
----
-
-## 4. ChordProgressions Extraction
-
-**Current:** 925 lines (371 CSS)
-
-### Structure Analysis
-
-```
-ChordProgressions.vue
-├── Script (220 lines)
-│   ├── Constants: GENRES, ALL_PROGRESSIONS (150+ lines of data)
-│   ├── State: selectedRoot, selectedGenre, expandedId, loopPlaying, bpm
-│   ├── Computed: filteredProgressions, filteredGroupedByKey
-│   └── Methods: play/stop chord, loop controls
-├── Template (330 lines)
-│   ├── Header (title + subtitle)
-│   ├── Controls row (root picker, genre tabs, BPM)
-│   ├── Progression sections (major/minor)
-│   │   └── Progression cards (repeated pattern)
-│   └── Chord card body (delegated to ChordCardBody)
-└── Styles (371 lines)
-```
-
-### Extraction Plan
-
-**Move to constants:**
-```
-src/constants/progressions.js
-├── export const GENRES = [...]
-└── export const ALL_PROGRESSIONS = [...]
-```
-
-**Extract components:**
-```
-src/components/progressions/
-├── GenreTabs.vue           ← tab row for genre filtering
-├── ProgressionSection.vue  ← "Major Key" / "Minor Key" collapsible section
-└── ProgressionCard.vue     ← single progression with play/loop controls
-```
-
-**After extraction:** ~200 lines
-
-### ProgressionCard API
+**Purpose:** Shared 6-string guitar neck grid. Used by `ScaleVisualizer`, `JamMode`, and `ChordDetector` to avoid duplicating ~35 lines of template and ~52 lines of CSS.
 
 ```typescript
-interface ProgressionCardProps {
-  progression: {
-    id: string
-    label: string
-    numeral: string
-    examples: string
-    chords: Array<{ degree: number, type: string, numeral: string }>
-  }
-  rootNote: string
-  isExpanded: boolean
-  isPlaying: boolean
-}
-
-// Events
-// @toggle-expand
-// @play
-// @stop
-// @loop-start
-// @loop-stop
-```
-
----
-
-## 5. JamMode Extraction
-
-**Current:** 657 lines (357 CSS)
-
-### Structure Analysis
-
-```
-JamMode.vue
-├── Script (130 lines)
-│   ├── Constants: SCALES (60 lines)
-│   ├── State: selectedRoot, selectedScaleId, showInfo, pianoOctave
-│   ├── Computed: activeIndices, anchorIndices, subtitle
-│   └── Methods: note playback via useNotePlayback
-├── Template (170 lines)
-│   ├── Header (title + computed subtitle)
-│   ├── Picker rows (root, scale, octave)
-│   ├── Scale info panel (collapsible)
-│   ├── ModeLayout (delegates to display mode)
-│   └── ScaleLegend
-└── Styles (357 lines)
-```
-
-### Extraction Plan
-
-**Move to constants:**
-```
-src/constants/scales.js
-└── export const JAM_SCALES = [...]  // with descriptions
-```
-
-**Extract components:**
-```
-src/components/jam/
-├── ScaleSelector.vue    ← dropdown + description panel
-└── OctaveControl.vue    ← octave up/down buttons (also used elsewhere?)
-```
-
-**After extraction:** ~150 lines
-
-### ScaleSelector API
-
-```typescript
-interface ScaleSelectorProps {
-  modelValue: string           // scale ID
-  scales: Array<{
-    id: string
-    label: string
-    description: string
-    intervals: number[]
+// Props
+interface GuitarNeckProps {
+  strings: Array<{        // Required. Output of buildGuitarNeck() from musicUtils.js
+    stringIdx: number
+    name: string
+    cells: Array<{
+      noteIdx: number
+      note: string
+      fret: number
+      isOpen: boolean
+      // ...any extra fields added via buildGuitarNeck's cellExtras callback
+    }>
   }>
-  showInfo: boolean
+  cellClass?: (cell) => object  // Optional. Returns :class binding for each neck cell.
 }
 
-// Events
-// @update:modelValue
-// @update:showInfo
+// Emits
+// @cell-down(stringIdx, fret, noteIdx) — pointerdown on a cell
+// @cell-up(stringIdx, fret)            — pointerup/leave/cancel on a cell
+
+// Slots
+// #cell({ cell }) — content inside each neck cell (e.g. a dot or note label)
+```
+
+**Usage:**
+```vue
+<GuitarNeck
+  :strings="guitarNeck"
+  :cell-class="cell => ({ active: cell.isActive, root: cell.isRoot })"
+  @cell-down="onCellDown"
+  @cell-up="onCellUp"
+>
+  <template #cell="{ cell }">
+    <span v-if="cell.isActive" class="neck-dot" :class="{ root: cell.isRoot }"></span>
+  </template>
+</GuitarNeck>
+```
+
+**Building `strings`:** Always use `buildGuitarNeck` from `@/utils/musicUtils.js`. Pass a `cellExtras` callback to attach page-specific flags (`isActive`, `isRoot`, `isSelected`, etc.) to each cell.
+
+```js
+const guitarNeck = computed(() =>
+  buildGuitarNeck(noteIdx => ({
+    isActive: activeIndices.value.has(noteIdx),
+    isRoot:   noteIdx === rootIndex.value,
+  }))
+)
+```
+
+**Page-specific styles:** Each page is responsible for styling its own cell content (dots, labels) and any cell modifier classes it adds via `cellClass`. Use `:deep()` when overriding GuitarNeck's scoped styles.
+
+---
+
+## 3. Directory Map
+
+```
+src/
+├── pages/                        ← route-level page components (10)
+│   ├── AboutPage.vue
+│   ├── ChordDetector.vue
+│   ├── ChordProgressions.vue
+│   ├── DrumComputer.vue
+│   ├── JamMode.vue
+│   ├── LearnMode.vue             ← thin orchestrator, 64 lines
+│   ├── ProgressionBuilder.vue
+│   ├── ScaleVisualizer.vue
+│   ├── SettingsPage.vue
+│   └── StartPage.vue
+│
+├── components/
+│   ├── ui/                       ← generic, reusable
+│   │   ├── Card.vue
+│   │   ├── NoteStripPicker.vue
+│   │   ├── PageHeader.vue
+│   │   └── PickerRow.vue
+│   ├── music/                    ← music-domain display
+│   │   ├── ChordCardBody.vue
+│   │   ├── GuitarChordDiagram.vue
+│   │   ├── GuitarNeck.vue        ← shared neck grid (ScaleVisualizer, JamMode, ChordDetector)
+│   │   ├── MidiControl.vue
+│   │   ├── PianoOctave.vue
+│   │   ├── RootNotePicker.vue
+│   │   └── ScaleLegend.vue
+│   ├── learn/                    ← LearnMode sub-components
+│   │   ├── LearnBeats.vue
+│   │   ├── LearnChords.vue
+│   │   ├── LearnImprovising.vue
+│   │   ├── LearnIntervals.vue
+│   │   ├── LearnProgressions.vue
+│   │   ├── LearnRootNotes.vue
+│   │   ├── LearnScales.vue
+│   │   ├── LearnStepFooter.vue
+│   │   └── LearnStepNav.vue
+│   ├── progressions/             ← ChordProgressions sub-components
+│   │   ├── GenreTabs.vue
+│   │   ├── ProgressionCard.vue
+│   │   └── ProgressionSection.vue
+│   ├── jam/                      ← JamMode sub-components
+│   │   ├── OctaveControl.vue
+│   │   └── ScaleSelector.vue
+│   └── layout/
+│       └── ModeLayout.vue        ← display-mode conditional wrapper (pad/notes/guitar/piano)
+│
+├── state/                        ← shared reactive state (exported refs)
+│   ├── colorMode.js
+│   ├── colorScheme.js
+│   ├── displayMode.js
+│   ├── octave.js
+│   ├── padSize.js                ← exports padSize ref + padCols computed
+│   ├── soundEnabled.js
+│   └── soundStyle.js
+│
+├── constants/
+│   ├── beatPatterns.js
+│   ├── chordTypes.js
+│   ├── intervals.js
+│   ├── musicConstants.js         ← NOTES, LABELS, SHARPS, SEMI_TO_NAME, CHORD_TYPES, etc.
+│   ├── progressions.js           ← GENRES, ALL_PROGRESSIONS, LEARN_PROGS
+│   └── scales.js                 ← JAM_SCALES, VISUALIZER_SCALES, LEARN_SCALES
+│
+├── utils/
+│   ├── chordDetect.js
+│   └── musicUtils.js             ← buildRows(), sliceRows(), buildGuitarNeck()
+│
+├── audio/
+│   ├── audioEngine.js
+│   ├── drumEngine.js
+│   └── midiManager.js
+│
+├── composables/
+│   └── useNotePlayback.js        ← pressDown/pressUp/pressToggle/releaseAll + onUnmounted cleanup
+│
+└── styles/                       ← design system (see Section 1)
+    ├── index.css
+    ├── base/
+    ├── components/
+    ├── layouts/
+    └── utilities/
 ```
 
 ---
 
-## Quick Reference
+## 4. State Modules
+
+All state lives in `src/state/` as plain JS files exporting Vue `ref`s (and `computed`s where useful). No Vuex/Pinia.
+
+| Module | Exports | Persisted |
+|--------|---------|-----------|
+| `displayMode.js` | `displayMode` ref (`'pad' \| 'notes' \| 'guitar' \| 'piano'`) | No |
+| `padSize.js` | `padSize` ref (`'4x3' \| '4x4'`), `padCols` computed (`3 \| 4`) | No |
+| `octave.js` | `octave` ref (number) | No |
+| `colorMode.js` | `colorMode` ref (`'dark' \| 'light'`) | `localStorage` |
+| `colorScheme.js` | `colorScheme` ref (`'none' \| 'medieval' \| 'ko2' \| 'riddim'`) | `localStorage` |
+| `soundEnabled.js` | `soundEnabled` ref (boolean) | `localStorage` |
+| `soundStyle.js` | `soundStyle` ref (string) | `localStorage` |
+
+**`padCols` is the canonical way to get the current column count.** Never inline the ternary:
+
+```js
+// Correct
+import { padCols } from '@/state/padSize.js'
+buildRows(set, root, padCols.value)
+
+// Wrong — don't do this
+import { padSize } from '@/state/padSize.js'
+buildRows(set, root, padSize.value === '4x4' ? 4 : 3)
+```
+
+---
+
+## 5. Quick Reference
 
 ### CSS Class Naming
 
@@ -890,23 +808,39 @@ import NoteStripPicker from '@/components/ui/NoteStripPicker.vue'
 
 // Music Components
 import PianoOctave from '@/components/music/PianoOctave.vue'
+import GuitarNeck from '@/components/music/GuitarNeck.vue'
 
 // Constants
-import { NOTES, CHROMATIC } from '@/constants/musicConstants'
-import { JAM_SCALES } from '@/constants/scales'
+import { NOTES, SEMI_TO_NAME, CHORD_TYPES } from '@/constants/musicConstants.js'
+import { JAM_SCALES } from '@/constants/scales.js'
 
 // Utils
-import { buildRows } from '@/utils/musicUtils'
+import { buildRows, buildGuitarNeck } from '@/utils/musicUtils.js'
 
 // State
-import { displayMode } from '@/state/displayMode'
+import { displayMode } from '@/state/displayMode.js'
+import { padCols } from '@/state/padSize.js'  // use padCols, not padSize, for column count
 
 // Audio
-import { playNote } from '@/audio/audioEngine'
+import { playNote } from '@/audio/audioEngine.js'
 
 // Composables
-import { useNotePlayback } from '@/composables/useNotePlayback'
+import { useNotePlayback } from '@/composables/useNotePlayback.js'
 ```
+
+### Music Constants Cheat Sheet
+
+| Constant | Type | Description |
+|----------|------|-------------|
+| `NOTES` | `string[12]` | A-based note names: `['A','A#','B','C',...]` |
+| `SEMI_TO_NAME` | `string[12]` | C-based chromatic names: `['C','C#','D',...]` |
+| `NOTE_TO_SEMI` | `number[12]` | A-based index → C-based semitone offset |
+| `SHARPS` | `Set<string>` | Set of sharp note names |
+| `CHORD_TYPES` | `object` | Interval arrays keyed by type: `maj`, `min`, `dim`, etc. |
+| `OPEN_STRINGS` | `number[6]` | Guitar open string note indices (low→high) |
+| `FRET_COUNT` | `number` | Number of frets on the neck (currently 7) |
+
+**Do not define local `CHROMATIC` arrays** — use `SEMI_TO_NAME` from `musicConstants.js` instead.
 
 ### File Naming
 
