@@ -1270,15 +1270,14 @@ src/components/learn/LearnStepNav.test.js
 30. ✅ Update all imports to new subdirectory paths
 31. ✅ **TEST:** `npm test` — 239 tests pass
 
-### Week 5: LearnMode Decomposition
-27. Create `src/components/learn/` directory
-28. Extract LearnRootNotes.vue + test (move 7 tests from LearnMode.test.js)
-29. Extract LearnIntervals.vue + test (move 9 tests)
-30. Extract LearnScales.vue + test (move 4 tests)
-31. Extract remaining steps + tests
-32. Refactor LearnMode.vue to orchestration-only
-33. Update LearnMode.test.js to orchestration tests only
-34. **TEST:** `npm test` — all tests pass (count increases to ~250)
+### ✅ Phase 6 DONE — LearnMode Steps 1-4 Extraction (244 tests pass)
+32. ✅ Create `LearnStepNav.vue` + `LearnStepNav.test.js` (5 new tests)
+33. ✅ Create `LearnRootNotes.vue` + `LearnRootNotes.test.js` (7 tests)
+34. ✅ Create `LearnIntervals.vue` + `LearnIntervals.test.js` (9 tests)
+35. ✅ Create `LearnScales.vue` + `LearnScales.test.js` (4 tests)
+36. ✅ Create `LearnProgressions.vue` (self-contained)
+37. ✅ LearnMode.vue delegates steps 1-4 via v-if; migrated tests to child files
+38. ✅ **TEST:** `npm test` — 244 tests pass
 
 ### Week 6: Constants Extraction + Polish
 35. Extract scales.js, intervals.js, progressions.js from components
